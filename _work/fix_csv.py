@@ -7,7 +7,7 @@ CSV 欄位：編號,主稿,證據,層級,狀態,主題,四分,五分,十誦,僧�
          位置,實質差異,四分對照,五分對照,十誦對照,補證
 """
 import csv, io, os, sys
-from errata import ERRATA, dedup_xref
+from errata import ERRATA, dedup_xref, clean_title
 
 W = os.path.dirname(os.path.abspath(__file__))
 CSVP = os.path.join(os.path.dirname(W), '03_成品', '五部律綜合異同矩陣.csv')
@@ -36,6 +36,11 @@ def main():
             if col and col in r:
                 r[col] = cv
         n += 1
+
+    # 主題列清理（段號後綴、分類標籤、戒號統一）——全部行
+    for r in rows:
+        if r.get('主題'):
+            r['主題'] = clean_title(r['主題'], r['編號'])
 
     # 補證欄去重（全部行，不限勘誤行）
     for r in rows:

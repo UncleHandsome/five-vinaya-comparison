@@ -43,6 +43,8 @@ for _rid, (_n, _seg) in ERRATA_POS.items():
 
 # G/T 歸併組（自矩陣 md 提取，此處硬編，來源見 _work/gt_groups.json）
 GT_PATH = os.path.join(BASE, 'gt_groups.json')
+# 分卷檔不含第三部歸併組，故其 G/T 標籤不作連結，免生死鏈
+GT_LINK = True
 if os.path.exists(GT_PATH):
     GT = json.load(open(GT_PATH, encoding='utf-8'))
 else:
@@ -90,7 +92,7 @@ SAME_TOPIC = {
     'M-0531': 'M-0582', 'M-0582': 'M-0531',   # 五似食
 }
 
-from errata import apply as apply_errata
+from errata import apply as apply_errata, ERRATA, clean_title, cn2num
 
 
 # 篇名覆寫：原檔 038 名為「(開頭)」，實含受戒至自恣四揵度，且括號會壞目錄錨點
@@ -216,9 +218,26 @@ for n in by_seg:
 # 四分律原文每戒末標「(一竟)」「(二竟)」…，據此切分篇內戒條。
 JIE = {}   # 篇號 -> [(起段, 迄段, 序, 戒名), ...]
 
-CN2N = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8,
-        '九': 9, '十': 10, '十一': 11, '十二': 12, '十三': 13, '十四': 14,
-        '十五': 15, '十六': 16, '十七': 17, '十八': 18, '十九': 19, '二十': 20}
+def errata_orig(rid, s):
+    """本稿原文來自 originals_index，errata 的 _sub 需另行套用。"""
+    e = ERRATA.get(rid)
+    if not e:
+        return s
+    for fld, old, new in e.get('_sub', []):
+        if fld == 'orig' and old in s:
+            s = s.replace(old, new, 1)
+    return s
+
+
+def errata_plain(rid, s):
+    """白話來自 originals_index，不在 row 內，故 errata 的 _sub 需另行套用。"""
+    e = ERRATA.get(rid)
+    if not e:
+        return s
+    for fld, old, new in e.get('_sub', []):
+        if fld == 'plain' and old in s:
+            s = s.replace(old, new, 1)
+    return s
 
 
 def _jie_name(s):
@@ -307,11 +326,11 @@ def render_item(r, no_prefix, compact=False):
     g = ID2GT.get(r['id'])
     _aid = no_prefix.lower()
     tag = f'〔{r["canon"]} {r["st"]}〕'
-    gt_tag = f'　[`{g}`](#gt-{g})' if g else ''
+    gt_tag = (f'　[`{g}`](#gt-{g})' if GT_LINK else f'　`{g}`') if g else ''
     lines = []
     lines.append(f'<a id="{_aid}"></a>')
     lines.append('')
-    lines.append(f'**{no_prefix}**　{fix_terms(r["title"], r["canon"])}{gt_tag}')
+    lines.append(f'**{no_prefix}**　{clean_title(fix_terms(r["title"], r["canon"]), r["id"])}{gt_tag}')
     lines.append('')
     p_ = PLACED.get(r['id'])
     loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
@@ -330,8 +349,8 @@ def render_item(r, no_prefix, compact=False):
     if compact:
         # 簡版：錄原文與白話（折疊），不錄他部對照
         o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
-        orig = clean_orig((o.get('orig') or '').strip())
-        plain = fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon'])
+        orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
+        plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
         if orig:
             body, clipped = clip_orig(orig, r)
             lines.append(f'**本稿原文**（{r["canon"]}）：')
@@ -363,8 +382,8 @@ def render_item(r, no_prefix, compact=False):
 
     # 本稿原文
     o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
-    orig = clean_orig((o.get('orig') or '').strip())
-    plain = fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon'])
+    orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
+    plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
     if orig:
         body, clipped = clip_orig(orig, r)
         lines.append(f'**本稿原文**（{r["canon"]}）：')
@@ -439,7 +458,7 @@ def render_gt_block(g, ids):
             out.append(f'**差異**：{diff}')
             out.append('')
         o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
-        orig = clean_orig((o.get('orig') or '').strip())
+        orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
         if orig:
             body, clipped = clip_orig(orig, r)
             out.append(f'**本稿原文**（{r["canon"]}）：')
@@ -620,6 +639,14 @@ def build_front():
     L.append('十、**資料限制**：四分律自恣揵度之一未入庫（卷37末），此處以全庫檢索及他部對照為據；'
              '四分律尼律單提第一至八十六戒僅存戒條列表，緣起從缺。')
     L.append('')
+    L.append('十一、**文本處理**：五部原文據大正藏電子文本，組字式（如 `[卄/告]`、`[真/心]`）'
+             '與校記字形一概照錄，以存底本之真，不代以通行字；讀者可參白話與差異說明所釋。'
+             '標題末之底稿段號已移入「本稿位置」一欄，以免與項號相混。'
+             '篇號（000–074）為本書所編之內容序，**非四分律卷次**；篇與卷之對應見附錄三。')
+    L.append('')
+    L.append('十二、**白話之有無**：白話為編者所譯，非底本所有。五分、僧祇、根有三稿悉具；'
+             '十誦稿原無白話，尚待補譯，讀者逕覽其原文可也。')
+    L.append('')
     L.append('<a id="front6"></a>'); L.append(''); L.append('### 六、五部律罪名異譯對照')
     L.append('')
     L.append('同一罪階，五部譯名不同；同一譯名，五部所指亦未必盡同。讀他部之文，'
@@ -723,6 +750,8 @@ def build_toc():
 
 # ---------- 第一部 ----------
 def build_part1(seg_filter=None):
+    global GT_LINK
+    GT_LINK = (seg_filter is None)
     L = []
     if seg_filter is None:
         L.append('## 第一部　四分律有對應處之差異')
@@ -786,7 +815,8 @@ def build_part1(seg_filter=None):
                 L.append('')
                 for _s2, _r2 in _items:
                     _no2 = D_NO[_r2['id']]
-                    L.append(f'- [`{_no2}`](#{_no2.lower()})　{esc(_r2["title"][:38])}')
+                    _t2 = clean_title(fix_terms(apply_errata(_r2)["title"], _r2["canon"]), _r2["id"])
+                    L.append(f'- [`{_no2}`](#{_no2.lower()})　{esc(_t2)}')
                 L.append('')
                 L.append('</details>')
                 L.append('')
@@ -797,7 +827,7 @@ def build_part1(seg_filter=None):
                     if not _grp:
                         continue
                     _h = f'第{_cn}戒' + (f'　{_nm}' if _nm else '')
-                    _jn = CN2N.get(_cn, 0)
+                    _jn = cn2num(_cn)
                     L.append(f'<a id="j{n:03d}-{_jn}"></a>')
                     L.append('')
                     L.append(f'##### {_h}　（段{_s1}–{_s2}）')
@@ -819,6 +849,8 @@ def build_part1(seg_filter=None):
 
 # ---------- 第二部 ----------
 def build_part2():
+    global GT_LINK
+    GT_LINK = True   # 第二部與第三部同檔（合冊、四分所無檔），錨點俱在
     L = []
     L.append('## 第二部　四分律所無之制度')
     L.append('')
@@ -1044,6 +1076,18 @@ def build_appendix():
 
 
 # ---------- 輸出 ----------
+def norm_seg(txt):
+    """統一引用格式：「013段8」→「013 段8」。"""
+    return re.sub(r'(?<!\d)(\d{3})段(\d+)', r'\1 段\2', txt)
+
+
+def unlink_cross(txt, keep):
+    """分卷檔只含單一部之項，跨部之「同制另見」鏈接轉純文本，免死鏈。
+    keep: 'D' 或 'S'，表本檔所含之項號前綴。"""
+    drop = 'S' if keep == 'D' else 'D'
+    return re.sub(r'\[`(' + drop + r'-\d{4})`\]\(#[ds]-\d{4}\)', r'`\1`', txt)
+
+
 def main():
     front = build_front()
     toc = build_toc()
@@ -1067,18 +1111,21 @@ def main():
     full = '\n'.join([front, toc, p1, part2, part3, appendix])
 
     out_full = os.path.join(OUT, '五部律差異對照本.md')
+    full = norm_seg(full)
     open(out_full, 'w', encoding='utf-8').write(full)
     print(f'合冊：{out_full}　{len(full):,} 字')
 
     # 分卷
     for jname, txt in parts.items():
+        txt = norm_seg(unlink_cross(txt, 'D'))
         out = os.path.join(OUT, f'五部律差異對照本_{jname}.md')
         open(out, 'w', encoding='utf-8').write(txt)
         print(f'  {jname}：{len(txt):,} 字')
 
     # 第二、三部 + 附錄另存
     out2 = os.path.join(OUT, '五部律差異對照本_四分所無與歸併組.md')
-    open(out2, 'w', encoding='utf-8').write('\n'.join([part2, part3, appendix]))
+    open(out2, 'w', encoding='utf-8').write(
+        norm_seg(unlink_cross('\n'.join([part2, part3, appendix]), 'S')))
     print(f'  四分所無與歸併組：{len(part2)+len(part3)+len(appendix):,} 字')
 
 

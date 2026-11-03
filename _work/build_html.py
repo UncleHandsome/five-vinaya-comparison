@@ -232,6 +232,34 @@ JS = r"""
 """
 
 
+_CN_D = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+         '六': 6, '七': 7, '八': 8, '九': 9}
+
+
+def cn2num(s):
+    """中文數字轉阿拉伯數字，支援「二十四」「一百七十八」等複合式。"""
+    s = (s or '').strip()
+    if not s:
+        return 0
+    if s == '十':
+        return 10
+    if '百' in s:
+        a, _, b = s.partition('百')
+        n = (_CN_D.get(a, 1) if a else 1) * 100
+        if not b:
+            return n
+        if b == '十':
+            return n + 10
+        if '十' in b:
+            c, _, d = b.partition('十')
+            return n + (_CN_D.get(c, 1) if c else 1) * 10 + _CN_D.get(d, 0)
+        return n + _CN_D.get(b, 0)
+    if '十' in s:
+        a, _, b = s.partition('十')
+        return (_CN_D.get(a, 1) if a else 1) * 10 + _CN_D.get(b, 0)
+    return _CN_D.get(s, 0)
+
+
 def build_nav(md_text, is_full):
     """從 Markdown 提取目錄結構，生成側邊欄"""
     parts = []
@@ -273,9 +301,6 @@ def build_nav(md_text, is_full):
         parts.append('</div>')
     else:
         # 分卷：列該卷各篇；有戒條者折疊展開，便於直達
-        CN2N = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8,
-                '九': 9, '十': 10, '十一': 11, '十二': 12, '十三': 13, '十四': 14,
-                '十五': 15, '十六': 16, '十七': 17, '十八': 18, '十九': 19, '二十': 20}
         parts.append('<div class="grp"><b>本卷篇目</b>')
         secs = re.split(r'(?=^#### \d{3}　)', md_text, flags=re.M)
         for sec in secs:
@@ -289,7 +314,7 @@ def build_nav(md_text, is_full):
                 parts.append(f'<details class="navj"><summary>{n}　{t}'
                              f'<span class="jcnt">{len(jies)}</span></summary>')
                 for cn, nm in jies:
-                    jn = CN2N.get(cn, 0)
+                    jn = cn2num(cn)
                     parts.append(f'<a href="#j{n}-{jn}" class="jie">{cn}　{htmlmod.escape(nm.strip())}</a>')
                 parts.append('</details>')
             else:
