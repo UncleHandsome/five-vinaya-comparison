@@ -5,6 +5,10 @@ _work/_pdf_tmp/
 _work/_tex_tmp/
 _work/*.pkl
 
+# 備份檔
+*.bak
+*.orig
+
 # Python
 __pycache__/
 *.py[cod]
