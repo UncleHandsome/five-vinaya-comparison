@@ -19,6 +19,8 @@ from errata import apply as apply_errata, ERRATA, ERRATA_POS, clean_title, cn2nu
 from collections import defaultdict, Counter, OrderedDict
 from norm_ref import normalize as norm_ref
 from section_intro import INTRO as SEC_INTRO
+from diff_fmt import diff_lines, expand_refs
+from diff_rewrite import apply as rewrite_diff
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -354,17 +356,21 @@ def render_item(r, no_prefix, compact=False):
     lines.append('')
     p_ = PLACED.get(r['id'])
     loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}　{loc_tag}　本稿位置：{esc(fix_pos(r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
     lines.append('')
     # 差異
-    diff = fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon'])
+    diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
     if diff:
         _mate = SAME_TOPIC.get(r['id'])
+        _tail = ''
         if _mate:
             _mno = D_NO.get(_mate) or S_NO.get(_mate)
             if _mno:
-                diff += f'　〔同制另見 [`{_mno}`](#{_mno.lower()})〕'
-        lines.append(f'**差異**：{diff}')
+                _tail = f'　〔同制另見 [`{_mno}`](#{_mno.lower()})〕'
+        _dl = diff_lines(dict(r, diff_full=diff))
+        if _tail and _dl:
+            _dl[-1] += _tail
+        lines.extend(_dl)
         lines.append('')
     if compact:
         # 簡版：錄原文與白話（折疊），不錄他部對照
@@ -475,11 +481,11 @@ def render_gt_block(g, ids):
         out.append('')
         p_ = PLACED.get(r['id'])
         loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(fix_pos(r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
         out.append('')
-        diff = fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon'])
+        diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
         if diff:
-            out.append(f'**差異**：{diff}')
+            out.extend(diff_lines(dict(r, diff_full=diff)))
             out.append('')
         o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
         orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
@@ -492,6 +498,15 @@ def render_gt_block(g, ids):
             if clipped:
                 out.append('>')
                 out.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {r["unit"]}#{r["no"]}〕')
+            out.append('')
+        plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
+        if plain:
+            out.append('<details><summary>白話</summary>')
+            out.append('')
+            for ln in plain.split('\n'):
+                out.append(ln)
+                out.append('')
+            out.append('</details>')
             out.append('')
         ref4 = clean_ref(r.get('ref4', ''), '四分')
         if ref4:
@@ -612,8 +627,8 @@ def build_front():
     L.append('二、**篇旨與每項八目**：每篇之首標「篇旨」，述該篇在四分律中所載之戒目、制度或體例，'
              '俾讀者未讀其文先知其略。篇旨之下，每項八目：序號、標題（差異事由）、狀態與出處、'
              '差異說明、本稿原文、白話、他部對照、補證。'
-             '序號 `D-` 屬第一部（按四分篇次），`S-` 屬第二部（按主稿）。白話以摺疊塊呈現，不佔篇幅。'
-             '十誦稿原未譯白話，故十誦諸項無此目，非本書之闕。')
+             '序號 `D-` 屬第一部（按四分篇次），`S-` 屬第二部（按主稿）。白話以摺疊塊呈現，不佔篇幅；'
+             '五稿皆已具白話，無有闕者。')
     L.append('')
     L.append('三、**引文**：本稿原文錄主稿（該項所屬之律）之文，四分對照錄四分律之文，他部對照錄該部之文，'
              '皆逐字迻錄，出自各稿 findings，已經程式回錨底本，逐句可覆核。'
@@ -645,22 +660,15 @@ def build_front():
     L.append('八、**與矩陣之關係**：本書為《五部律綜合異同矩陣》之閱讀本。矩陣重證據（五欄有無、逐列可查），'
              '本書重閱讀（按四分篇次、一處一覽）。二者同源，編號可互查：矩陣 `M-####`，本書 `D-####`／`S-####`。')
     L.append('')
-    L.append('九、**稱謂**：各稿原以「本律」自稱、「兩律」「三律」稱其對校本。本書已將「差異說明」與'
-             '「標題」中的「本律」「此律」逕換為具體律名（如「僧祇律」），免讀者回頭查主稿；'
-             '惟「本稿原文」保留底本自稱，該處「本律」即指此項所屬之律，不另改。「兩律」「三律」'
-             '仍存其舊，所指隨主稿而異，列表如下。凡此類語，皆就該項所屬之律立說，非就本書之五部立說。')
+    L.append('九、**稱謂與差異說明**：各稿原以「本律」自稱，以「兩律」「三律」統稱其對校本，'
+             '所指隨主稿而異，讀者須回頭查主稿方知。本書於「差異說明」與「標題」中，'
+             '此類指代一律還原為具體律名（四分、五分、十誦、僧祇、根有），並加粗以便掃讀；'
+             '上下文不足以判定者，仍存舊文。'
+             '「本稿原文」一欄則保留底本自稱，該處「本律」即指此項所屬之律，不另改。')
     L.append('')
-    L.append('| 主稿 | 「兩律」所指 | 「三律」所指 | 出現次數 |')
-    L.append('|---|---|---|---|')
-    L.append('| 五分 | 四分、五分 | —（未用） | 兩律 31 |')
-    L.append('| 十誦 | 四分、五分 | 四分、五分、十誦 | 兩律 528、三律 9 |')
-    L.append('| 僧祇 | —（未用） | 四分、五分、十誦 | 三律 660 |')
-    L.append('| 根有 | 四分、五分 | 四分、五分、十誦 | 兩律 1、三律 202 |')
-    L.append('')
-    L.append('> **參差之辨**：十誦稿之「三律」含本律（如「三律賊數各異：四分二賊、五分五賊、'
-             '十誦三賊」），而「兩律」則否（如「兩律戒文皆無」，指四分、五分）；'
-             '僧祇、根有之「三律」則為對校本，不含本律。此原稿用語之不一，'
-             '讀者當按上下文自辨。')
+    L.append('　　差異說明若含數事，按句分條，一句一事：大抵先列諸律之同，次及本稿之異，'
+             '末綴其所以然（此「所以」皆原文所已有，非編者增飾）。各律分述者，每律自成一條，'
+             '主語寫明，以免混淆。')
     L.append('')
     L.append('十、**資料限制**：四分律自恣揵度之一未入庫（卷37末），此處以全庫檢索及他部對照為據；'
              '四分律尼律單提第一至八十六戒僅存戒條列表，緣起從缺。')
@@ -670,8 +678,9 @@ def build_front():
              '標題末之底稿段號已移入「本稿位置」一欄，以免與項號相混。'
              '篇號（000–074）為本書所編之內容序，**非四分律卷次**；篇與卷之對應見附錄三。')
     L.append('')
-    L.append('十二、**白話之有無**：白話為編者所譯，非底本所有。五分、僧祇、根有三稿悉具；'
-             '十誦稿原無白話，尚待補譯，讀者逕覽其原文可也。')
+    L.append('十二、**白話之有無**：白話為編者所譯，非底本所有，五稿悉具（五分 379 項、'
+             '十誦 949 項、僧祇 584 項、根有 212 項）。譯筆以逐句對應為原則，不增不減，'
+             '術語保留原詞，難解處寧直譯而不發揮。白話止可為入門之階，考據仍當以原文為斷。')
     L.append('')
     L.append('<a id="front6"></a>'); L.append(''); L.append('### 六、五部律罪名異譯對照')
     L.append('')

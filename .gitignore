@@ -4,6 +4,10 @@ _work/_cache_corpus.pkl
 _work/_pdf_tmp/
 _work/_tex_tmp/
 _work/*.pkl
+# 代理產出的白話／改寫原稿：已併入 findings 與 diff_rewrite.py，原檔不留
+_work/_plain_out/
+_work/_diff_long.json
+_work/_diff_long_out.json
 
 # 備份檔
 *.bak

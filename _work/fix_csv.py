@@ -15,6 +15,7 @@ CSV 欄位：編號,主稿,證據,層級,狀態,主題,四分,五分,十誦,僧�
 import csv, io, json, os, re
 
 from errata import apply as apply_errata, clean_title, dedup_xref
+from diff_fmt import expand_refs
 
 W = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(W)
@@ -65,7 +66,7 @@ def main():
             '狀態': r.get('st', ''),
             '主題': clean_title(r.get('title', ''), r['id']),
             '位置': fix_pos(r, orig),
-            '實質差異': (r.get('diff_full') or '').replace('\n', ' '),
+            '實質差異': expand_refs((r.get('diff_full') or '').replace('\n', ' '), r),
             '四分對照': (r.get('ref4') or '').replace('\n', ' '),
             '五分對照': (r.get('ref5') or '').replace('\n', ' '),
             '十誦對照': (r.get('ref10') or '').replace('\n', ' '),

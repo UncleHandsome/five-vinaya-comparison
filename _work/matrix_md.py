@@ -4,6 +4,7 @@ import json, os, re
 from collections import Counter
 
 from errata import apply as _apply_errata, dedup_xref, clean_title
+from diff_fmt import expand_refs
 
 W = os.path.dirname(os.path.abspath(__file__))
 _raw = json.load(open(os.path.join(W, 'matrix_built.json'), encoding='utf-8'))
@@ -144,7 +145,7 @@ for c in CANONS:
             r['id'], esc(r['lv']), r['st'], esc(clean_title(r['title'], r['id'])),
             r.get('v4', '未比'), r.get('v5', '未比'), r.get('v10', '未比'),
             r.get('vMK', '未比'), r.get('vGU', '未比'),
-            esc(r['pos']), esc(r['diff']),
+            esc(r['pos']), esc(expand_refs(r['diff'] or '', r)),
             esc(dedup_xref(r.get('xref', ''))) or '—', ev))
     A('')
 A('---')

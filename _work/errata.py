@@ -442,6 +442,22 @@ JIE_NO_FIX = {
 }
 
 
+_ROW_CACHE = None
+
+
+def _row_by_id(rid):
+    """取 matrix_built 的一列，供標題還原「兩律」等指代。取不到則回 None。"""
+    global _ROW_CACHE
+    if _ROW_CACHE is None:
+        import json, os
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'matrix_built.json')
+        try:
+            _ROW_CACHE = {r['id']: r for r in json.load(open(p, encoding='utf-8'))}
+        except Exception:
+            _ROW_CACHE = {}
+    return _ROW_CACHE.get(rid)
+
+
 def clean_title(t, rid=None):
     """去除標題中的段號後綴與分類標籤，並統一戒號為四分律。"""
     t = (t or '').strip()
@@ -454,6 +470,12 @@ def clean_title(t, rid=None):
         t = t.replace(f'（{tag}）', '')
     # 根有稿初編時把層級寫在標題末尾，與 lv 欄重複，去之
     t = _re.sub(r'（(?:戒條|制度|法數|事件)）\s*$', '', t)
+    # 標題中的「兩律」「三律」「本律」亦還原為具體律名，與差異說明一致
+    if rid:
+        _r = _row_by_id(rid)
+        if _r:
+            from diff_fmt import expand_refs
+            t = expand_refs(t, _r)
     return t.strip()
 
 

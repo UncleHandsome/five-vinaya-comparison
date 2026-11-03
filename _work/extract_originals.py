@@ -23,7 +23,11 @@ RE_H2 = re.compile(r'^##\s+', re.M)
 # 「- 原文：」到「- 白話：」或下一個欄位，或任一標題（## / ###），或區塊尾
 BOUND = r'(?=^-\s*(?:白話|補證|位置|四分律對照|五分律對照|十誦律對照|差異說明)\s*[：:]|^#{2,6}\s|\Z)'
 RE_ORIG_BLOCK = re.compile(r'^-\s*原文\s*[：:]\s*\n(.*?)' + BOUND, re.M | re.S)
-RE_PLAIN_BLOCK = re.compile(r'^-\s*白話\s*[：:]\s*\n(.*?)' + BOUND, re.M | re.S)
+# 白話可接在同行（「- 白話：……」）或次行（縮排塊），
+# 標籤後也可能帶夾註（「- 白話（括號內名相略釋）：」），兩種都要吃
+RE_PLAIN_BLOCK = re.compile(
+    r'^-\s*白話\s*(?:[（(][^）)\n]{0,40}[）)])?\s*[：:][ \t]*\n?(.*?)' + BOUND,
+    re.M | re.S)
 RE_QUOTE = re.compile(r'^\s*>\s?(.*)$')
 
 
