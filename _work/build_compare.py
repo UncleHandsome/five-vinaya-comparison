@@ -307,6 +307,11 @@ def render_item(r, no_prefix, compact=False):
         if ref4:
             lines.append(f'- **四分對照**：{ref4}')
             lines.append('')
+        # 補證（簡版亦須出，凡例八目之一）
+        _xref = dedup_xref(one_line(r.get('xref', '')))
+        if _xref:
+            lines.append(f'- **補證**：{_xref}')
+            lines.append('')
         return '\n'.join(lines)
 
     # 本稿原文
