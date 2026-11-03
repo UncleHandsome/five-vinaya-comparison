@@ -11,9 +11,28 @@ TOT_SRC = sum(s['src'] for s in meta['stats'])
 TOT_KEPT = sum(s['kept'] for s in meta['stats'])
 TOT_ITEMS = sum(s['items'] for s in meta['stats'])
 
-FAN = '''# 十誦律去重
+def plain_chars():
+    """白話字數（只計漢字），自各項「- 白話：」塊累加。"""
+    n = 0
+    for u in UNITS:
+        for it in BY[u['unit']]['items']:
+            m = re.search(r'^-\s*白話[^：:]{0,8}[：:]\s*$', it, re.M)
+            if not m:
+                continue
+            for ln in it[m.end():].split('\n'):
+                s = ln.strip()
+                if not s:
+                    continue
+                if s.startswith('-') or s.startswith('#'):
+                    break
+                n += len(re.sub(r'[^\u4e00-\u9fff]', '', s))
+    return n
 
-以《十誦律》（說一切有部）為底本，以《四分律》（法藏部）與《五分律》（彌沙塞部）為對校本；凡兩律任一已有之內容，視為重複，一律刪去，只保留十誦律獨有、或與兩律均實質不同之文。本編不譯白話，原文逐字迻錄。
+TOT_PLAIN = plain_chars()
+
+FAN = '''# 十誦律去重白話
+
+以《十誦律》（說一切有部）為底本，以《四分律》（法藏部）與《五分律》（彌沙塞部）為對校本；凡兩律任一已有之內容，視為重複，一律刪去，只保留十誦律獨有、或與兩律均實質不同之文。原文逐字迻錄，逐項附以白話。
 
 ## 凡例
 
@@ -25,11 +44,11 @@ FAN = '''# 十誦律去重
 3. 僅屬譯語、詳略、修辭、次第不同，或名相異稱而範疇相當者 → 不保留。
 4. 同一戒之緣起，若只是同事件之細節擴寫 → 不保留；若為兩律所無之獨立情節 → 保留。
 
-三、保留比例：全書六十一卷正文 @@SRC@@ 字，本編保留 @@KEPT@@ 字，約百分之 @@RATIO@@。戒條與揵度部分（卷1～47）多在百分之十五至三十；優波離問、毘尼增一兩部多為十誦律獨有之判例問答，故比例偏高（部分卷次達五至九成），此係文本結構使然，非採錄過寬。逐卷數字見「全書統計」。
+三、保留比例：全書六十一卷正文 @@SRC@@ 字，本編保留 @@KEPT@@ 字，約百分之 @@RATIO@@。戒條與揵度部分（卷1～47）多在百分之十至二十七；優波離問、毘尼增一兩部多為十誦律獨有之判例問答，故比例偏高（部分卷次達五至九成），此係文本結構使然，非採錄過寬。逐卷數字見「全書統計」。
 
-四、編次：依十誦律卷次（六十一卷，分四十四個校勘單位）。每先標卷名、範圍與刪略統計，再列保留項。每項含「位置」（底本段號）、「四分律對照」、「五分律對照」、「差異說明」、「原文」五目。
+四、編次：依十誦律卷次（六十一卷，分四十四個校勘單位）。每先標卷名、範圍與刪略統計，再列保留項。每項含「位置」（底本段號）、「四分律對照」、「五分律對照」、「差異說明」、「原文」、「白話」六目。
 
-五、引文：原文一律逐字迻錄，並已逐句回錨底本（九百四十九項全數對上，無改字）；同一項若跨段引用，段前標「段N」，段間標「（中略：段X～Y）」。
+五、引文：原文一律逐字迻錄，並已逐句回錨底本（九百四十九項全數對上，無改字）；同一項若跨段引用，段前標「段N」，段間標「（中略：段X～Y）」。白話為編者所譯，非底本所有，九百四十九項悉具；譯筆以逐句對應為原則，不增不減，術語保留原詞，難解處寧直譯而不發揮。白話止可為入門之階，考據仍當以原文為斷。
 
 六、資料限制：
 1. 《四分律》自恣揵度之一未入本資料夾；卷23～24自法之比對以其餘部分及全庫檢索為據。
@@ -96,8 +115,8 @@ app.append('\n---\n<a id="app3"></a>\n' + '''# 附錄三：工作方法與資料
 ## 二、結果
 
 - 底本 658,969 字（六十一卷正文）
-- 保留 161,403 字（24.5%），949 項
-- 戒條與揵度部分（卷1～47）保留 15%～28%；毘尼增一與優波離問（卷48～61）保留 22%～94%
+- 保留 161,403 字（24.5%），949 項；白話 @@PLAIN@@ 字
+- 戒條與揵度部分（卷1～47）保留 10%～27%；毘尼增一與優波離問（卷48～61）保留 14%～88%
 - 存疑 @@N@@ 條（見附錄二），暫從刪略
 
 ## 三、限制與提醒
@@ -108,11 +127,11 @@ app.append('\n---\n<a id="app3"></a>\n' + '''# 附錄三：工作方法與資料
 4. 本編為節本，非校勘定本；引用原文請以底本覆核。
 
 *完成日期：2026-10-31*
-'''.replace('@@N@@', str(sum(1 for u in UNITS for _ in re.findall(r'^-|^1[.]|^2[.]|^3[.]', BY[u['unit']]['doubts'], re.M) if BY[u['unit']]['doubts']))))
+'''.replace('@@PLAIN@@', format(TOT_PLAIN, ',')).replace('@@N@@', str(sum(1 for u in UNITS for _ in re.findall(r'^-|^1[.]|^2[.]|^3[.]', BY[u['unit']]['doubts'], re.M) if BY[u['unit']]['doubts']))))
 
 full = '\n'.join(lines) + '\n' + '\n'.join(body) + '\n' + '\n'.join(app)
 os.makedirs(OUT, exist_ok=True)
-open(os.path.join(OUT, '十誦律_去重_合冊.md'), 'w', encoding='utf-8').write(full)
+open(os.path.join(OUT, '十誦律_去重白話_合冊.md'), 'w', encoding='utf-8').write(full)
 
 GROUPS = [('卷1至卷20', ['vol%02d' % i for i in range(1, 21)] + ['vol05-06', 'vol07-08', 'vol09-10', 'vol11-12', 'vol13-14', 'vol15-16', 'vol17-18', 'vol19-20']),
           ('卷21至卷40', None), ('卷41至卷61', None)]
@@ -121,18 +140,21 @@ def unit_vols(u):
     return u['vols']
 
 def group_units(lo, hi):
-    out = []
-    for u in UNITS:
-        vs = u['vols']
-        if all(lo <= v <= hi for v in vs) and any(lo <= v <= hi for v in vs):
-            out.append(u)
-    return out
+    """凡起始卷落在區間內即歸本冊。跨冊單位（如卷40～41）依起始卷歸前冊，
+    並在冊首注明，以免同一單位在三冊中重出或盡遭漏收。"""
+    return [u for u in UNITS if lo <= u['vols'][0] <= hi]
 
 for name, lo, hi in [('卷一至卷二十', 1, 20), ('卷二十一至卷四十', 21, 40), ('卷四十一至卷六十一', 41, 61)]:
     us = group_units(lo, hi)
-    hl = ['# 十誦律去重　%s\n' % name,
-          '> 本冊為《十誦律去重》之分冊，收卷%d至卷%d。凡例、判重口徑與資料限制見合冊本。\n' % (lo, hi),
-          '## 本冊統計\n',
+    hl = ['# 十誦律去重白話　%s\n' % name,
+          '> 本冊為《十誦律去重白話》之分冊，收卷%d至卷%d。凡例、判重口徑與資料限制見合冊本。\n' % (lo, hi)]
+    cross = [u for u in us if u['vols'][-1] > hi]
+    if cross:
+        hl.append('> %s 一單位跨卷（起卷%d、訖卷%d），依起始卷歸本冊，故本冊兼收卷%d之文；下冊不重出。\n' % (
+            '、'.join(u['title'].split('　')[0] for u in cross),
+            min(u['vols'][0] for u in cross), max(u['vols'][-1] for u in cross),
+            max(u['vols'][-1] for u in cross)))
+    hl += ['## 本冊統計\n',
           '| 校勘單位 | 卷次與篇目 | 底本字數 | 保留字數 | 比例 | 保留項 |',
           '|---|---|---:|---:|---:|---:|']
     for u in us:
@@ -154,7 +176,7 @@ for name, lo, hi in [('卷一至卷二十', 1, 20), ('卷二十一至卷四十',
             format(s['src'], ','), format(s['kept'], ','), s['ratio']*100, s['items']))
         for it in BY[u['unit']]['items']:
             parts.append(it.strip() + '\n')
-    open(os.path.join(OUT, '十誦律_去重_%s.md' % name), 'w', encoding='utf-8').write('\n'.join(parts))
+    open(os.path.join(OUT, '十誦律_去重白話_%s.md' % name), 'w', encoding='utf-8').write('\n'.join(parts))
     print(name, 'units', len(us), 'items', gi, 'kept', gk)
 
 print('written', OUT, 'chars', len(full))

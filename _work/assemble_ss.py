@@ -5,7 +5,7 @@ import os, re, json
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W = os.path.join(ROOT, '_work')
-OUT = os.path.join(ROOT, '十誦律_去重')
+OUT = os.path.join(ROOT, '02_去重稿', '十誦律_去重白話')
 os.makedirs(OUT, exist_ok=True)
 
 UNITS = json.load(open(os.path.join(W, 'ss_units.json'), encoding='utf-8'))
@@ -127,6 +127,26 @@ def parse_items(keep_sec):
 
 FIELDS = ['位置', '四分律對照', '五分律對照', '差異說明']
 
+
+def extract_plain(body):
+    """取「- 白話：」以下之縮排塊（可多段，段落各占一行）"""
+    out, on = [], False
+    for ln in body.split('\n'):
+        if not on:
+            m = re.match(r'^-\s*白話[^：:]{0,8}[：:]\s*(.*)$', ln)
+            if m:
+                on = True
+                if m.group(1).strip():
+                    out.append(m.group(1).strip())
+            continue
+        if re.match(r'^-\s', ln) or re.match(r'^#{1,6}\s', ln):
+            break
+        s = ln.rstrip()
+        out.append('' if not s.strip() else re.sub(r'^ {1,4}', '', s))
+    while out and not out[-1].strip():
+        out.pop()
+    return out
+
 units_out = []
 all_lost = []
 stats = []
@@ -173,6 +193,11 @@ for u in UNITS:
                     tag = ('卷%d·' % vv) if vv and len(u['vols']) > 1 else ''
                     out.append('> **%s段%s**　%s' % (tag, pid, txt))
                     kept_chars += len(norm(txt))
+        plain = extract_plain(body)
+        if plain:
+            out.append('- 白話：')
+            for ln in plain:
+                out.append('  ' + ln if ln else '')
         items_md.append('\n'.join(out))
     stats.append({'unit': u['unit'], 'title': u['title'], 'items': n_items,
                   'src': len(src), 'kept': kept_chars,
