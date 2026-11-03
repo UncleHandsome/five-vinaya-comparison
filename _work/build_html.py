@@ -42,8 +42,8 @@ CSS = r"""
 html{scroll-behavior:smooth; scroll-padding-top:1.2rem}
 body{
   margin:0; background:var(--bg); color:var(--fg);
-  font-family:"FangSong","STFangsong","Songti SC","SimSun",serif;
-  font-size:17px; line-height:1.85;
+  font-family:"KaiTi","STKaiti","Kaiti SC","Songti SC","SimSun",serif;
+  font-size:18px; line-height:1.85;
   -webkit-font-smoothing:antialiased;
 }
 /* ── 版面 ── */
@@ -105,7 +105,7 @@ blockquote strong{color:var(--accent)}
 /* ── 表格 ── */
 table{border-collapse:collapse; width:100%; margin:1.1rem 0;
   font-family:"Microsoft YaHei","PingFang SC",sans-serif; font-size:13.5px;
-  display:block; overflow-x:auto}
+  display:table; table-layout:auto}
 th,td{border:1px solid var(--line); padding:.42rem .6rem; text-align:left;
   vertical-align:top}
 th{background:var(--panel); font-weight:600; white-space:nowrap}
@@ -119,6 +119,18 @@ summary{cursor:pointer; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
   letter-spacing:.06em}
 summary:hover{color:var(--accent)}
 details p{font-size:.94em; color:#4a4038; margin:.5rem 0}
+/* ── 本篇目錄 ── */
+details.art-toc{margin:.9rem 0 1.4rem; border:1px solid var(--line); border-radius:4px;
+  background:#faf8f3; padding:.4rem .9rem}
+details.art-toc summary{cursor:pointer; font-family:"Microsoft YaHei",sans-serif;
+  font-size:13.5px; color:var(--accent); padding:.25rem 0; letter-spacing:.03em}
+details.art-toc summary:hover{color:var(--accent2)}
+details.art-toc ul{list-style:none; margin:.5rem 0 .3rem; padding:0;
+  columns:2; column-gap:1.6rem}
+details.art-toc li{margin:.12rem 0; font-size:13px; line-height:1.65; break-inside:avoid}
+details.art-toc a{color:var(--fg2); text-decoration:none}
+details.art-toc a:hover{color:var(--accent); text-decoration:underline}
+@media(max-width:700px){details.art-toc ul{columns:1}}
 /* ── 分隔線 ── */
 hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 錨點高亮 ── */
@@ -333,8 +345,9 @@ def build_index():
             n = len(re.findall(r'^\*\*D-\d{4}\*\*', t, re.M)) + len(re.findall(r'^\*\*S-\d{4}\*\*', t, re.M))
             rows.append((jname, fn.replace('.md', '.html'), n))
 
+    total = sum(n for _, _, n in rows)
     li = '\n'.join(
-        f'<tr><td><a href="{h}">{j}</a></td><td style="text-align:right">{n}</td></tr>'
+        f'<tr><td><a href="{h}">{j}</a></td><td style="text-align:right">{n:,}</td></tr>'
         for j, h, n in rows)
 
     body = f"""
@@ -342,10 +355,22 @@ def build_index():
 <blockquote><p><strong>以《四分律》為閱讀主線，一冊在手，遍知五部之異同。</strong></p>
 <p>讀四分律至某篇某戒，翻至本書同篇，即見其餘四部於此處有何增、減、開、異。</p></blockquote>
 
+<h2>五部律</h2>
+<table>
+<tr><th>律</th><th>部派</th><th>譯者</th><th>大正藏</th><th style="text-align:right">卷數</th></tr>
+<tr><td><strong>四分律</strong></td><td>法藏部</td><td>姚秦 佛陀耶舍、竺佛念</td><td>T22, no. 1428</td><td style="text-align:right">60</td></tr>
+<tr><td>五分律</td><td>彌沙塞部</td><td>劉宋 佛陀什、竺道生</td><td>T22, no. 1421</td><td style="text-align:right">30</td></tr>
+<tr><td>十誦律</td><td>說一切有部</td><td>後秦 弗若多羅、鳩摩羅什</td><td>T23, no. 1435</td><td style="text-align:right">61</td></tr>
+<tr><td>摩訶僧祇律</td><td>大眾部</td><td>東晉 佛陀跋陀羅、法顯</td><td>T22, no. 1425</td><td style="text-align:right">40</td></tr>
+<tr><td>根本說一切有部毘奈耶</td><td>根本說一切有部</td><td>唐 義淨</td><td>T23, no. 1442</td><td style="text-align:right">50</td></tr>
+</table>
+
 <h2>全書</h2>
 <table>
 <tr><th>卷次</th><th style="text-align:right">項數</th></tr>
-<tr><td><a href="五部律差異對照本.html"><strong>合冊（全）</strong></a></td><td style="text-align:right">2,115</td></tr>
+<tr><td><a href="五部律差異對照本.html"><strong>合冊（全）</strong></a>
+<br><span style="font-size:12px;color:#8a8278">檔案較大，建議用電腦瀏覽</span></td>
+<td style="text-align:right">{total:,}</td></tr>
 {li}
 </table>
 
@@ -355,29 +380,39 @@ def build_index():
 <tr><td><a href="五部律差異對照本.html"><strong>五部律差異對照本</strong></a></td>
 <td>按四分律七十五篇次第讀。每篇有篇旨，每項有差異、原文、他部對照。適合<strong>讀律時查</strong>。</td></tr>
 <tr><td><a href="五部律綜合異同矩陣.html"><strong>五部律綜合異同矩陣</strong></a></td>
-<td>2,124 列，每列一項，五欄記各律有無。可按狀態、主稿、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
+<td>每列一項，五欄記各律有無。可按狀態、主稿、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
 </table>
 
 <h2>怎麼用</h2>
 <ol>
 <li><strong>讀律時查</strong>：讀四分律至某篇，翻至本書同篇。每篇先有「篇旨」述其內容，次依四分段號列差異。</li>
 <li><strong>查某部獨有何制</strong>：看「四分所無與歸併組」，按主稿分節。</li>
-<li><strong>同一制度兩稿並列</strong>：看第三部歸併十組。</li>
+<li><strong>同一制度兩稿並列</strong>：看第三部歸併組（甲表 G1–G7 同條歸併、乙表 T1–T3 同題異制）。</li>
 </ol>
 
 <h2>凡例摘要</h2>
 <ul>
 <li>每項八目：序號、標題、狀態與出處、差異、本稿原文、白話、他部對照、補證。</li>
 <li>狀態：<strong>A</strong> 同條增異、<strong>B</strong> 同條開緣、<strong>C</strong> 四分所無、<strong>D</strong> 同條減略。</li>
-<li>項號 <code>D-0001</code>–<code>D-1456</code>（第一部）、<code>S-0001</code>–<code>S-0659</code>（第二部）、<code>G1</code>–<code>G7</code>／<code>T1</code>–<code>T3</code>（第三部）。</li>
-<li>「遍查未見」為文獻學斷言，謂四分律無此制，非工作進度之闕漏。</li>
+<li>項號前綴：<code>D</code> 第一部（按四分篇次）、<code>S</code> 第二部（按主稿）、
+<code>G</code>／<code>T</code> 第三部歸併組（G 為同條歸併，T 為同題異制）。</li>
+<li>「遍查未見」為文獻學斷言，謂四分律無此制，非工作進度之闕漏；
+若散見雜篇或名相異稱者，歡迎指正。</li>
 </ul>
+
+<hr>
+<p style="font-size:13px;color:#8a8278">
+原始碼、勘誤與 Issue：
+<a href="https://github.com/UncleHandsome/five-vinaya-comparison">GitHub</a>
+　·　
+<a href="https://unclehandsome.github.io/five-vinaya-comparison/">線上版</a>
+</p>
 """
     nav = ('<h1><a href="index.html">五部律差異對照本</a></h1>'
            '<div class="grp"><b>全書</b>'
            '<a href="index.html">目錄與說明</a>'
            '<a href="五部律差異對照本.html">對照本合冊</a>'
-           '<a href="五部律綜合異同矩陣.html">異同矩陣（2,124 列）</a></div>'
+           '<a href="五部律綜合異同矩陣.html">異同矩陣</a></div>'
            '<div class="grp"><b>分卷</b>'
            + ''.join(f'<a href="{h}">{j}</a>' for j, h, _ in rows)
            + '</div>')

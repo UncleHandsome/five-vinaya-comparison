@@ -123,6 +123,8 @@ p:has(> strong:first-child){page-break-after:avoid}
 
 def prep_md(md):
     """預處理：details → 普通區塊（PDF 不折疊）；移除錨點標籤"""
+    # 本篇目錄在 PDF 中無用（已有書籤與目錄頁），整段移除
+    md = re.sub(r'<details class="art-toc">.*?</details>\s*', '', md, flags=re.S)
     # <details><summary>白話</summary> ... </details>
     md = re.sub(
         r'<details>\s*<summary>([^<]*)</summary>',

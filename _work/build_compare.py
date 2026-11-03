@@ -732,6 +732,17 @@ def build_part1(seg_filter=None):
             cn_parts = '、'.join(f'{c} {cnc[c]}' for c in ['十誦', '五分', '僧祇', '根有'] if cnc.get(c))
             L.append(f'<sub>狀態：{st_parts}　｜　主稿：{cn_parts}</sub>')
             L.append('')
+            # 本篇目錄（項數多者，便於篇內跳轉）
+            _items = by_seg.get(n, [])
+            if len(_items) >= 15:
+                L.append(f'<details class="art-toc"><summary>本篇目錄（{len(_items)} 項）</summary>')
+                L.append('')
+                for _s2, _r2 in _items:
+                    _no2 = D_NO[_r2['id']]
+                    L.append(f'- [`{_no2}`](#{_no2.lower()})　{esc(_r2["title"][:38])}')
+                L.append('')
+                L.append('</details>')
+                L.append('')
             for seg, r in by_seg[n]:
                 L.append(render_item(r, D_NO[r['id']]))
             L.append('')

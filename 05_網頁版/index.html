@@ -90,6 +90,18 @@ summary{cursor:pointer; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
   letter-spacing:.06em}
 summary:hover{color:var(--accent)}
 details p{font-size:.94em; color:#4a4038; margin:.5rem 0}
+/* ── 本篇目錄 ── */
+details.art-toc{margin:.9rem 0 1.4rem; border:1px solid var(--line); border-radius:4px;
+  background:#faf8f3; padding:.4rem .9rem}
+details.art-toc summary{cursor:pointer; font-family:"Microsoft YaHei",sans-serif;
+  font-size:13.5px; color:var(--accent); padding:.25rem 0; letter-spacing:.03em}
+details.art-toc summary:hover{color:var(--accent2)}
+details.art-toc ul{list-style:none; margin:.5rem 0 .3rem; padding:0;
+  columns:2; column-gap:1.6rem}
+details.art-toc li{margin:.12rem 0; font-size:13px; line-height:1.65; break-inside:avoid}
+details.art-toc a{color:var(--fg2); text-decoration:none}
+details.art-toc a:hover{color:var(--accent); text-decoration:underline}
+@media(max-width:700px){details.art-toc ul{columns:1}}
 /* ── 分隔線 ── */
 hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 錨點高亮 ── */
