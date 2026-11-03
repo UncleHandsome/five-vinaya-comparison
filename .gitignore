@@ -1,0 +1,36 @@
+# 中間產物（可由腳本重建，不入庫）
+_work/_backup/
+_work/_cache_corpus.pkl
+_work/_pdf_tmp/
+_work/_tex_tmp/
+_work/*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# LaTeX 中間文件
+*.aux
+*.log
+*.toc
+*.out
+*.xdv
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# 工作記憶（工具內部，非專案內容）
+.workbuddy-ai/
+
+# 系統
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 編輯器
+.vscode/
+.idea/
+*.swp
