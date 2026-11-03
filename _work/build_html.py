@@ -71,6 +71,9 @@ nav details.navj>summary:before{content:"▸ "; color:var(--accent2); font-size:
 nav details.navj[open]>summary:before{content:"▾ "}
 nav details.navj>summary:hover{background:#ece8dd; color:var(--accent)}
 nav a.art{padding-left:2rem; font-size:12.5px; color:#6a6258}
+nav a.jie{padding-left:2.6rem; font-size:12px; color:#8a8278; line-height:1.5}
+nav a.jie:hover{color:var(--accent)}
+nav .jcnt{float:right; color:#b8b2a6; font-size:11px; margin-right:.2rem}
 main{flex:1; min-width:0; max-width:1200px; margin:0 auto; padding:2.6rem 3rem 6rem;
   transition:max-width .18s ease}
 body.wide main{max-width:none}
@@ -269,12 +272,28 @@ def build_nav(md_text, is_full):
         parts.append('<a href="#ap3">三、篇目卷次</a>')
         parts.append('</div>')
     else:
-        # 分卷：列該卷各篇
+        # 分卷：列該卷各篇；有戒條者折疊展開，便於直達
+        CN2N = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8,
+                '九': 9, '十': 10, '十一': 11, '十二': 12, '十三': 13, '十四': 14,
+                '十五': 15, '十六': 16, '十七': 17, '十八': 18, '十九': 19, '二十': 20}
         parts.append('<div class="grp"><b>本卷篇目</b>')
-        for m in re.finditer(r'^#### (\d{3})　([^\n]+)$', md_text, re.M):
+        secs = re.split(r'(?=^#### \d{3}　)', md_text, flags=re.M)
+        for sec in secs:
+            m = re.match(r'^#### (\d{3})　([^\n]+)', sec)
+            if not m:
+                continue
             n, title = m.group(1), m.group(2)
-            t = re.sub(r'<[^>]+>', '', title)
-            parts.append(f'<a href="#p{n}">{n}　{htmlmod.escape(t)}</a>')
+            t = htmlmod.escape(re.sub(r'<[^>]+>', '', title))
+            jies = re.findall(r'^##### 第([一二三四五六七八九十]+)戒　([^（]*?)（段', sec, re.M)
+            if jies:
+                parts.append(f'<details class="navj"><summary>{n}　{t}'
+                             f'<span class="jcnt">{len(jies)}</span></summary>')
+                for cn, nm in jies:
+                    jn = CN2N.get(cn, 0)
+                    parts.append(f'<a href="#j{n}-{jn}" class="jie">{cn}　{htmlmod.escape(nm.strip())}</a>')
+                parts.append('</details>')
+            else:
+                parts.append(f'<a href="#p{n}">{n}　{t}</a>')
         parts.append('</div>')
         parts.append('<div class="grp"><b>其他</b>')
         parts.append('<a href="index.html">← 回目錄</a>')
