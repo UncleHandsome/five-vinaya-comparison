@@ -201,6 +201,21 @@ def fix_terms(diff, canon):
     return d
 
 
+def fix_pos(r):
+    """僧祇稿部分項僅記段號，卷次自原文「卷N·段M」標記補出。"""
+    pos = r.get('pos') or ''
+    if r['canon'] == '僧祇' and pos.startswith('段'):
+        # 先自原文「卷N·段M」取；無則以 unit（volNN）為卷號
+        o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
+        m = re.search(r'卷(\d+)[·・]段', o.get('orig') or '')
+        if m:
+            return f'卷{m.group(1)}·{pos}'
+        mu = re.match(r'vol(\d+)', r['unit'] or '')
+        if mu:
+            return f'卷{int(mu.group(1))}·{pos}'
+    return pos
+
+
 def clean_orig(t):
     """清理原文中的重複標點與工作殘留"""
     if not t:
@@ -339,7 +354,7 @@ def render_item(r, no_prefix, compact=False):
     lines.append('')
     p_ = PLACED.get(r['id'])
     loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}　{loc_tag}　本稿位置：{esc(r.get("pos",""))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}　{loc_tag}　本稿位置：{esc(fix_pos(r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
     lines.append('')
     # 差異
     diff = fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon'])
@@ -460,7 +475,7 @@ def render_gt_block(g, ids):
         out.append('')
         p_ = PLACED.get(r['id'])
         loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(r.get("pos",""))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(fix_pos(r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
         out.append('')
         diff = fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon'])
         if diff:
@@ -1101,6 +1116,12 @@ def norm_seg(txt):
     txt = re.sub(r'遍查\s+未見', '遍查未見', txt)
     # 單篇範圍 `038`～`038` → `038`
     txt = re.sub(r'`(\d{3})`～`\1`', r'`\1`', txt)
+    # 編纂備忘清理
+    txt = re.sub(r'，(?:已入刪除表|已刪)）', '）', txt)      # 括號內
+    txt = re.sub(r'，已入刪除表。', '。', txt)               # 句末
+    txt = re.sub(r'（見保留項\d+）', '', txt)               # 保留項編號
+    txt = re.sub(r'，詳「存疑」\d*。', '。', txt)            # 存疑指引
+    txt = re.sub(r'詳「存疑」\d*。', '', txt)
     return txt
 
 
