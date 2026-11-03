@@ -83,7 +83,9 @@ h2{font-size:1.45rem; margin:3rem 0 1rem; padding-bottom:.4rem;
 h3{font-size:1.15rem; margin:2.2rem 0 .8rem; color:var(--accent)}
 h4{font-size:1.05rem; margin:1.8rem 0 .6rem; padding-left:.6rem;
   border-left:4px solid var(--accent2)}
-h5{font-size:.98rem; margin:1.4rem 0 .5rem; color:var(--fg2)}
+h5{font-size:.95rem; margin:1.9rem 0 .7rem; color:var(--accent);
+  padding:.35rem .8rem; background:#f3efe6; border-left:3px solid var(--accent2);
+  font-family:"Microsoft YaHei",sans-serif; line-height:1.45; letter-spacing:.02em}
 /* ── 段落與行內 ── */
 p{margin:.7rem 0}
 strong{font-weight:700; color:#000}

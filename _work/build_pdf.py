@@ -63,8 +63,9 @@ h3{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:13pt;
 h4{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:12pt;
   margin:9pt 0 3pt; page-break-after:avoid;
   border-left:3pt solid #8a5a2b; padding-left:5pt; line-height:1.35}
-h5{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:11pt;
-  margin:7pt 0 2pt; page-break-after:avoid; color:#444; line-height:1.3}
+h5{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:10.5pt;
+  margin:10pt 0 3pt; page-break-after:avoid; color:#8a5a2b;
+  background:#f5f1e8; border-left:2.5pt solid #a8763f; padding:2pt 6pt; line-height:1.4}
 /* ── 段落 ── */
 p{margin:2.5pt 0; orphans:2; widows:2}
 strong{font-weight:700}

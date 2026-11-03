@@ -14,7 +14,7 @@
   五部律差異對照本.md（合冊）
   五部律差異對照本_卷一至卷十.md 等 6 個分卷檔
 """
-import json, re, os
+import json, re, os, glob
 from collections import defaultdict, Counter, OrderedDict
 from norm_ref import normalize as norm_ref
 from section_intro import INTRO as SEC_INTRO
@@ -210,6 +210,49 @@ for rid, p in PLACED.items():
 
 for n in by_seg:
     by_seg[n].sort(key=lambda x: (x[0], ST_ORDER.get(x[1]['st'], 9), x[1]['id']))
+
+
+# ---------- 戒條分節 ----------
+# 四分律原文每戒末標「(一竟)」「(二竟)」…，據此切分篇內戒條。
+JIE = {}   # 篇號 -> [(起段, 迄段, 序, 戒名), ...]
+
+
+def _jie_name(s):
+    """從戒條句提取短名"""
+    s = re.sub(r'^若比丘[，,]?', '', s or '')
+    s = re.sub(r'[，,]?(尼薩耆波逸提|僧伽婆尸沙|波羅夷|波逸提|波羅提提舍尼|突吉羅).*$', '', s)
+    s = re.sub(r'^衣已竟[，,]?迦絺那衣已[出捨][，,]?', '', s)
+    s = s.strip('，,。 ')
+    return s[:12] + ('…' if len(s) > 12 else '')
+
+
+def load_jie():
+    d = os.path.join(BASE, 'sifen')
+    if not os.path.isdir(d):
+        return
+    for f in glob.glob(os.path.join(d, '*.txt')):
+        try:
+            no = int(os.path.basename(f)[:3])
+        except ValueError:
+            continue
+        lines = open(f, encoding='utf-8', errors='ignore').read().split('\n')
+        marks = []
+        for i, l in enumerate(lines):
+            m = re.search(r'\(([一二三四五六七八九十百]+)竟[)）]?', l)
+            if m:
+                marks.append((i + 1, m.group(1)))
+        if not marks:
+            continue
+        jies, prev = [], 0
+        for seg, cn in marks:
+            seg_text = '\n'.join(lines[prev:seg])
+            m = re.search(r'當如是說[：:]\s*([^\n。]{8,120})', seg_text)
+            jies.append((prev + 1, seg, cn, _jie_name(m.group(1)) if m else ''))
+            prev = seg
+        JIE[no] = jies
+
+
+load_jie()
 
 # 序號
 D_NO = {}
@@ -743,8 +786,26 @@ def build_part1(seg_filter=None):
                 L.append('')
                 L.append('</details>')
                 L.append('')
-            for seg, r in by_seg[n]:
-                L.append(render_item(r, D_NO[r['id']]))
+            _jies = JIE.get(n)
+            if _jies:
+                for (_s1, _s2, _cn, _nm) in _jies:
+                    _grp = [(s, r) for s, r in by_seg[n] if _s1 <= s <= _s2]
+                    if not _grp:
+                        continue
+                    _h = f'第{_cn}戒' + (f'　{_nm}' if _nm else '')
+                    L.append(f'##### {_h}　（段{_s1}–{_s2}）')
+                    L.append('')
+                    for seg, r in _grp:
+                        L.append(render_item(r, D_NO[r['id']]))
+                _rest = [(s, r) for s, r in by_seg[n] if s > _jies[-1][1]]
+                if _rest:
+                    L.append('##### 其餘')
+                    L.append('')
+                    for seg, r in _rest:
+                        L.append(render_item(r, D_NO[r['id']]))
+            else:
+                for seg, r in by_seg[n]:
+                    L.append(render_item(r, D_NO[r['id']]))
             L.append('')
     return '\n'.join(L)
 
