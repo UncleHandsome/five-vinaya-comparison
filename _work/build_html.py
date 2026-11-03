@@ -127,6 +127,18 @@ summary{cursor:pointer; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
   letter-spacing:.06em}
 summary:hover{color:var(--accent)}
 details p{font-size:.94em; color:#4a4038; margin:.5rem 0}
+/* ── 四分律原文／白話 ── */
+details.art-src,details.art-plain{margin:.5rem 0 .5rem; padding:.25rem .8rem}
+details.art-src{background:#fbf9f2; border-left:3px solid #c9b48a}
+details.art-plain{background:#f6f8f6; border-left:3px solid #9fb59b}
+details.art-src>summary,details.art-plain>summary{font-size:12.5px; letter-spacing:.04em}
+details.art-src>summary{color:#8a6d3b}
+details.art-plain>summary{color:#4f6b4a}
+details.art-src p,details.art-plain p{font-size:.95em; line-height:1.9; margin:.45rem 0;
+  text-align:justify}
+details.art-src sub{display:inline; margin:0 .15em 0 0; vertical-align:baseline;
+  color:#9c8a6a; font-size:11px; letter-spacing:.05em}
+details.art-plain strong{color:#3f5a3a; font-size:.95em}
 /* ── 本篇目錄 ── */
 details.art-toc{margin:.9rem 0 1.4rem; border:1px solid var(--line); border-radius:4px;
   background:#faf8f3; padding:.4rem .9rem}
@@ -228,7 +240,7 @@ JS = r"""
       var ds = document.querySelectorAll('details');
       var anyClosed = Array.prototype.some.call(ds, function(d){ return !d.open; });
       Array.prototype.forEach.call(ds, function(d){ d.open = anyClosed; });
-      bar.textContent = anyClosed ? '全部收起白話' : '全部展開白話';
+      bar.textContent = anyClosed ? '全部收起' : '全部展開';
     });
   }
 })();
@@ -312,13 +324,13 @@ def build_nav(md_text, is_full):
                 continue
             n, title = m.group(1), m.group(2)
             t = htmlmod.escape(re.sub(r'<[^>]+>', '', title))
-            jies = re.findall(r'^##### 第([一二三四五六七八九十]+)戒　([^（]*?)（段', sec, re.M)
-            if jies:
+            units = re.findall(r'^##### 段(\d+)–(\d+)(?:　([^\n]*))?$', sec, re.M)
+            if units:
                 parts.append(f'<details class="navj"><summary>{n}　{t}'
-                             f'<span class="jcnt">{len(jies)}</span></summary>')
-                for cn, nm in jies:
-                    jn = cn2num(cn)
-                    parts.append(f'<a href="#j{n}-{jn}" class="jie">{cn}　{htmlmod.escape(nm.strip())}</a>')
+                             f'<span class="jcnt">{len(units)}</span></summary>')
+                for a, b, lbl in units:
+                    lbl = htmlmod.escape(lbl.strip()) if lbl else f'段{a}–{b}'
+                    parts.append(f'<a href="#u{n}-{a}" class="jie">{lbl}</a>')
                 parts.append('</details>')
             else:
                 parts.append(f'<a href="#p{n}">{n}　{t}</a>')
@@ -363,7 +375,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <nav>
 {nav}
 <div class="grp" style="margin-top:1.2rem">
-<a href="#" id="toggle" style="color:var(--accent)">全部展開白話</a>
+<a href="#" id="toggle" style="color:var(--accent)">全部展開／收起</a>
 <a href="#" id="width" style="color:var(--accent)">切換寬屏</a>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">

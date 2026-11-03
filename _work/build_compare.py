@@ -238,7 +238,12 @@ for n in by_seg:
 
 # ---------- 戒條分節 ----------
 # 四分律原文每戒末標「(一竟)」「(二竟)」…，據此切分篇內戒條。
-JIE = {}   # 篇號 -> [(起段, 迄段, 序, 戒名), ...]
+# 尼單提諸篇標「(一)」「(二)」…；卷三十一至六十依揵度與子題。
+# 切分邏輯集中在 sifen_src.py，此處僅取用。
+from sifen_src import SEG as SRC_SEG, units as src_units, plain_text as src_plain, unit_label as src_label
+
+JIE = {}   # 篇號 -> [(起段, 迄段, 序, 戒名), ...]  （供目錄與統計沿用）
+
 
 def errata_orig(rid, s):
     """本稿原文來自 originals_index，errata 的 _sub 需另行套用。"""
@@ -272,32 +277,61 @@ def _jie_name(s):
 
 
 def load_jie():
-    d = os.path.join(BASE, 'sifen')
-    if not os.path.isdir(d):
-        return
-    for f in glob.glob(os.path.join(d, '*.txt')):
-        try:
-            no = int(os.path.basename(f)[:3])
-        except ValueError:
-            continue
-        lines = open(f, encoding='utf-8', errors='ignore').read().split('\n')
-        marks = []
-        for i, l in enumerate(lines):
-            m = re.search(r'\(([一二三四五六七八九十百]+)竟[)）]?', l)
-            if m:
-                marks.append((i + 1, m.group(1)))
-        if not marks:
-            continue
-        jies, prev = [], 0
-        for seg, cn in marks:
-            seg_text = '\n'.join(lines[prev:seg])
-            m = re.search(r'當如是說[：:]\s*([^\n。]{8,120})', seg_text)
-            jies.append((prev + 1, seg, cn, _jie_name(m.group(1)) if m else ''))
-            prev = seg
-        JIE[no] = jies
+    for n in sorted(SRC_SEG):
+        us = [u for u in src_units(n) if u.get('cn')]
+        if us:
+            JIE[n] = [(u['a'], u['b'], u['cn'], u.get('name') or '') for u in us]
 
 
 load_jie()
+
+RE_PHEAD = re.compile(r'^[（(][一二三四五六七八九十百]+[）)]')
+
+# 白話對齊品質（節首 → 該節原文與所配白話之最高 cosine）。
+# 低於門檻者，寧缺勿濫，以免以甲戒之白話充乙戒。
+try:
+    PLAIN_QC = json.load(open(os.path.join(BASE, 'sifen_plain_qc.json'), encoding='utf-8'))
+except Exception:
+    PLAIN_QC = {}
+PLAIN_QC_MIN = 0.12
+
+
+def plain_doubt(n, u):
+    q = PLAIN_QC.get('%03d-%d' % (n, u['a']))
+    return q is not None and q < PLAIN_QC_MIN
+
+
+def render_src(n, u):
+    """四分律原文（摺疊）"""
+    segs = [(k, t) for k, t in SRC_SEG[n] if u['a'] <= k <= u['b']]
+    if not segs:
+        return []
+    L = [f'<details class="art-src"><summary>四分律原文　段{u["a"]}–{u["b"]}（{len(segs)} 段）</summary>', '']
+    for k, t in segs:
+        L.append(f'<sub>段{k}</sub>　{t}')
+        L.append('')
+    L += ['</details>', '']
+    return L
+
+
+def render_plain(n, u):
+    """白話直譯（摺疊；譯者所加小標轉粗體）"""
+    ps = src_plain(n, u['a'], u['b'])
+    if not ps:
+        return []
+    L = [f'<details class="art-plain"><summary>白話　段{u["a"]}–{u["b"]}</summary>', '']
+    for p in ps:
+        for ln in p.split('\n'):
+            ln = ln.strip()
+            if not ln:
+                continue
+            if len(ln) <= 40 and RE_PHEAD.match(ln):
+                L.append(f'**{ln}**')
+            else:
+                L.append(ln)
+            L.append('')
+    L += ['</details>', '']
+    return L
 
 # 序號
 D_NO = {}
@@ -682,6 +716,15 @@ def build_front():
              '十誦 949 項、僧祇 584 項、根有 212 項）。譯筆以逐句對應為原則，不增不減，'
              '術語保留原詞，難解處寧直譯而不發揮。白話止可為入門之階，考據仍當以原文為斷。')
     L.append('')
+    L.append('十三、**四分律原文與白話**：每節之首（前三十卷以戒條為節，卷三十一至六十以揵度子題為節），'
+             '附「四分律原文」與「白話」二摺疊塊，**預設收起**，按題展開；不需者逕讀差異說明，不礙瀏覽。'
+             '原文逐段迻錄，段前標段號，與差異說明所引「`001` 段38」相應。'
+             '白話取《白話四分律》之「白話直譯」，其「義理通解」「如何用心」二門不錄。')
+    L.append('')
+    L.append('> 須辨者：白話與原文非逐句對應——譯者或合數段為一，或析一段為數，'
+             '今按文意錨定於段，略有參差；其對應未確者寧缺，標「暫從缺」以存疑，'
+             '不以甲戒之白話充乙戒。白話但求可讀，考據仍以原文為斷。')
+    L.append('')
     L.append('<a id="front6"></a>'); L.append(''); L.append('### 六、五部律罪名異譯對照')
     L.append('')
     L.append('同一罪階，五部譯名不同；同一譯名，五部所指亦未必盡同。讀他部之文，'
@@ -721,14 +764,17 @@ def build_front():
         _lo, _hi, _c26 = D_NO[_ids26[0]], D_NO[_ids26[-1]], len(_ids26)
         L.append(f'1. 查目錄，得「026　八波羅夷法」在卷二十二之首，計 {_c26} 項。')
         L.append('2. 先讀該篇「篇旨」，知此篇所載者何事；次讀「狀態」一行，知差異之構成。')
-        L.append(f'3. 次見 `{_lo}` 至 `{_hi}`，依四分段號排列；段1、段3、段7……各有差異。')
+        L.append(f'3. 該篇分 {len(src_units(26))} 節（前三十卷以戒條為節），每節之首標段號範圍與戒名，'
+                 '並附「四分律原文」「白話」二摺疊塊，預設收起——欲讀原文或白話者按題展開，'
+                 '不需者逕讀其下差異，不礙瀏覽。')
+        L.append(f'4. 次見 `{_lo}` 至 `{_hi}`，依四分段號排列；段1、段3、段7……各有差異。')
     else:
         L.append('1. 查目錄，得「026　八波羅夷法」在卷二十二之首。')
         L.append('2. 翻至該篇，諸項依四分段號排列。')
-    L.append('4. 每項先讀「差異」一句，知異在何處；再讀「四分對照」，知四分原文作何；'
+    L.append('5. 每項先讀「差異」一句，知異在何處；再讀「四分對照」，知四分原文作何；'
              '終讀他部對照，知彼部作何。')
-    L.append('5. 若該項標 `G#`／`T#`，則同一制度他部亦記一次，可翻第三部見兩稿全文並列。')
-    L.append('6. 讀畢該篇，若欲知「四分律於此完全沒有什麼」，翻第二部相應主稿之節。')
+    L.append('6. 若該項標 `G#`／`T#`，則同一制度他部亦記一次，可翻第三部見兩稿全文並列。')
+    L.append('7. 讀畢該篇，若欲知「四分律於此完全沒有什麼」，翻第二部相應主稿之節。')
     L.append('')
     L.append('---')
     L.append('')
@@ -813,9 +859,10 @@ def build_part1(seg_filter=None):
         L.append(f'<sub>四分律原檔：{fname.replace("原文.txt", "卷").replace("-", "–").replace(" 卷", "卷")}</sub>')
         L.append('')
         for n in segs:
-            _has = bool(by_seg.get(n))
-            if not _has and n not in SEC_INTRO:
+            if n not in SRC_SEG:
                 continue
+            _items = by_seg.get(n, [])
+            _has = bool(_items)
             info = si[n]
             L.append(f'<a id="{anchor(n)}"></a>')
             L.append('')
@@ -825,26 +872,24 @@ def build_part1(seg_filter=None):
                 L.append(f'> **篇旨**：{SEC_INTRO[n]}')
                 L.append('')
             extra = '（含受戒、說戒、安居、自恣四揵度，段1–330）' if n == 38 else ''
-            _cnt_n = len(by_seg.get(n, []))
-            if _cnt_n:
-                L.append(f'<sub>本篇 {info["paras"]} 段{extra}，差異 {_cnt_n} 項</sub>')
+            _us = src_units(n)
+            _ns = len(_us)
+            _seg_note = f'，分 {_ns} 節' if _ns > 1 else ''
+            if _has:
+                L.append(f'<sub>本篇 {info["paras"]} 段{extra}{_seg_note}，差異 {len(_items)} 項</sub>')
             else:
-                L.append(f'<sub>本篇 {info["paras"]} 段{extra}，**無差異項**</sub>')
+                L.append(f'<sub>本篇 {info["paras"]} 段{extra}{_seg_note}，**無差異項**</sub>')
             L.append('')
-            if not _cnt_n:
-                L.append('> 本篇諸部皆同，無可指認之實質差異，故不列項。')
-                L.append('')
-                continue
             # 概覽：狀態分布與主稿分布
-            _rows_n = [apply_errata(r) for _s, r in by_seg.get(n, [])]
-            stc = Counter(r['st'] for r in _rows_n)
-            cnc = Counter(r['canon'] for r in _rows_n)
-            st_parts = '・'.join(f'{k} {stc[k]}' for k in ['A', 'B', 'C', 'D'] if stc.get(k))
-            cn_parts = '、'.join(f'{c} {cnc[c]}' for c in ['十誦', '五分', '僧祇', '根有'] if cnc.get(c))
-            L.append(f'<sub>狀態：{st_parts}　｜　主稿：{cn_parts}</sub>')
-            L.append('')
+            _rows_n = [apply_errata(r) for _s, r in _items]
+            if _rows_n:
+                stc = Counter(r['st'] for r in _rows_n)
+                cnc = Counter(r['canon'] for r in _rows_n)
+                st_parts = '・'.join(f'{k} {stc[k]}' for k in ['A', 'B', 'C', 'D'] if stc.get(k))
+                cn_parts = '、'.join(f'{c} {cnc[c]}' for c in ['十誦', '五分', '僧祇', '根有'] if cnc.get(c))
+                L.append(f'<sub>狀態：{st_parts}　｜　主稿：{cn_parts}</sub>')
+                L.append('')
             # 本篇目錄（項數多者，便於篇內跳轉）
-            _items = by_seg.get(n, [])
             if len(_items) >= 15:
                 L.append(f'<details class="art-toc"><summary>本篇目錄（{len(_items)} 項）</summary>')
                 L.append('')
@@ -855,28 +900,39 @@ def build_part1(seg_filter=None):
                 L.append('')
                 L.append('</details>')
                 L.append('')
-            _jies = JIE.get(n)
-            if _jies:
-                for (_s1, _s2, _cn, _nm) in _jies:
-                    _grp = [(s, r) for s, r in by_seg[n] if _s1 <= s <= _s2]
-                    if not _grp:
-                        continue
-                    _h = f'第{_cn}戒' + (f'　{_nm}' if _nm else '')
-                    _jn = cn2num(_cn)
-                    L.append(f'<a id="j{n:03d}-{_jn}"></a>')
+            if not _has and n not in SEC_INTRO:
+                L.append('> 本篇諸部皆同，無可指認之實質差異；四分律原文與白話見下。')
+                L.append('')
+            # 逐節：原文（摺疊）→ 白話（摺疊）→ 該節差異項
+            _lo, _hi = _us[0]['a'], _us[-1]['b']
+            for _u in _us:
+                _grp = [(s, r) for s, r in _items if _u['a'] <= s <= _u['b']]
+                _lbl = src_label(_u)
+                _h = f'##### 段{_u["a"]}–{_u["b"]}' + (f'　{_lbl}' if _lbl else '')
+                L.append(f'<a id="u{n:03d}-{_u["a"]}"></a>')
+                L.append('')
+                L.append(_h)
+                L.append('')
+                if _grp:
+                    L.append(f'<sub>本節差異 {len(_grp)} 項</sub>')
                     L.append('')
-                    L.append(f'##### {_h}　（段{_s1}–{_s2}）')
+                L.extend(render_src(n, _u))
+                _pb = [] if plain_doubt(n, _u) else render_plain(n, _u)
+                if _pb:
+                    L.extend(_pb)
+                elif plain_doubt(n, _u):
+                    L.append('<sub>本節白話與原文對應未確，暫從缺</sub>')
                     L.append('')
-                    for seg, r in _grp:
-                        L.append(render_item(r, D_NO[r['id']]))
-                _rest = [(s, r) for s, r in by_seg[n] if s > _jies[-1][1]]
-                if _rest:
-                    L.append('##### 其餘')
+                else:
+                    L.append('<sub>本節白話從缺</sub>')
                     L.append('')
-                    for seg, r in _rest:
-                        L.append(render_item(r, D_NO[r['id']]))
-            else:
-                for seg, r in by_seg[n]:
+                for seg, r in _grp:
+                    L.append(render_item(r, D_NO[r['id']]))
+            _rest = [(s, r) for s, r in _items if s < _lo or s > _hi]
+            if _rest:
+                L.append('##### 其餘')
+                L.append('')
+                for seg, r in _rest:
                     L.append(render_item(r, D_NO[r['id']]))
             L.append('')
     return '\n'.join(L)

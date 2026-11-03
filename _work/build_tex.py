@@ -44,7 +44,14 @@ FULL = '五部律差異對照本.md'
 
 def prep(md):
     """轉為 LaTeX 友善的 Markdown"""
-    # details → 普通段落
+    # 本篇目錄在 PDF 無用，整段移除
+    md = re.sub(r'<details class="art-toc">.*?</details>\s*', '', md, flags=re.S)
+    # 四分律原文／白話
+    md = re.sub(r'<details class="art-src">\s*<summary>([^<]*)</summary>',
+                lambda m: f'\n**〔{m.group(1)}〕**\n', md)
+    md = re.sub(r'<details class="art-plain">\s*<summary>([^<]*)</summary>',
+                lambda m: f'\n**〔{m.group(1)}〕**\n', md)
+    # 其餘 details → 普通段落
     md = re.sub(r'<details>\s*<summary>([^<]*)</summary>',
                 lambda m: f'\n**〔{m.group(1)}〕**\n', md)
     md = md.replace('</details>', '\n')

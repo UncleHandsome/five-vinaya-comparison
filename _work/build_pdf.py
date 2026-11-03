@@ -94,6 +94,20 @@ th{background:#eee; font-weight:600}
 .bh-l{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:8pt;
   color:#777; letter-spacing:1pt; margin-bottom:1pt}
 .bh p{margin:1pt 0}
+/* ── 四分律原文／白話 ── */
+.src{margin:4pt 0 4pt; padding:3pt 8pt; background:#fbf9f2;
+  border-left:2.5pt solid #c9b48a; font-size:10.5pt; line-height:1.5}
+.src p{margin:1.5pt 0; text-align:justify}
+.src sub{display:inline; vertical-align:baseline; font-size:7.5pt;
+  color:#9c8a6a; margin-right:1.5pt}
+.plain{margin:3pt 0 5pt; padding:3pt 8pt; background:#f6f8f6;
+  border-left:2.5pt solid #9fb59b; font-size:9.5pt; line-height:1.45; color:#3f4a3c}
+.plain p{margin:1.5pt 0; text-align:justify}
+.plain strong{font-size:9.5pt; color:#33502e}
+.bl{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:8pt;
+  color:#8a7a5a; letter-spacing:1pt; margin-bottom:1.5pt}
+.src .bl{color:#8a6d3b}
+.plain .bl{color:#5f7a58}
 /* ── 列表 ── */
 ul,ol{margin:3pt 0 3pt 1.2em; padding:0}
 li{margin:1.5pt 0}
@@ -126,7 +140,12 @@ def prep_md(md):
     """預處理：details → 普通區塊（PDF 不折疊）；移除錨點標籤"""
     # 本篇目錄在 PDF 中無用（已有書籤與目錄頁），整段移除
     md = re.sub(r'<details class="art-toc">.*?</details>\s*', '', md, flags=re.S)
-    # <details><summary>白話</summary> ... </details>
+    # 四分律原文／白話：改為帶標籤的普通區塊
+    md = re.sub(r'<details class="art-src">\s*<summary>([^<]*)</summary>',
+                lambda m: f'<div class="src"><div class="bl">〔{m.group(1)}〕</div>\n', md)
+    md = re.sub(r'<details class="art-plain">\s*<summary>([^<]*)</summary>',
+                lambda m: f'<div class="plain"><div class="bl">〔{m.group(1)}〕</div>\n', md)
+    # 其餘 <details><summary>白話</summary> ... </details>
     md = re.sub(
         r'<details>\s*<summary>([^<]*)</summary>',
         lambda m: f'<div class="bh"><div class="bh-l">〔{m.group(1)}〕</div>\n',
@@ -193,7 +212,7 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None):
 
     _sub = title.replace('五部律差異對照本', '').strip() or '全一冊'
     cover = make_cover('五部律差異對照本', '以《四分律》為軸　五部對校',
-                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　十組歸併',
+                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　576 節　·　九組歸併',
                         'A4 · 內文 12pt · 緊湊排版'])
     toc = make_toc(md)
     page = f"""<!DOCTYPE html>
