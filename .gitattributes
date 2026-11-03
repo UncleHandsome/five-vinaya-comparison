@@ -1,0 +1,32 @@
+# 統一換行符，避免跨平台出現「整個倉庫已修改」的假象
+# 索引與工作區皆用 LF；Windows 檢出時亦不轉 CRLF
+* text=auto eol=lf
+
+# 二進制文件，不參與換行轉換
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.ttf  binary
+*.otf  binary
+*.woff binary
+*.woff2 binary
+*.pkl  binary
+*.zip  binary
+*.gz   binary
+
+# 明確指定文本類型（供 diff 與語言識別）
+*.md   text eol=lf
+*.txt  text eol=lf
+*.py   text eol=lf
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.csv  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.tex  text eol=lf
+*.tsv  text eol=lf
