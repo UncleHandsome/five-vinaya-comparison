@@ -15,6 +15,7 @@
   五部律差異對照本_卷一至卷十.md 等 6 個分卷檔
 """
 import json, re, os, glob
+from errata import apply as apply_errata, ERRATA, ERRATA_POS, clean_title, cn2num
 from collections import defaultdict, Counter, OrderedDict
 from norm_ref import normalize as norm_ref
 from section_intro import INTRO as SEC_INTRO
@@ -35,7 +36,7 @@ ABSENT = set(loc['absent'])
 UNPLACED = loc['unplaced']
 
 # 勘誤改判者：原判「四分所無」，覆核後實有對應，改入第一部
-ERRATA_POS = {'M-1913': (0, 3)}
+# ERRATA_POS 由 errata.py 提供（勘誤改判者，歸入第一部）
 for _rid, (_n, _seg) in ERRATA_POS.items():
     if _rid not in PLACED:
         PLACED[_rid] = {'id': _rid, 'n': _n, 'seg': _seg, 'how': 'errata'}
@@ -49,7 +50,7 @@ if os.path.exists(GT_PATH):
     GT = json.load(open(GT_PATH, encoding='utf-8'))
 else:
     GT = {
-        'G1': ['M-0071', 'M-1524'], 'G2': ['M-0067', 'M-0508'],
+        'G1': ['M-0071', 'M-1524'],
         'G3': ['M-0093', 'M-1594'], 'G4': ['M-0088', 'M-2102'],
         'G5': ['M-1682', 'M-2124'], 'G6': ['M-1169', 'M-1666'],
         'G7': ['M-1088', 'M-2105'], 'T1': ['M-0228', 'M-1692'],
@@ -63,8 +64,6 @@ for g, ids in GT.items():
 GT_INFO = {
     'G1': ('未獲許可入比丘尼住處', '五分 vol07#1（僧差）／僧祇 vol14-15#26（白）',
            '以五分戒文為主，僧祇之「白」法與「為尼作唄」四判入程序差異欄'),
-    'G2': ('作大房過量', '五分 vol06#11（三重為限）／十誦 vol11-12#9（三種不犯緣）',
-           '以五分戒文與犯相為主，十誦板覆、鳥翅覆、草根覆三句入開緣欄'),
     'G3': ('知檀越欲與僧物迴與餘人', '五分 vol09#1／僧祇 vol20-21#18',
            '以五分戒文為主，僧祇五層遞減判入判罪欄'),
     'G4': ('輕師／不恭敬', '五分 vol08#10／根有 vol42-43#1',
@@ -92,7 +91,6 @@ SAME_TOPIC = {
     'M-0531': 'M-0582', 'M-0582': 'M-0531',   # 五似食
 }
 
-from errata import apply as apply_errata, ERRATA, clean_title, cn2num
 
 
 # 篇名覆寫：原檔 038 名為「(開頭)」，實含受戒至自恣四揵度，且括號會壞目錄錨點
@@ -184,6 +182,13 @@ def clip_orig(orig, r):
     nl = cut.rfind('\n')
     if nl > ORIG_LIMIT * 0.7:
         cut = cut[:nl]
+    else:
+        # 單段過長者，回退至最近句末，免斷在詞中（如「式叉摩|尼」）
+        for sep in ('。」', '。', '；', '，'):
+            p = cut.rfind(sep)
+            if p > ORIG_LIMIT * 0.6:
+                cut = cut[:p + len(sep)]
+                break
     return cut, True
 
 
@@ -433,6 +438,10 @@ def render_item(r, no_prefix, compact=False):
     return '\n'.join(lines)
 
 
+def _cn_num(n):
+    return {1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}.get(n, str(n))
+
+
 def render_gt_block(g, ids):
     """渲染一個 G/T 歸併組"""
     title, ev, handle = GT_INFO.get(g, ('', '', ''))
@@ -559,13 +568,14 @@ def build_front():
     for lv in ['戒條', '制度', '法數', '事件']:
         L.append(f'| {lv} | {lv_cnt.get(lv,0)} |')
     L.append('')
-    L.append('按四分律篇次歸位者 **{:,}** 項（第一部），四分律所無者 **{:,}** 項（第二部），'
+    _n_abs_body = sum(len(by_canon_absent.get(c, [])) for c in ['五分', '十誦', '僧祇', '根有'])
+    _n_merged = len(ABSENT) - _n_abs_body
+    L.append('按四分律篇次歸位者 **{:,}** 項（第一部），四分律所無者 **{:,}** 項，'
              '二者合 **{:,}** 項，即全數歸位，無遺漏（歸位方法見附錄一）。'
-             '其中 9 項因與他稿同一制度而併入第三部之 `G#`／`T#` 組，'
-             '故第一部、第二部正文共見 **{:,}** 項。'.format(
+             '其中 {:,} 項因與同組他稿重出而併入第三部之 `G#`／`T#` 組，'
+             '故第二部正文 **{:,}** 項，第一、二部正文共見 **{:,}** 項。'.format(
                  len(PLACED), len(ABSENT), len(PLACED) + len(ABSENT),
-                 len(PLACED) + len(by_canon_absent.get('五分', [])) + len(by_canon_absent.get('十誦', []))
-                 + len(by_canon_absent.get('僧祇', [])) + len(by_canon_absent.get('根有', []))))
+                 _n_merged, _n_abs_body, len(PLACED) + _n_abs_body))
     L.append('')
     L.append('<a id="front4"></a>'); L.append(''); L.append('### 四、狀態代號')
     L.append('')
@@ -611,8 +621,9 @@ def build_front():
     L.append('六、**不補造**：凡一稿未設對照欄者，本書不作推斷，於矩陣記「未比」。'
              '本書為對照本，非裁決本；兩存其說者，並列不強合。')
     L.append('')
-    L.append('七、**項號與引用**：`D-0001` 至 `D-1456` 為第一部（按四分篇段），'
-             '`S-0001` 至 `S-0659` 為第二部（按主稿），`G1`–`G7`／`T1`–`T3` 為第三部歸併組。'
+    L.append(f'七、**項號與引用**：`D-0001` 至 `D-{len(PLACED):04d}` 為第一部（按四分篇段），'
+             f'`S-0001` 至 `S-{_n_abs_body:04d}` 為第二部（按主稿），'
+             f'`G1`、`G3`–`G7`／`T1`–`T3` 為第三部歸併組。'
              '項號全書唯一且連續，可徑引作「《五部律差異對照本》D-0450」。'
              '每項皆有錨點，`D-0450` 與 `[D-0450](#d-0450)` 相通。')
     L.append('')
@@ -734,7 +745,7 @@ def build_toc():
     L.append('')
     L.append('### 第三部　歸併組')
     L.append('')
-    L.append('- [甲、同條歸併七組](#gt-g)')
+    L.append('- [甲、同條歸併六組](#gt-g)')
     L.append('- [乙、同題異制三組](#gt-t)')
     L.append('')
     L.append('### 附錄')
@@ -916,15 +927,16 @@ def build_part3():
     L.append('## 第三部　歸併組')
     L.append('')
     L.append('> 同一制度，兩稿各記一次者，合為一組。矩陣中該二列並列同一 `G#`／`T#`。'
-             '本部所收十組，皆經逐條回讀確認，非機械配對。')
+             '本部所收九組，皆經逐條回讀確認，非機械配對。')
     L.append('')
     L.append('<a id="gt-g"></a>')
     L.append('')
-    L.append('### 甲、同條歸併七組')
+    _gs = [g for g in ('G1', 'G3', 'G4', 'G5', 'G6', 'G7') if g in GT]
+    L.append(f'### 甲、同條歸併{_cn_num(len(_gs))}組')
     L.append('')
     L.append('兩稿各記一次同一戒或同一制度者。')
     L.append('')
-    for g in ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7']:
+    for g in _gs:
         L.append(render_gt_block(g, GT[g]))
         L.append('')
     L.append('<a id="gt-t"></a>')
@@ -950,7 +962,7 @@ def build_appendix():
     L.append('')
     L.append('### 附錄一　歸位方法與覆核')
     L.append('')
-    L.append('本書第一部按四分律篇段編次，其歸位之法有六，依可靠程度為序：')
+    L.append('本書第一部按四分律篇段編次，其歸位之法十有三，依可靠程度為序：')
     L.append('')
     L.append('| 法 | 依據 | 項數 | 說明 |')
     L.append('|---|---|---:|---|')
@@ -974,7 +986,11 @@ def build_appendix():
                 'chunk', 'file_only', 'quote', 'force']:
         if cnt_how.get(how):
             L.append(f'| `{how}` | {how_name.get(how,"")} | {cnt_how[how]} | — |')
-    L.append(f'| | **合計** | **{len(loc["placed"])}** | |')
+    _n_er = len(ERRATA_POS)
+    if _n_er:
+        L.append(f'| `errata` | 覆核改判，另行歸位（見 `_work/errata.py`） | {_n_er} | — |')
+    _tot = len(loc['placed']) + _n_er
+    L.append(f'| | **合計** | **{_tot}** | |')
     L.append('')
     if UNPLACED:
         L.append(f'#### 未能歸位者（{len(UNPLACED)} 項）')
@@ -986,9 +1002,11 @@ def build_appendix():
             L.append(f'| {i} | {r["canon"]} | {r["st"]} | {esc(r["title"])} | {esc(clean_ref(r.get("ref4",""), '四分')[:90])} |')
         L.append('')
     else:
-        L.append('> 全部 1,455 項皆已歸位，無遺漏。其中 `file_only` 十八項僅知篇而不知段，'
-                 '依篇次列於該篇之首；`quote` 十二項以引文回原文定位，已逐項覆核；'
-                 '`force` 三項引文未入庫（四分律卷37自恣揵度之一、妄語戒名相），依語義定其篇。')
+        L.append(f'> 全部 {_tot:,} 項皆已歸位，無遺漏。其中 `file_only` '
+                 f'{cnt_how.get("file_only", 0)} 項僅知篇而不知段，依篇次列於該篇之首；'
+                 f'`quote` {cnt_how.get("quote", 0)} 項以引文回原文定位，已逐項覆核；'
+                 f'`force` {cnt_how.get("force", 0)} 項引文未入庫（四分律卷37自恣揵度之一、'
+                 f'妄語戒名相），依語義定其篇；`errata` {_n_er} 項係覆核改判後歸位。')
         L.append('')
     L.append('**覆核之法**：任取一項，以其「四分對照」所引之文，回四分律原檔同篇同段比對，字句當合。'
              '若不合，則歸位有誤，可據段號修正。')
@@ -1070,7 +1088,7 @@ def build_appendix():
     L.append('---')
     L.append('')
     L.append('*本書據《五部律綜合異同矩陣》2,124 項、四分律七十五篇索引及歸位表機械生成，'
-             'G/T 十組自矩陣正文提取。凡引文皆逐字迻錄自各稿 findings，可回底本覆核。*')
+             'G/T 九組自矩陣正文提取。凡引文皆逐字迻錄自各稿 findings，可回底本覆核。*')
     L.append('')
     return '\n'.join(L)
 
@@ -1078,7 +1096,12 @@ def build_appendix():
 # ---------- 輸出 ----------
 def norm_seg(txt):
     """統一引用格式：「013段8」→「013 段8」。"""
-    return re.sub(r'(?<!\d)(\d{3})段(\d+)', r'\1 段\2', txt)
+    txt = re.sub(r'(?<!\d)(\d{3})段(\d+)', r'\1 段\2', txt)
+    # 「遍查 未見」多餘空格
+    txt = re.sub(r'遍查\s+未見', '遍查未見', txt)
+    # 單篇範圍 `038`～`038` → `038`
+    txt = re.sub(r'`(\d{3})`～`\1`', r'`\1`', txt)
+    return txt
 
 
 def unlink_cross(txt, keep):

@@ -51,6 +51,9 @@ def normalize(s, kind):
         s = CHUNK.sub('`038`', s)
         s = SIFEN_PREFIX.sub(lambda m: f'`{m.group(1)}`', s)
         s = SIFEN_FILE.sub(lambda m: f'`{m.group(1)}`', s)
+        # 篇號範圍 NNN-NNN → `NNN`、`NNN`（須先於「篇-段」判定，否則 059 被誤為段號）
+        s = re.sub(r'^`?(\d{3})[-–](\d{3})`?(?![-\d])',
+                   lambda m: f'`{m.group(1)}`、`{m.group(2)}`', s)
         # 開頭 NNN-M → `NNN` 段M
         s = SIFEN_DASH.sub(lambda m: f'`{m.group(1)}` 段{m.group(2)}', s)
         # 篇名替換後殘留的 `NNN`-M → `NNN` 段M
