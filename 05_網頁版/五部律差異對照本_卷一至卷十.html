@@ -26,6 +26,7 @@
 <meta property="og:locale" content="zh_TW">
 <meta property="og:url" content="https://unclehandsome.github.io/five-vinaya-comparison/">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ScholarlyArticle", "name": "五部律差異對照本　卷一至卷十", "author": {"@type": "Person", "name": "UncleHandsome"}, "datePublished": "2026-11-04", "inLanguage": "zh-Hant", "url": "https://unclehandsome.github.io/five-vinaya-comparison/", "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/", "isPartOf": {"@type": "Book", "name": "五部律差異對照本"}, "about": [{"@type": "Thing", "name": "Dharmaguptaka Vinaya（四分律）"}, {"@type": "Thing", "name": "Sarvāstivāda Vinaya（十誦律）"}, {"@type": "Thing", "name": "Mahīśāsaka Vinaya（五分律）"}, {"@type": "Thing", "name": "Mahāsāṃghika Vinaya（摩訶僧祇律）"}, {"@type": "Thing", "name": "Mūlasarvāstivāda Vinaya（根本說一切有部毘奈耶）"}, {"@type": "Thing", "name": "Comparative Vinaya Studies"}]}</script>
 <style>
 :root{
   --fg:#1a1a1a; --fg2:#5a5a5a; --bg:#fdfdfb; --panel:#f5f4ef;
@@ -183,6 +184,38 @@ body.par details.art-plain{margin-right:0}
 body.par details.art-src + *:not(details.art-plain),
 body.par details.art-plain + *{clear:both}
 body.par main:after{content:""; display:block; clear:both}
+/* ── 深色模式 ── */
+@media (prefers-color-scheme: dark){
+  :root{
+    --fg:#e6e2da; --fg2:#b3aca1; --bg:#161514; --panel:#1e1d1b;
+    --line:#3a3733; --accent:#d9a05b; --accent2:#c98f4c;
+    --quote:#242220; --code:#26241f;
+  }
+  nav{background:#1b1a18; border-right:1px solid var(--line)}
+  nav a:hover,nav details.navj>summary:hover,nav button:hover{background:#2a2825}
+  nav a.on{background:#2e2b26}
+  nav a.art{color:#9d968b}
+  nav a.jie{color:#8b857b}
+  nav .jcnt{color:#6b665e}
+  nav input[type=text],nav input[type=search]{background:#232120; color:var(--fg);
+    border-color:var(--line)}
+  #findinfo{color:#8b857b}
+  #colophon{color:var(--fg2)}
+  details{background:#1e1d1b}
+  details p{color:#c9c3b8}
+  details summary{color:var(--fg2)}
+  blockquote{color:#cfc8bc}
+  h5{background:#26241f}
+  details.art-src{background:#1c1b19; border-left-color:#8a7443}
+  details.art-plain{background:#191c19; border-left-color:#5c7059}
+  details.art-src>summary{color:#c9a76a}
+  details.art-plain>summary{color:#8fae8a}
+  details.art-src p,details.art-plain p{color:#cfc8bc}
+  details.art-toc{background:#1e1d1b}
+  .hitflash{background:#4a3f1e !important; box-shadow:0 0 0 3px #6b5a22}
+  #top{background:#2a2825; color:var(--fg)}
+  img{opacity:.92}
+}
 /* ── 窄屏 ── */
 @media(max-width:1100px){
   nav{display:none}
@@ -13741,9 +13774,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 3859aa4（2026-11-04）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 0033235-dirty（2026-11-04）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 3859aa4」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 0033235-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -13751,7 +13784,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 3859aa4（2026-11-04）}<br>
+　note = {版本 0033235-dirty（2026-11-04）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。

@@ -73,6 +73,32 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 """
 
 
+def _jsonld(title):
+    """schema.org 結構化資料，供搜尋引擎與學術索引辨識。"""
+    import json as _j
+    d = {
+        "@context": "https://schema.org",
+        "@type": "ScholarlyArticle",
+        "name": title,
+        "author": {"@type": "Person", "name": "UncleHandsome"},
+        "datePublished": _DATE,
+        "inLanguage": "zh-Hant",
+        "url": SITE_URL,
+        "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "isPartOf": {"@type": "Book", "name": "五部律差異對照本"},
+        "about": [
+            {"@type": "Thing", "name": "Dharmaguptaka Vinaya（四分律）"},
+            {"@type": "Thing", "name": "Sarvāstivāda Vinaya（十誦律）"},
+            {"@type": "Thing", "name": "Mahīśāsaka Vinaya（五分律）"},
+            {"@type": "Thing", "name": "Mahāsāṃghika Vinaya（摩訶僧祇律）"},
+            {"@type": "Thing", "name": "Mūlasarvāstivāda Vinaya（根本說一切有部毘奈耶）"},
+            {"@type": "Thing", "name": "Comparative Vinaya Studies"},
+        ],
+    }
+    return ('<script type="application/ld+json">'
+            + _j.dumps(d, ensure_ascii=False) + '</script>')
+
+
 def _build_stamp():
     """版本戳：git 短雜湊（工作區有未提交改動則加 -dirty）＋ 建置日期。"""
     import datetime
@@ -262,6 +288,38 @@ body.par details.art-plain{margin-right:0}
 body.par details.art-src + *:not(details.art-plain),
 body.par details.art-plain + *{clear:both}
 body.par main:after{content:""; display:block; clear:both}
+/* ── 深色模式 ── */
+@media (prefers-color-scheme: dark){
+  :root{
+    --fg:#e6e2da; --fg2:#b3aca1; --bg:#161514; --panel:#1e1d1b;
+    --line:#3a3733; --accent:#d9a05b; --accent2:#c98f4c;
+    --quote:#242220; --code:#26241f;
+  }
+  nav{background:#1b1a18; border-right:1px solid var(--line)}
+  nav a:hover,nav details.navj>summary:hover,nav button:hover{background:#2a2825}
+  nav a.on{background:#2e2b26}
+  nav a.art{color:#9d968b}
+  nav a.jie{color:#8b857b}
+  nav .jcnt{color:#6b665e}
+  nav input[type=text],nav input[type=search]{background:#232120; color:var(--fg);
+    border-color:var(--line)}
+  #findinfo{color:#8b857b}
+  #colophon{color:var(--fg2)}
+  details{background:#1e1d1b}
+  details p{color:#c9c3b8}
+  details summary{color:var(--fg2)}
+  blockquote{color:#cfc8bc}
+  h5{background:#26241f}
+  details.art-src{background:#1c1b19; border-left-color:#8a7443}
+  details.art-plain{background:#191c19; border-left-color:#5c7059}
+  details.art-src>summary{color:#c9a76a}
+  details.art-plain>summary{color:#8fae8a}
+  details.art-src p,details.art-plain p{color:#cfc8bc}
+  details.art-toc{background:#1e1d1b}
+  .hitflash{background:#4a3f1e !important; box-shadow:0 0 0 3px #6b5a22}
+  #top{background:#2a2825; color:var(--fg)}
+  img{opacity:.92}
+}
 /* ── 窄屏 ── */
 @media(max-width:1100px){
   nav{display:none}
@@ -624,6 +682,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <meta property="og:locale" content="zh_TW">
 <meta property="og:url" content="{SITE_URL}">
 <meta name="twitter:card" content="summary">
+{_jsonld(title)}
 <style>{CSS}</style>
 </head>
 <body>
