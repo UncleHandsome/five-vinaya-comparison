@@ -267,7 +267,7 @@ def main():
 <script>{JS}</script>
 </body></html>"""
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    open(OUT, 'w', encoding='utf-8').write(page)
+    open(OUT, 'w', encoding='utf-8', newline='\n').write(page)
     print(f'written {OUT}')
     print(f'  分段：' + '、'.join(f'{n} {len(r)}' for n, _c, r in segs) + f'　合 {total}')
     print(f'  大小：{os.path.getsize(OUT)/1024:.0f} KB')

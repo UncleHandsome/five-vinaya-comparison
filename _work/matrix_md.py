@@ -171,5 +171,5 @@ A('*資料來源：`_work/matrix_rows.json`（2,124 項）、`_work/island_verdi
   '`_work/sscol/*.tsv`（五分×十誦 111 條）、`_work/collide.json`（語料碰撞 224 候選）、'
   '`_work/crossref.json`（刪除表交叉引用 26 條）、`_work/audit_ss.json`（十誦刪除表 935 處反向校驗）。*')
 
-open(OUT, 'w', encoding='utf-8').write('\n'.join(L))
+open(OUT, 'w', encoding='utf-8', newline='\n').write('\n'.join(L))
 print(f'written {OUT} {len(L)} lines')

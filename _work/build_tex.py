@@ -68,13 +68,13 @@ def build(src_md, out_pdf, title, extra_meta=None):
     os.makedirs(TMP, exist_ok=True)
     md = prep(open(src_md, encoding='utf-8').read())
     tmp_md = os.path.join(TMP, 'doc.md')
-    open(tmp_md, 'w', encoding='utf-8').write(md)
+    open(tmp_md, 'w', encoding='utf-8', newline='\n').write(md)
 
     env = dict(os.environ)
     env['PATH'] = TEXBIN + os.pathsep + env.get('PATH', '')
 
     hdr = os.path.join(TMP, 'header.tex')
-    open(hdr, 'w', encoding='utf-8').write(r'''\usepackage{fancyhdr}
+    open(hdr, 'w', encoding='utf-8', newline='\n').write(r'''\usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\itshape 五部律差異對照本}

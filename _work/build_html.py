@@ -362,7 +362,9 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
     if p.returncode != 0:
         print('pandoc 失敗：', p.stderr.decode('utf-8')[:400])
         return False
-    body = p.stdout.decode('utf-8')
+    # pandoc 在 Windows 上輸出 CRLF；此處先歸 LF，寫檔時亦不再轉換，
+    # 否則 text mode 會把 \n 再轉成 \r\n，成 \r\r\n（雙重回車）。
+    body = p.stdout.decode('utf-8').replace('\r\n', '\n')
 
     nav = build_nav(md_text, is_full)
     page = f"""<!DOCTYPE html>
@@ -396,7 +398,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <script>{JS}</script>
 </body>
 </html>"""
-    open(out_path, 'w', encoding='utf-8').write(page)
+    open(out_path, 'w', encoding='utf-8', newline='\n').write(page)
     return True
 
 
@@ -492,7 +494,7 @@ def build_index():
 <nav>{nav}</nav>
 <main>{body}</main>
 </div></body></html>"""
-    open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(page)
+    open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='\n').write(page)
 
 
 def main():

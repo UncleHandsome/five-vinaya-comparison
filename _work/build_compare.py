@@ -1238,19 +1238,19 @@ def main():
 
     out_full = os.path.join(OUT, '五部律差異對照本.md')
     full = norm_seg(full)
-    open(out_full, 'w', encoding='utf-8').write(full)
+    open(out_full, 'w', encoding='utf-8', newline='\n').write(full)
     print(f'合冊：{out_full}　{len(full):,} 字')
 
     # 分卷
     for jname, txt in parts.items():
         txt = norm_seg(unlink_cross(txt, 'D'))
         out = os.path.join(OUT, f'五部律差異對照本_{jname}.md')
-        open(out, 'w', encoding='utf-8').write(txt)
+        open(out, 'w', encoding='utf-8', newline='\n').write(txt)
         print(f'  {jname}：{len(txt):,} 字')
 
     # 第二、三部 + 附錄另存
     out2 = os.path.join(OUT, '五部律差異對照本_四分所無與歸併組.md')
-    open(out2, 'w', encoding='utf-8').write(
+    open(out2, 'w', encoding='utf-8', newline='\n').write(
         norm_seg(unlink_cross('\n'.join([part2, part3, appendix]), 'S')))
     print(f'  四分所無與歸併組：{len(part2)+len(part3)+len(appendix):,} 字')
 
