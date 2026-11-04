@@ -5,6 +5,7 @@ from collections import Counter
 
 from errata import apply as _apply_errata, dedup_xref, clean_title
 from diff_fmt import expand_refs
+from sifen_src import glyph_fix
 
 W = os.path.dirname(os.path.abspath(__file__))
 _raw = json.load(open(os.path.join(W, 'matrix_built.json'), encoding='utf-8'))
@@ -26,7 +27,7 @@ ABSENT = ('遍查未見', '全無', '無此', '未見', '不見', '無對應', '
 
 
 def esc(s):
-    return (s or '').replace('|', '｜').replace('\n', ' ')
+    return glyph_fix((s or '').replace('|', '｜').replace('\n', ' '))
 
 
 def fill(canon, field):

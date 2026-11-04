@@ -16,6 +16,7 @@ import csv, io, json, os, re
 
 from errata import apply as apply_errata, clean_title, dedup_xref
 from diff_fmt import expand_refs
+from sifen_src import glyph_fix
 
 W = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(W)
@@ -74,6 +75,10 @@ def main():
         }
         for k, col in CELL:
             rec[col] = r.get(k, '未比')
+        # 組字式代通行字，與對照本、矩陣一致
+        for k in rec:
+            if isinstance(rec[k], str):
+                rec[k] = glyph_fix(rec[k])
         out.append(rec)
 
     buf = io.StringIO()

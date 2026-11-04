@@ -710,12 +710,14 @@ def build_front():
              '末條若僅為「判罪輕重不同」一類的分類語，不含新事，則降為項末小字「異在：…」，'
              '以存其目而不贅其文。')
     L.append('')
-    L.append('十、**資料限制**：四分律自恣揵度之一未入庫（卷37末），此處以全庫檢索及他部對照為據；'
-             '四分律尼律單提第一至八十六戒僅存戒條列表，緣起從缺。')
+    L.append('十、**資料限制**：四分律尼律單提第一至八十六戒僅存戒條列表，緣起從缺；'
+             '卷三十八至卷四十九以下諸揵度，間有底本殘脫處，皆據他部對照存其異同。')
     L.append('')
     L.append('十一、**文本處理**：五部原文據大正藏電子文本。底本無 Unicode 之字，舊以組字式'
              '（方括夾注部件）合成，如「木」「奈」合為「柰」、「真」「心」合為「瞋」；'
-             '本書節題與正文一律代以通行字，其字罕見、無通行字可代者，仍存舊式，以存底本之真。'
+             '本書節題與正文一律代以通行字，所據為 CBETA 造字對照表。其字罕見、'
+             '唯存於 Unicode 增補區而通行字體不能顯示者，仍存組字式，惟其中「*」'
+             '改用全角「＊」，以免與 Markdown 之強調標記相混。'
              '標題末之底稿段號已移入「本稿位置」一欄，以免與項號相混。'
              '篇號（000–074）為本書所編之內容序，**非四分律卷次**；篇與卷之對應見附錄三。')
     L.append('')
@@ -882,7 +884,7 @@ def build_part1(seg_filter=None):
             if n in SEC_INTRO:
                 L.append(f'> **篇旨**：{SEC_INTRO[n]}')
                 L.append('')
-            extra = '（含受戒、說戒、安居、自恣四揵度，段1–330）' if n == 38 else ''
+            extra = '（受戒段1–185、說戒段186–262、安居段263–330、自恣段331–348）' if n == 38 else ''
             _us = src_units(n)
             _ns = len(_us)
             _seg_note = f'，分 {_ns} 節' if _ns > 1 else ''
@@ -896,7 +898,7 @@ def build_part1(seg_filter=None):
             if _rows_n:
                 stc = Counter(r['st'] for r in _rows_n)
                 cnc = Counter(r['canon'] for r in _rows_n)
-                st_parts = '・'.join(f'{k} {stc[k]}' for k in ['A', 'B', 'C', 'D'] if stc.get(k))
+                st_parts = '・'.join(f'{k} {ST_NAME[k]} {stc[k]}' for k in ['A', 'B', 'C', 'D'] if stc.get(k))
                 cn_parts = '、'.join(f'{c} {cnc[c]}' for c in ['十誦', '五分', '僧祇', '根有'] if cnc.get(c))
                 L.append(f'<sub>狀態：{st_parts}　｜　主稿：{cn_parts}</sub>')
                 L.append('')
@@ -1069,10 +1071,10 @@ def build_appendix():
         'num_seg': '對照欄明記篇號與段號',
         'sifen_prefix': '對照欄明記篇號與段號',
         'loose': '對照欄明記篇號與段號',
-        'chunk': '受戒揵度分塊檔，歸 038 篇',
+        'chunk': '揵度分塊檔，按揵度歸篇（自恣之二歸 039）',
         'file_only': '對照欄僅記篇名，段號從缺',
         'quote': '引文檢索（以「」內引文回四分原文定位）',
-        'force': '語義判定（引文未入庫者）',
+        'force': '語義判定（引文無段號可據者）',
     }
     cnt_how = Counter(p['how'] for p in loc['placed'])
     for how in ['file', 'name_seg', 'name_dash', 'bare', 'dash', 'dot', 'num_seg', 'sifen_prefix', 'loose',
@@ -1098,7 +1100,7 @@ def build_appendix():
         L.append(f'> 全部 {_tot:,} 項皆已歸位，無遺漏。其中 `file_only` '
                  f'{cnt_how.get("file_only", 0)} 項僅知篇而不知段，依篇次列於該篇之首；'
                  f'`quote` {cnt_how.get("quote", 0)} 項以引文回原文定位，已逐項覆核；'
-                 f'`force` {cnt_how.get("force", 0)} 項引文未入庫（四分律卷37自恣揵度之一、'
+                 f'`force` {cnt_how.get("force", 0)} 項引文無段號可據（卷37自恣揵度之一、'
                  f'妄語戒名相），依語義定其篇；`errata` {_n_er} 項係覆核改判後歸位。')
         L.append('')
     L.append('**覆核之法**：任取一項，以其「四分對照」所引之文，回四分律原檔同篇同段比對，字句當合。'

@@ -46,3 +46,7 @@ desktop.ini
 
 # 四分律白話直譯原檔（本地參考材料；已對齊為 _work/sifen_plain.json 供構建取用）
 白話四分律/
+
+# 外部取用之原始檔（可自 CBETA 重下，不入庫）
+_work/_1428.xml
+_work/_gaiji.json
