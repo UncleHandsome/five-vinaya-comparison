@@ -1054,6 +1054,9 @@ def build_part2():
         L.append(f'> **節旨**：此節 {len(sub)} 項，皆{_fn}於四分律之外別有之制。'
                  f'內含：{_lv_s}。')
         L.append('')
+        L.append(f'> **「所增」之義**：謂此項由{_fn}檢出，非謂餘四部皆無其制。'
+                 '同制而他部亦有者，矩陣五欄自見；'
+                 '若以「所增」為該部獨有之孤證，則失本書之意。')
         L.append(f'<sub>共 {len(sub)} 項</sub>')
         L.append('')
         # 按層級分組
@@ -1065,6 +1068,13 @@ def build_part2():
                 continue
             L.append(f'#### {c}·{lv}（{len(bylv[lv])} 項）')
             L.append('')
+            # 勘誤改判層級者，分組仍依原編次，故於此標出，免與標題牴牾
+            _dl = [(S_NO[r['id']], apply_errata(r).get('lv', ''))
+                   for r in bylv[lv] if apply_errata(r).get('lv', '') != lv]
+            if _dl:
+                L.append('<sub>按：' + '、'.join(f'{a} 實為「{b}」' for a, b in _dl)
+                         + '；勘誤改判其層級，而分組仍依原編次，故列於此，編號不更。</sub>')
+                L.append('')
             for r in bylv[lv]:
                 L.append(render_item(r, S_NO[r['id']], compact=True))
         L.append('')
@@ -1093,7 +1103,9 @@ def build_part3():
     L.append('')
     L.append('### 乙、同題異制三組')
     L.append('')
-    L.append('主題相近而規制不同，並存互註，不減項。')
+    L.append('主題相近而規制不同，並存互註，不減項。'
+             '組內所繫皆他部之項，四分律並無其制；「同題」謂二部之間同題，'
+             '非謂四分律亦有對應，讀者勿以「四分所無」與「同題異制」為相妨。')
     L.append('')
     for g in ['T1', 'T2', 'T3']:
         L.append(render_gt_block(g, GT[g]))

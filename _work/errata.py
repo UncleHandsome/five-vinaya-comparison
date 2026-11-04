@@ -585,7 +585,7 @@ for _rid, _specs in _REF_FIX.items():
 
 # S-0288 補證原稿兩次拼接，成「遍查未見（…）（遍查未見（…））」，括號重疊、語意不通。
 ERRATA.setdefault('M-1169', {})
-ERRATA['M-1169']['xref'] = '核定稿刪除表記；遍查未見（查詞：學悔／波羅市迦學／盡形學處）'
+ERRATA['M-1169']['xref'] = '遍查未見（查詞：學悔／波羅市迦學／盡形學處）'
 
 
 # ── 式叉摩那六法：補僧祇「十八事」一制（2026-11-04，第五輪校閱）──────
@@ -614,12 +614,63 @@ ERRATA_POS = {
 }
 
 
+def _tidy_xref(x):
+    """清掉 xref 中的內部工作痕與重出括註。
+
+    matrix_built.json 之 xref 有十六列作「核定稿刪除表記 A（A）」形，
+    原為編者自記「此項核定稿已列入刪除表」，非讀者所宜見；其後括註
+    又與前文全同，屬拼接時的重出。於覆蓋層統一清理，下游對照本、
+    矩陣 MD／CSV／HTML 一體生效，不必改 matrix_built.json。
+    """
+    if not x or '核定稿刪除表記' not in x:
+        return x
+    s = x.replace('核定稿刪除表記', '').strip()
+
+    def _split_top(t):
+        """只在括號外層切「；」，免切斷括註內的並列。"""
+        out, buf, depth = [], [], 0
+        for ch in t:
+            if ch == '（':
+                depth += 1
+            elif ch == '）':
+                depth = max(0, depth - 1)
+            if ch == '；' and depth == 0:
+                out.append(''.join(buf))
+                buf = []
+            else:
+                buf.append(ch)
+        out.append(''.join(buf))
+        return out
+
+    def _dedup(seg):
+        seg = seg.strip()
+        while seg.endswith('）'):
+            depth, cut = 0, -1
+            for i in range(len(seg) - 1, -1, -1):
+                if seg[i] == '）':
+                    depth += 1
+                elif seg[i] == '（':
+                    depth -= 1
+                    if depth == 0:
+                        cut = i
+                        break
+            if cut > 0 and seg[:cut].strip() == seg[cut + 1:-1].strip():
+                seg = seg[:cut].strip()
+            else:
+                break
+        return seg
+
+    return '；'.join(p for p in (_dedup(q) for q in _split_top(_dedup(s))) if p)
+
+
 def apply(r):
     """就地覆蓋渲染用欄位，回傳新 dict（不改原物件）"""
+    r = dict(r)
+    if r.get('xref'):
+        r['xref'] = _tidy_xref(r['xref'])
     e = ERRATA.get(r['id'])
     if not e:
         return r
-    r = dict(r)
     if '_fayi' in e:
         r['_fayi'] = e['_fayi']
     for k, v in e.items():
@@ -1039,3 +1090,19 @@ def note(rid):
     """取勘誤說明（若有）"""
     e = ERRATA.get(rid, {})
     return e.get('_note', '')
+
+
+# ── 補證「遍查未見（清淨欲／與欲清淨）」之誤（2026-11-04，第八輪校閱）──
+# 四分律卷31說戒揵度實有「與欲清淨」二十餘見（「不應稱事與欲清淨，
+# 聽如法僧事與欲清淨」等），非遍查未見。原補證只就所校之篇立說，
+# 未覆全庫，故改正為：四分有與欲清淨，惟無各該律之別制。
+for _rid, _txt in {
+    'M-0228': '四分「與欲清淨」見卷31說戒揵度（「不應稱事與欲清淨，聽如法僧事與欲清淨」），'
+              '惟無「為官所執，遣人求還、就彼取欲、全僧就彼布薩、出界」四級之制。',
+    'M-1692': '四分「與欲清淨」見卷31說戒揵度，惟無「時集與欲、非時集與清淨欲」之分，'
+              '亦無「時集得並與兩欲」之判。',
+}.items():
+    ERRATA.setdefault(_rid, {})
+    ERRATA[_rid]['_sub'] = list(ERRATA[_rid].get('_sub', [])) + [
+        ('xref', '遍查未見（查詞：清淨欲／與欲清淨／非時集）', _txt),
+    ]
