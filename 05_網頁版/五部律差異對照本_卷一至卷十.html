@@ -146,6 +146,12 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
   main{max-width:none; padding:0}
   details{border:0; background:none; padding:0}
   details>*{display:block !important}
+  /* 長文列印：標題不落頁底孤行，表格與引文不跨頁撕裂，段落不出現單行寡婦 */
+  h1,h2,h3,h4,h5,h6{break-after:avoid; page-break-after:avoid}
+  table,pre,blockquote{break-inside:avoid; page-break-inside:avoid}
+  tr,li{break-inside:avoid; page-break-inside:avoid}
+  p,li{orphans:3; widows:3}
+  a{color:inherit; text-decoration:none}
 }
 </style>
 </head>
@@ -182,8 +188,8 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u004-85" class="jie">沓婆摩羅子為僧知事</a>
 </details>
 <details class="navj"><summary>005　十三僧殘法之三<span class="jcnt">3</span></summary>
-<a href="#u005-1" class="jie">第八戒　㥲恚所覆故</a>
-<a href="#u005-10" class="jie">第九戒　以㥲恚故</a>
+<a href="#u005-1" class="jie">第八戒　瞋恚故以無根波羅夷謗</a>
+<a href="#u005-10" class="jie">第九戒　瞋恚故於異分事取片</a>
 <a href="#u005-17" class="jie">阿那律等釋種出家</a>
 </details>
 <details class="navj"><summary>006　十三僧殘法之四<span class="jcnt">4</span></summary>
@@ -197,14 +203,14 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u007-11" class="jie">迦留陀夷與齋優婆私</a>
 </details>
 <details class="navj"><summary>008　三十捨墮法之一<span class="jcnt">5</span></summary>
-<a href="#u008-1" class="jie">第一戒　畜長衣者</a>
+<a href="#u008-1" class="jie">第一戒　畜長衣</a>
 <a href="#u008-12" class="jie">第二戒　三衣中若離一一衣異處宿</a>
 <a href="#u008-24" class="jie">第三戒　欲須便受</a>
-<a href="#u008-35" class="jie">第四戒　從比丘尼取衣者</a>
+<a href="#u008-35" class="jie">第四戒　從比丘尼取衣</a>
 <a href="#u008-47" class="jie">第五戒　令比丘尼浣故衣</a>
 </details>
 <details class="navj"><summary>009　三十捨墮法之二<span class="jcnt">7</span></summary>
-<a href="#u009-1" class="jie">第六戒　從居士索衣者</a>
+<a href="#u009-1" class="jie">第六戒　從居士索衣</a>
 <a href="#u009-13" class="jie">第七戒　失衣、奪衣、燒衣、漂衣</a>
 <a href="#u009-23" class="jie">第八戒　居士為比丘辦衣價囑買</a>
 <a href="#u009-34" class="jie">第九戒　二居士、居士婦</a>
@@ -217,9 +223,9 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u010-10" class="jie">第十四戒　作新臥具持至六年</a>
 <a href="#u010-19" class="jie">第十五戒　作新坐具</a>
 <a href="#u010-28" class="jie">第十六戒　道路行得羊毛</a>
-<a href="#u010-36" class="jie">第十七戒　使比丘尼浣染擘羊毛者</a>
+<a href="#u010-36" class="jie">第十七戒　使比丘尼浣染擘羊毛</a>
 <a href="#u010-46" class="jie">第十八戒　自手捉錢、若金銀</a>
-<a href="#u010-54" class="jie">第十九戒　種種賣買寶物者</a>
+<a href="#u010-54" class="jie">第十九戒　種種賣買寶物</a>
 <a href="#u010-62" class="jie">第二十戒　種種販賣</a>
 </details>
 <details class="navj"><summary>011　三十捨墮法之四<span class="jcnt">5</span></summary>
@@ -234,7 +240,7 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u012-18" class="jie">第二十七戒　春殘一月在</a>
 <a href="#u012-30" class="jie">第二十八戒　十日未竟夏三月</a>
 <a href="#u012-42" class="jie">第二十九戒　夏三月竟</a>
-<a href="#u012-56" class="jie">第三十戒　斷僧物而自入己者</a>
+<a href="#u012-56" class="jie">第三十戒　斷僧物而自入己</a>
 </details>
 </div>
 <div class="grp"><b>其他</b>
@@ -5883,7 +5889,7 @@ href="#d-0178"><code>D-0178</code></a>　提婆達多五法以「一食」代「
 </details>
 
 <p><a id="u005-1"></a></p>
-<h5 id="第八戒-㥲恚所覆故">第八戒　㥲恚所覆故</h5>
+<h5 id="第八戒-瞋恚故以無根波羅夷謗">第八戒　瞋恚故以無根波羅夷謗</h5>
 <p><sub>段1–9　本節差異 9 項</sub></p>
 <details class="art-src"><summary>四分律原文　段1–9（9 段）</summary>
 
@@ -6174,7 +6180,7 @@ vol03#3</sub></p>
 段35「若比丘以無根波羅夷法謗不清淨比丘，十一種犯、五種不犯。」（以見聞疑之十一句配，無跨眾之梯階）</li>
 </ul>
 <p><a id="u005-10"></a></p>
-<h5 id="第九戒-以㥲恚故">第九戒　以㥲恚故</h5>
+<h5 id="第九戒-瞋恚故於異分事取片">第九戒　瞋恚故於異分事取片</h5>
 <p><sub>段10–16　本節差異 2 項</sub></p>
 <details class="art-src"><summary>四分律原文　段10–16（7 段）</summary>
 
@@ -7368,7 +7374,7 @@ href="#d-0238"><code>D-0238</code></a>　非親里尼浣染打，小浣更浣等
 </details>
 
 <p><a id="u008-1"></a></p>
-<h5 id="第一戒-畜長衣者">第一戒　畜長衣者</h5>
+<h5 id="第一戒-畜長衣">第一戒　畜長衣</h5>
 <p><sub>段1–11　本節差異 11 項</sub></p>
 <details class="art-src"><summary>四分律原文　段1–11（11 段）</summary>
 
@@ -8397,7 +8403,7 @@ vol04#6</sub></p>
 段86：「又比丘得不具足衣，停更望得衣故，即停衣日不得所望、非望而得，是衣十日應作衣……至十一日地了時，尼薩耆波夜提。」</li>
 </ul>
 <p><a id="u008-35"></a></p>
-<h5 id="第四戒-從比丘尼取衣者">第四戒　從比丘尼取衣者</h5>
+<h5 id="第四戒-從比丘尼取衣">第四戒　從比丘尼取衣</h5>
 <p><sub>段35–46　本節差異 7 項</sub></p>
 <details class="art-src"><summary>四分律原文　段35–46（12 段）</summary>
 
@@ -8906,7 +8912,7 @@ href="#d-0262"><code>D-0262</code></a>　以綿、縷、衣、繭四種作敷具
 </details>
 
 <p><a id="u009-1"></a></p>
-<h5 id="第六戒-從居士索衣者">第六戒　從居士索衣者</h5>
+<h5 id="第六戒-從居士索衣">第六戒　從居士索衣</h5>
 <p><sub>段1–12　本節差異 6 項</sub></p>
 <details class="art-src"><summary>四分律原文　段1–12（12 段）</summary>
 
@@ -10601,8 +10607,7 @@ vol20-21#4</sub></p>
 5-123「不犯者：三由旬內；若展轉持、若有人代」。</li>
 </ul>
 <p><a id="u010-36"></a></p>
-<h5
-id="第十七戒-使比丘尼浣染擘羊毛者">第十七戒　使比丘尼浣染擘羊毛者</h5>
+<h5 id="第十七戒-使比丘尼浣染擘羊毛">第十七戒　使比丘尼浣染擘羊毛</h5>
 <p><sub>段36–45　本節差異 2 項</sub></p>
 <details class="art-src"><summary>四分律原文　段36–45（10 段）</summary>
 
@@ -10982,7 +10987,7 @@ id="第十七戒-使比丘尼浣染擘羊毛者">第十七戒　使比丘尼浣�
 5-144「不犯者：雖施比丘，比丘不知，淨人受之為買淨物」。</li>
 </ul>
 <p><a id="u010-54"></a></p>
-<h5 id="第十九戒-種種賣買寶物者">第十九戒　種種賣買寶物者</h5>
+<h5 id="第十九戒-種種賣買寶物">第十九戒　種種賣買寶物</h5>
 <p><sub>段54–61　本節差異 6 項</sub></p>
 <details class="art-src"><summary>四分律原文　段54–61（8 段）</summary>
 
@@ -13411,7 +13416,7 @@ vol05#1</sub></p>
 段64：『是中犯者，比丘第六夜，應還取衣、若至衣所、若受餘衣，若比丘不取衣來、不往衣所、不受餘衣，至第七夜地了』</li>
 </ul>
 <p><a id="u012-56"></a></p>
-<h5 id="第三十戒-斷僧物而自入己者">第三十戒　斷僧物而自入己者</h5>
+<h5 id="第三十戒-斷僧物而自入己">第三十戒　斷僧物而自入己</h5>
 <p><sub>段56–65　本節差異 6 項</sub></p>
 <details class="art-src"><summary>四分律原文　段56–65（10 段）</summary>
 

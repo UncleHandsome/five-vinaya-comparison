@@ -903,10 +903,20 @@ def build_part1(seg_filter=None):
             continue
         if seg_filter is not None:
             # 分卷檔：加書名與導語
+            _lo = min(segs)
+            _prev = ''
+            for _i, (_jn, _sg, _f2) in enumerate(JUAN_SEGS):
+                if _jn == jname and _i > 0:
+                    _prev = JUAN_SEGS[_i - 1][0]
+            _pnote = ''
+            if _lo > 0 and _prev:
+                _pnote = (f'　本卷自篇 {_lo:03d} 起，其前之篇見《{_prev}》；'
+                          '篇號全書一貫，不隨分卷重起。')
             L.insert(0, f'# 五部律差異對照本　{jname}')
             L.insert(1, '')
             L.insert(2, '> 本檔為《五部律差異對照本》第一部之' + jname + '部分，'
-                         '依四分律篇次排列。卷首題解、目錄、第二部（四分所無）、'
+                         '依四分律篇次排列。' + _pnote +
+                         '卷首題解、目錄、第二部（四分所無）、'
                          '第三部（歸併組）及附錄見合冊 `五部律差異對照本.md`。')
             L.insert(3, '')
             L.insert(4, '---')
