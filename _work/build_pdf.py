@@ -212,7 +212,7 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None):
 
     _sub = title.replace('五部律差異對照本', '').strip() or '全一冊'
     cover = make_cover('五部律差異對照本', '以《四分律》為軸　五部對校',
-                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　576 節　·　九組歸併',
+                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　844 節　·　九組歸併',
                         'A4 · 內文 12pt · 緊湊排版'])
     toc = make_toc(md)
     page = f"""<!DOCTYPE html>

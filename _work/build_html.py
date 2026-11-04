@@ -324,13 +324,13 @@ def build_nav(md_text, is_full):
                 continue
             n, title = m.group(1), m.group(2)
             t = htmlmod.escape(re.sub(r'<[^>]+>', '', title))
-            units = re.findall(r'^##### 段(\d+)–(\d+)(?:　([^\n]*))?$', sec, re.M)
+            units = re.findall(r'<a id="u(\d{3})-(\d+)"></a>\s*\n+\s*##### ([^\n]+)', sec)
             if units:
                 parts.append(f'<details class="navj"><summary>{n}　{t}'
                              f'<span class="jcnt">{len(units)}</span></summary>')
-                for a, b, lbl in units:
-                    lbl = htmlmod.escape(lbl.strip()) if lbl else f'段{a}–{b}'
-                    parts.append(f'<a href="#u{n}-{a}" class="jie">{lbl}</a>')
+                for pn, a, lbl in units:
+                    lbl = htmlmod.escape(re.sub(r'<[^>]+>', '', lbl).strip()) or f'段{a}'
+                    parts.append(f'<a href="#u{pn}-{a}" class="jie">{lbl}</a>')
                 parts.append('</details>')
             else:
                 parts.append(f'<a href="#p{n}">{n}　{t}</a>')
