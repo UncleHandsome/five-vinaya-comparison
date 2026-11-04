@@ -170,6 +170,11 @@ def _units_jing(no):
         prev = n
     if prev < segs[-1][0]:
         out.append({'a': prev + 1, 'b': segs[-1][0], 'cn': '', 'name': ''})
+    for u in out:
+        u['cn'] = CN_FIX.get((no, u['a']), u['cn'])
+        pre = SEC_PREFIX.get((no, u['a']))
+        if pre and u.get('name'):
+            u['name'] = pre + u['name']
     return out
 
 
@@ -438,6 +443,12 @@ FRAG_NAME = {
 
 # 自動命名過短、截斷或同名重出者，另予覆寫
 JIE_FIX = {
+    (7, 1): '共女人屏處坐說非法語',
+    (9, 23): '居士為比丘辦衣價囑買',
+    (12, 1): '殘藥齊七日得服',
+    (17, 12): '無病自為身索美食',
+    (18, 79): '與衣後不語主還取',
+    (21, 19): '作兜羅綿貯床褥',
     (27, 4): '言人，若居士、居士兒',
     (28, 1): '染污心，從男子受食',
     (29, 14): '使織師織衣，自與其價',
@@ -446,6 +457,31 @@ JIE_FIX = {
     (35, 87): '索衣許授具足戒',
     (36, 15): '安居竟不往僧中自恣',
 }
+
+# 底本第62、67、68戒戒末標記奪「六十」二字，作「(二竟)」「(七竟)」「(八竟)」，
+# 致戒號倒退為二、七、八。今據戒次訂正；原文摺疊塊仍存底本之舊，讀者可覆核。
+CN_FIX = {(24, 87): '六十二', (24, 92): '六十七', (24, 102): '六十八'}
+
+# 篇021 於九十單提之末逕接四波羅提提舍尼，戒號復從「一」起，易與單提相混。
+# 節名冠以法名，使層級自明。
+SEC_PREFIX = {(21, 66): '〔波羅提提舍尼〕', (21, 77): '〔波羅提提舍尼〕',
+              (21, 85): '〔波羅提提舍尼〕', (21, 95): '〔波羅提提舍尼〕'}
+
+# 百眾學法「行／坐」成對，底本於坐戒多省作「坐亦如是」，節名遂空。
+# 依前行戒之節名補「坐」字（底本坐戒亦作「…行入白衣舍坐」，仍其舊文）。
+_ZUO_PIAN = (22, 23)
+
+
+def _fill_zuo(no, r):
+    if no not in _ZUO_PIAN:
+        return r
+    prev = ''
+    for u in r:
+        nm = (u.get('name') or '').strip()
+        if not nm and prev:
+            u['name'] = prev + '坐'
+        prev = (u.get('name') or '').strip() or prev
+    return r
 
 
 def _apply_frag(no, r):
@@ -534,6 +570,7 @@ def units(no):
         r = _units_qian(no)
     else:
         r = _units_jing(no)
+        r = _fill_zuo(no, r)
     r = _apply_frag(no, r)
     UNITS_CACHE[no] = r
     return r
