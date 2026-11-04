@@ -50,3 +50,10 @@ desktop.ini
 # 外部取用之原始檔（可自 CBETA 重下，不入庫）
 _work/_1428.xml
 _work/_gaiji.json
+
+# 校閱盤點的中間輸出（可由 _work/_inv*.py、_todo_title.py 等重跑）
+_work/_inv.json
+_work/_split.json
+_work/_dense_fix.json
+_work/_todo_title.json
+_work/_todo_title.txt
