@@ -55,7 +55,57 @@ MAP = {
     'Bimbisara': 'Bimbisāra',
 }
 
-LET = 'A-Za-zĀāĪīŪūṚṛṂṃḤḥŚśṢṣṬṭḌḍṆṇÑñ'
+
+# ── 第二輪：人地名與其餘名相（2026-11-04）──────────────────────────
+# 同一詞在諸卷之間或作巴利、或作 ASCII、或漏一變音符，前輪未及者，此處補之。
+MAP.update({
+    # 人地名
+    'Rajagaha': 'Rājagṛha', 'Kassapa': 'Kāśyapa', 'Uruvela': 'Uruvilvā',
+    'Kitagiri': 'Kīṭāgiri', 'Sakra': 'Śakra', 'Devanam': 'Devānāṃ',
+    'Candala': 'Caṇḍāla', 'Panca': 'Pañca', 'Yasa': 'Yaśas',
+    'Brahmin': 'Brāhmaṇa', 'Jivaka': 'Jīvaka', 'Kosambi': 'Kosambī',
+    'Manava': 'Māṇava', 'Upali': 'Upāli', 'Visakha': 'Visākhā',
+    'Varanasi': 'Vārāṇasī', 'Amrapali': 'Āmrapālī', 'Ananda': 'Ānanda',
+    'Abhavana': 'Abhavana', 'Abhavāna': 'Abhavana', 'Abhāvāna': 'Abhavana',
+    # 名相
+    'Bhagavan': 'Bhagavān', 'Dhyana': 'Dhyāna', 'Samyojana': 'Saṃyojana',
+    'Kasaya': 'Kāṣāya', 'Kaṣāya': 'Kāṣāya',
+    'Nisidana': 'Niṣīdana', 'Nisīdana': 'Niṣīdana', 'Nivasana': 'Nivāsana',
+    'Antaravasaka': 'Antarvāsa', 'Sankaksika': 'Saṃkakṣikā',
+    'Uttarasanga': 'Uttarāsaṅga', 'Pandaka': 'Paṇḍaka',
+    'Parinirvana': 'Parinirvāṇa',
+    'Pāṃśūkūla': 'Pāṃśukūla', 'Pāṃsukūla': 'Pāṃśukūla',
+    'Sima': 'Sīmā', 'Stupa': 'Stūpa', 'Tirthika': 'Tīrthika',
+    'Sravaka': 'Śrāvaka', 'Sramaneri': 'Śrāmaṇerī',
+    'Srotapanna': 'Srotāpanna', 'Sakrdagamin': 'Sakṛdāgāmin',
+    'Anagamin': 'Anāgāmin', 'Adhimana': 'Adhimāna',
+    'Anuvada': 'Anuvāda', 'Amrta': 'Amṛta',
+    'Pratityasamutpada': 'Pratītyasamutpāda', 'Trayastrimsa': 'Trāyastriṃśa',
+    'Jambudvipa': 'Jambudvīpa', 'Salaka': 'Śalākā', 'Salākā': 'Śalākā',
+    'Sarpirmanda': 'Sarpirmaṇḍa', 'Khadaniya': 'Khādanīya',
+    'Amudha-vinaya': 'Amūḍha-vinaya',
+    # 僧團法制（補前輪未及之巴利形與漏符者）
+    'Pavarana': 'Pravāraṇā', 'Pavāraṇā': 'Pravāraṇā',
+    'Pravārana': 'Pravāraṇā', 'Pravarana': 'Pravāraṇā',
+    'Patidesaniya': 'Prātideśanīya', 'Pātidesaniya': 'Prātideśanīya',
+    'Pāṭidesanīya': 'Prātideśanīya', 'Pratidesaniya': 'Prātideśanīya',
+    'Pratideśanīya': 'Prātideśanīya',
+    'Pārisuddhi': 'Pāriśuddhi', 'Pariśuddhi': 'Pāriśuddhi',
+    'Upasampada': 'Upasaṃpadā',
+    'Sanghādisesa': 'Saṃghāvaśeṣa', 'Saṅghādisesa': 'Saṃghāvaśeṣa',
+    'Saṅghāvaśeṣa': 'Saṃghāvaśeṣa', 'Sanghāvaśeṣa': 'Saṃghāvaśeṣa',
+    'Śikṣamānā': 'Śikṣamāṇā', 'Saṃghāṭi': 'Saṃghāṭī',
+    'Samgharama': 'Saṃghārāma', 'Āraṇya': 'Araṇya', 'Bhiksu': 'Bhikṣu',
+    'nisraya': 'Niśraya', 'Jnaptidvitiya-karman': 'Jñaptidvitīya-karman',
+    'Kappiya-karaka': 'Kalpika-kāraka', 'Kappiya-kāraka': 'Kalpika-kāraka',
+    'Kappiya-bhūmi': 'Kalpika-bhūmi', 'Kappiya': 'Kalpika',
+    'Uttarimanussadhamma': 'Uttarimanuṣyadharma',
+    'Uttari-manussa-dhamma': 'Uttarimanuṣyadharma',
+    'Viraja-dhamma-cakkhu': 'Viraja-dharma-cakṣu',
+    'Samyak-sambodhi': 'Samyak-saṃbodhi', 'Samyak-sambuddha': 'Samyak-saṃbuddha',
+})
+
+LET = 'A-Za-zĀāĪīŪūṚṛṂṃḤḥŚśṢṣṬṭḌḍṆṇÑñṄṅ'
 KEYS = sorted(MAP, key=len, reverse=True)
 PAT = re.compile('(?<![%s])(%s)(?![%s])' % (LET, '|'.join(map(re.escape, KEYS)), LET))
 
