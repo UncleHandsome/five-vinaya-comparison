@@ -56,6 +56,14 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 <a href="__SITE__">__SITE__</a><br>
 　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 __VER__」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
+<p><b>BibTeX</b><br>
+<code>@misc{unclehandsome_vinaya,<br>
+　author = {UncleHandsome},<br>
+　title = {五部律差異對照本},<br>
+　year = {2026},<br>
+　url = {__SITE__},<br>
+　note = {版本 __VER__（__DATE__）}<br>
+}</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
 故引用時請用上列網址，不用檔名；檔名之正規化形式為 NFC。
@@ -609,6 +617,13 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <meta name="DC.date" content="{_DATE}">
 <meta name="DC.language" content="zh-Hant">
 <meta name="DC.rights" content="CC BY-NC-SA 4.0">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="五部律差異對照本">
+<meta property="og:title" content="{htmlmod.escape(title)}">
+<meta property="og:description" content="以四分律為底本，橫向比對五分律、十誦律、摩訶僧祇律、根本說一切有部毘奈耶之戒條與制度差異。">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="{SITE_URL}">
+<meta name="twitter:card" content="summary">
 <style>{CSS}</style>
 </head>
 <body>
