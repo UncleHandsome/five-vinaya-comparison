@@ -56,6 +56,11 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 <a href="__SITE__">__SITE__</a><br>
 　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 __VER__」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
+<p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
+之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
+故引用時請用上列網址，不用檔名；檔名之正規化形式為 NFC。
+若需長期典藏與永久識別碼，宜將定稿（含 MD、CSV、HTML）打包寄存於 Zenodo 或 OSF，
+取得 DOI 後於此頁補記。在此之前，版本戳即本書之引用憑據。</p>
 </footer>
 """
 
@@ -590,6 +595,20 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>{htmlmod.escape(title)}</title>
+<meta name="author" content="UncleHandsome">
+<meta name="description" content="以《四分律》為軸，對校《五分律》《十誦律》《摩訶僧祇律》《根本說一切有部毘奈耶》五部廣律之逐項差異對照本。">
+<meta name="keywords" content="四分律,五分律,十誦律,摩訶僧祇律,根本說一切有部毘奈耶,律藏,戒律,對照本,vinaya">
+<link rel="canonical" href="{SITE_URL}">
+<meta name="citation_title" content="{htmlmod.escape(title)}">
+<meta name="citation_author" content="UncleHandsome">
+<meta name="citation_publication_date" content="{_DATE}">
+<meta name="citation_language" content="zh-Hant">
+<meta name="citation_fulltext_html_url" content="{SITE_URL}">
+<meta name="DC.title" content="{htmlmod.escape(title)}">
+<meta name="DC.creator" content="UncleHandsome">
+<meta name="DC.date" content="{_DATE}">
+<meta name="DC.language" content="zh-Hant">
+<meta name="DC.rights" content="CC BY-NC-SA 4.0">
 <style>{CSS}</style>
 </head>
 <body>
@@ -717,6 +736,14 @@ def build_index():
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
+<meta name="author" content="UncleHandsome">
+<meta name="description" content="《五部律差異對照本》線上版：以四分律為軸，對校五部廣律。">
+<meta name="citation_title" content="五部律差異對照本">
+<meta name="citation_author" content="UncleHandsome">
+<meta name="citation_publication_date" content="{_DATE}">
+<meta name="citation_language" content="zh-Hant">
+<meta name="DC.rights" content="CC BY-NC-SA 4.0">
+<link rel="canonical" href="{SITE_URL}">
 <title>五部律差異對照本</title>
 <style>{CSS}</style></head>
 <body><div class="wrap">

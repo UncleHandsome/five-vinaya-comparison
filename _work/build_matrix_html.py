@@ -265,6 +265,13 @@ def main():
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>五部律綜合異同矩陣</title>
+<meta name="author" content="UncleHandsome">
+<meta name="description" content="《五部律差異對照本》之證據層：2,124 項逐列五欄有無、狀態、層級與差異按語。">
+<meta name="citation_title" content="五部律綜合異同矩陣">
+<meta name="citation_author" content="UncleHandsome">
+<meta name="citation_publication_date" content="{DATE}">
+<meta name="citation_language" content="zh-Hant">
+<meta name="DC.rights" content="CC BY-NC-SA 4.0">
 <style>{CSS}</style></head>
 <body><div class="wrap">
 <nav>{''.join(nav)}</nav>
