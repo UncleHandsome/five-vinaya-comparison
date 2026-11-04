@@ -480,6 +480,13 @@ CN_FIX = {(24, 87): '六十二', (24, 92): '六十七', (24, 102): '六十八'}
 SEC_PREFIX = {(21, 66): '〔波羅提提舍尼〕', (21, 77): '〔波羅提提舍尼〕',
               (21, 85): '〔波羅提提舍尼〕', (21, 95): '〔波羅提提舍尼〕'}
 
+# 篇037 同病：一百七十八單提之末逕接八波羅提提舍尼。底本以「(一百七十八波逸提法竟)」
+# 結單提，而提舍尼首戒只作「(一)」，無「竟」字可據，切戒時遂將段141–147 併入
+# 第一百七十八戒——節名作「使外道女香塗摩身」，而所含已是乞酥戒文。
+# 今於段141 補切一刀，冠以法名，與篇021 同例；戒號逕定，不與單提之累加相混。
+SEC_SPLIT = {(37, 141): ('〔波羅提提舍尼〕', '乞酥食')}
+NUM_FIX = {(37, 135): 178, (37, 141): 1}
+
 # 百眾學法「行／坐」成對，底本於坐戒多省作「坐亦如是」，節名遂空。
 # 依前行戒之節名補「坐」字（底本坐戒亦作「…行入白衣舍坐」，仍其舊文）。
 _ZUO_PIAN = (22, 23)
@@ -497,7 +504,28 @@ def _fill_zuo(no, r):
     return r
 
 
+def _split_sec(no, r):
+    """於指定段補切一刀，使律末附出之法（如尼律提舍尼）自成一節。"""
+    hits = [(a, pre, nm) for (n, a), (pre, nm) in SEC_SPLIT.items() if n == no]
+    if not hits:
+        return r
+    out = []
+    for u in r:
+        done = False
+        for a, pre, nm in hits:
+            if u['a'] < a <= u['b']:
+                out.append({'a': u['a'], 'b': a - 1,
+                            'cn': u.get('cn', ''), 'name': u.get('name', '')})
+                out.append({'a': a, 'b': u['b'], 'cn': '', 'name': pre + nm})
+                done = True
+                break
+        if not done:
+            out.append(u)
+    return out
+
+
 def _apply_frag(no, r):
+    r = _split_sec(no, r)
     for u in r:
         fix = JIE_FIX.get((no, u['a']))
         if fix:
@@ -551,6 +579,11 @@ def _renumber_nun():
         fam = _base_title(TITLE.get(no, ''))
         st = state.setdefault(fam, [0, 0])   # [上一原始戒號, 累計位移]
         for u in UNITS_CACHE.get(no) or []:
+            fx = NUM_FIX.get((no, u.get('a')))
+            if fx:
+                u['num'] = fx
+                st[0], st[1] = fx, 0
+                continue
             v = _cn2int(u.get('cn') or '')
             if not v:
                 continue

@@ -40,8 +40,8 @@ UNPLACED = loc['unplaced']
 # 勘誤改判者：原判「四分所無」，覆核後實有對應，改入第一部
 # ERRATA_POS 由 errata.py 提供（勘誤改判者，歸入第一部）
 for _rid, (_n, _seg) in ERRATA_POS.items():
-    if _rid not in PLACED:
-        PLACED[_rid] = {'id': _rid, 'n': _n, 'seg': _seg, 'how': 'errata'}
+    # 已歸位者亦可改繫（如 M-1860 原繫 026 段40，實屬 027 段49），故一律覆蓋
+    PLACED[_rid] = {'id': _rid, 'n': _n, 'seg': _seg, 'how': 'errata'}
     ABSENT.discard(_rid)
 
 # G/T 歸併組（自矩陣 md 提取，此處硬編，來源見 _work/gt_groups.json）
