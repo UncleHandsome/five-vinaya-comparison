@@ -21,6 +21,10 @@ ROOT = os.path.dirname(BASE)
 SRC = os.path.join(ROOT, '03_成品')
 OUT = os.path.join(ROOT, '05_網頁版')
 
+# 換帳號、換倉庫、換網域時，只改這兩行，再重跑本腳本即可
+SITE_URL = 'https://unclehandsome.github.io/five-vinaya-comparison/'
+REPO_URL = 'https://github.com/UncleHandsome/five-vinaya-comparison'
+
 JUAN = [
     ('卷一至卷十', '五部律差異對照本_卷一至卷十.md'),
     ('卷十一至卷二十一', '五部律差異對照本_卷十一至卷二十一.md'),
@@ -464,9 +468,9 @@ def build_index():
 <hr>
 <p style="font-size:13px;color:#8a8278">
 原始碼、勘誤與 Issue：
-<a href="https://github.com/UncleHandsome/five-vinaya-comparison">GitHub</a>
+<a href="{REPO_URL}">GitHub</a>
 　·　
-<a href="https://unclehandsome.github.io/five-vinaya-comparison/">線上版</a>
+<a href="{SITE_URL}">線上版</a>
 </p>
 """
     nav = ('<h1><a href="index.html">五部律差異對照本</a></h1>'
