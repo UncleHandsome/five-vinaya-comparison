@@ -137,6 +137,9 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
   font-size:15px; opacity:.75; z-index:99;
   font-family:sans-serif}
 #top:hover{opacity:1}
+/* ── 無障礙：僅供讀屏，視覺上隱藏 ── */
+.sr-only{position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
 /* ── 版權頁 ── */
 #colophon{margin-top:3rem; font-size:13.5px; line-height:1.75; color:var(--fg2);
   font-family:"Songti SC","SimSun",serif}
@@ -276,16 +279,17 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#ap3">三、篇目卷次</a>
 </div>
 <div class="grp" style="margin-top:1.2rem">
-<a href="#" id="toggle" style="color:var(--accent)">全部展開／收起</a>
-<a href="#" id="width" style="color:var(--accent)">切換寬屏</a>
+<a href="#" id="toggle" role="button" aria-controls="main" style="color:var(--accent)">全部展開／收起</a>
+<a href="#" id="width" role="button" style="color:var(--accent)">切換寬屏</a>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
-<input type="text" id="jump" placeholder="跳至 D-0450"
+<label for="jump" class="sr-only">跳至指定編號</label>
+<input type="text" id="jump" placeholder="跳至 D-0450" aria-label="跳至指定編號，如 D-0450"
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 </div>
 </nav>
-<main>
+<main id="main">
 <h1 id="五部律差異對照本">五部律差異對照本</h1>
 <blockquote>
 <p><strong>以《四分律》為閱讀主線，一冊在手，遍知五部之異同。</strong></p>
@@ -81995,7 +81999,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 </footer>
 
 </div>
-<a href="#top-anchor" id="top">↑</a>
+<a href="#top-anchor" id="top" aria-label="回到頂部">↑</a>
 <script>
 (function(){
   // 目錄高亮：滾動時標記當前章節

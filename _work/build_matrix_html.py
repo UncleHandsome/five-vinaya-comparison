@@ -258,7 +258,7 @@ def main():
   <span class="lbl">狀態</span>{st_chips}
   <span class="lbl">主稿</span>{seg_chips}
   <span class="lbl">層級</span>{lv_chips}
-  <input type="search" id="q" placeholder="搜索主題或差異…">
+  <input type="search" id="q" placeholder="搜索主題或差異…" aria-label="搜索主題或差異">
   <span class="count" id="cnt">{total:,} 項</span>
 </div>
 {''.join(body)}

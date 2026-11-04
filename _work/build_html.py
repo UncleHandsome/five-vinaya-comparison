@@ -188,6 +188,9 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
   font-size:15px; opacity:.75; z-index:99;
   font-family:sans-serif}
 #top:hover{opacity:1}
+/* ── 無障礙：僅供讀屏，視覺上隱藏 ── */
+.sr-only{position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
 /* ── 版權頁 ── */
 #colophon{margin-top:3rem; font-size:13.5px; line-height:1.75; color:var(--fg2);
   font-family:"Songti SC","SimSun",serif}
@@ -438,21 +441,22 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <nav>
 {nav}
 <div class="grp" style="margin-top:1.2rem">
-<a href="#" id="toggle" style="color:var(--accent)">全部展開／收起</a>
-<a href="#" id="width" style="color:var(--accent)">切換寬屏</a>
+<a href="#" id="toggle" role="button" aria-controls="main" style="color:var(--accent)">全部展開／收起</a>
+<a href="#" id="width" role="button" style="color:var(--accent)">切換寬屏</a>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
-<input type="text" id="jump" placeholder="跳至 D-0450"
+<label for="jump" class="sr-only">跳至指定編號</label>
+<input type="text" id="jump" placeholder="跳至 D-0450" aria-label="跳至指定編號，如 D-0450"
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 </div>
 </nav>
-<main>
+<main id="main">
 {body}
 </main>
 {FOOTER}
 </div>
-<a href="#top-anchor" id="top">↑</a>
+<a href="#top-anchor" id="top" aria-label="回到頂部">↑</a>
 <script>{JS}</script>
 </body>
 </html>"""
