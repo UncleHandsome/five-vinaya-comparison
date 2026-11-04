@@ -262,6 +262,15 @@ def main():
   <span class="count" id="cnt">{total:,} 項</span>
 </div>
 {''.join(body)}
+<footer style="margin:2.5rem 0 1rem;font-size:13px;line-height:1.7;color:#6a635a">
+<hr>
+<p><b>底本與鳴謝</b>　五部律原文錄自大正新脩大藏經：四分律 T22 no. 1428、
+五分律 T22 no. 1421、摩訶僧祇律 T22 no. 1425、十誦律 T23 no. 1435、
+根本說一切有部毘奈耶 T23 no. 1442。大正藏之電子化為中華電子佛典協會（CBETA）成果，
+本書四分律文字與校記並據 CBETA T22 no. 1428 電子檔覆核，謹致謝忱。
+CBETA 電子佛典依 Creative Commons「姓名標示—非商業性—相同方式分享」授權釋出。</p>
+<p>本矩陣之項目劃分、狀態判別與差異按語，皆編者所加，非底本原有；引據時請以 CBETA 原書覆核。</p>
+</footer>
 </main>
 </div>
 <script>{JS}</script>
