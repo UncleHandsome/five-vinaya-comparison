@@ -10962,7 +10962,7 @@ id="第七十四戒-共同羯磨已後作如是語">第七十四戒　共同羯�
 
 <details class="art-plain" role="region" aria-label="白話直譯，段20至段28"><summary>白話　段20–28</summary>
 
-<p>那時，佛陀在王舍城耆闍崛山（靈鷲山）中。當時，尊者沓婆摩羅子比丘，被僧團推派負責管理大眾的床座、臥具以及分配飲食（即擔任知客與庫頭之職）。他因為忙於僧團與佛塔的事務，加上外界有人初建寺院、房屋、開鑿池井而設齋會布施時，他也無法前往應供，導致他的衣服破爛損壞、沾滿垢膩而不清淨。</p>
+<p>那時，佛陀在王舍城耆闍崛山（靈鷲山）中。當時，尊者沓婆摩羅子比丘，被僧團推派負責管理大眾的床座、臥具以及分配飲食（即僧團所差之分臥具人與差次受請食人；此二職出佛世僧制，非後世叢林之知客、庫頭）。他因為忙於僧團與佛塔的事務，加上外界有人初建寺院、房屋、開鑿池井而設齋會布施時，他也無法前往應供，導致他的衣服破爛損壞、沾滿垢膩而不清淨。</p>
 <p>在另一個時間，有人布施給僧團一件昂貴的衣服。僧眾們便互相商議：「尊者沓婆摩羅子比丘被大眾推派管理床座飲食，因忙於僧事塔事，無法去應供，導致衣服破爛垢膩，我們應該把這件衣服賜予他。」於是，僧團便進行了「白二羯磨」（Saṃghakarma，僧團的一項提案與一項表決的合法會議程序），將衣服合法授予了他。</p>
 <p>當進行白二羯磨（表決）時，六群比丘明明也在僧眾之中參與了會議。但給予衣服之後，他們卻（在背後）說：「這些比丘根本是依據自己與誰親近，就把僧團的衣服給了誰（指控僧團循私舞弊）！」</p>
 <p>具備慚愧心的比丘們聽見了，便嫌責六群比丘：「你們為何在僧眾中共同作羯磨（表決）將衣服布施給他，事後卻又說『比丘們是看交情把僧物送人』呢？」</p>
@@ -15518,9 +15518,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 9e6cd91（2026-11-04）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 94687e0-dirty（2026-11-04）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 9e6cd91」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 94687e0-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -15528,7 +15528,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 9e6cd91（2026-11-04）}<br>
+　note = {版本 94687e0-dirty（2026-11-04）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -15708,6 +15708,25 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
     });
   }
+  // 列印前自動展開全部折疊（CSS 對 closed details 的內容未必生效），列印後復原
+  (function(){
+    var saved = null;
+    var openAll = function(){
+      var ds = document.querySelectorAll('details');
+      saved = Array.prototype.map.call(ds, function(d){ return d.open; });
+      Array.prototype.forEach.call(ds, function(d){ d.open = true; });
+    };
+    var restore = function(){
+      if (!saved) return;
+      var ds = document.querySelectorAll('details');
+      Array.prototype.forEach.call(ds, function(d, i){
+        if (i < saved.length) d.open = saved[i];
+      });
+      saved = null;
+    };
+    window.addEventListener('beforeprint', openAll);
+    window.addEventListener('afterprint', restore);
+  })();
 })();
 </script>
 </body>

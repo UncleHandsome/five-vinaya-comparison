@@ -511,6 +511,25 @@ JS = r"""
       if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
     });
   }
+  // 列印前自動展開全部折疊（CSS 對 closed details 的內容未必生效），列印後復原
+  (function(){
+    var saved = null;
+    var openAll = function(){
+      var ds = document.querySelectorAll('details');
+      saved = Array.prototype.map.call(ds, function(d){ return d.open; });
+      Array.prototype.forEach.call(ds, function(d){ d.open = true; });
+    };
+    var restore = function(){
+      if (!saved) return;
+      var ds = document.querySelectorAll('details');
+      Array.prototype.forEach.call(ds, function(d, i){
+        if (i < saved.length) d.open = saved[i];
+      });
+      saved = null;
+    };
+    window.addEventListener('beforeprint', openAll);
+    window.addEventListener('afterprint', restore);
+  })();
 })();
 """
 

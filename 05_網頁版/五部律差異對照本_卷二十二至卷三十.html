@@ -556,7 +556,7 @@ id="五部律差異對照本-卷二十二至卷三十">五部律差異對照本�
 <p><a id="p026"></a></p>
 <h4 id="026-八波羅夷法">026　八波羅夷法</h4>
 <blockquote>
-<p><strong>篇旨</strong>：尼律八波羅夷。含婬、盜、殺、妄語四根本，及摩觸、八事、覆藏他重罪、隨順被擯者四條。此篇為尼律之首。前四戒與比丘波羅夷同條（見
+<p><strong>篇旨</strong>：尼律八波羅夷。含婬、盜、殺、妄語四根本，及摩觸、八事、覆藏他重罪、隨順被擯者四條。此篇為尼律之首。<strong>「八事」即八事成重</strong>：懷染污心與染污心男子捉手、捉衣、入屏處、共立、共語、共行、身相倚、共期，八事具足即犯波羅夷——與「八敬法」之八條威儀截然二事，讀者幸勿以名近而混。前四戒與比丘波羅夷同條（見
 001、002
 兩篇），所異者在犯相之男女別，及「不共住」後之處分；後四戒則尼所獨有。本書於此四戒仍錄尼律原文與白話，不避重出，以存本部之文；欲知比丘同條之本末，則參
 001、002 兩篇。</p>
@@ -9356,9 +9356,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 9e6cd91（2026-11-04）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 94687e0-dirty（2026-11-04）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 9e6cd91」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 94687e0-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -9366,7 +9366,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 9e6cd91（2026-11-04）}<br>
+　note = {版本 94687e0-dirty（2026-11-04）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -9546,6 +9546,25 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
     });
   }
+  // 列印前自動展開全部折疊（CSS 對 closed details 的內容未必生效），列印後復原
+  (function(){
+    var saved = null;
+    var openAll = function(){
+      var ds = document.querySelectorAll('details');
+      saved = Array.prototype.map.call(ds, function(d){ return d.open; });
+      Array.prototype.forEach.call(ds, function(d){ d.open = true; });
+    };
+    var restore = function(){
+      if (!saved) return;
+      var ds = document.querySelectorAll('details');
+      Array.prototype.forEach.call(ds, function(d, i){
+        if (i < saved.length) d.open = saved[i];
+      });
+      saved = null;
+    };
+    window.addEventListener('beforeprint', openAll);
+    window.addEventListener('afterprint', restore);
+  })();
 })();
 </script>
 </body>
