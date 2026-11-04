@@ -36,6 +36,27 @@ PLAIN = {}
 if os.path.exists(PLAIN_JSON):
     PLAIN = json.load(open(PLAIN_JSON, encoding='utf-8'))
 
+
+def _fix_dup034():
+    """篇034（四分律卷二十七）底本重出：段1–136 之後復見卷首（段137–141）與
+    同一卷全文（段142–277），段278–281 方為真尾。存前段、刪重出、綴真尾，
+    並同步搬移白話鍵。"""
+    segs = SEG.get(34) or []
+    if not segs or segs[-1][0] < 280:
+        return
+    head = [(n, t) for n, t in segs if n <= 136]
+    tail = [(n - 141, t) for n, t in segs if n >= 278]
+    SEG[34] = head + tail
+    for n in range(137, 278):
+        PLAIN.pop('034-%d' % n, None)
+    for n in range(278, 282):
+        v = PLAIN.pop('034-%d' % n, None)
+        if v:
+            PLAIN['034-%d' % (n - 141)] = v
+
+
+_fix_dup034()
+
 RE_JING = re.compile(r'[（(]([一二三四五六七八九十百]+)竟[)）]?')
 RE_TAIL = re.compile(r'[（(]([一二三四五六七八九十百]+)[）)]\s*$')
 RE_NIAN = re.compile(r'[（(]([^（()）]{1,10}(?:揵度|犍度)[^（()）]{0,4}竟)[)）]')
@@ -63,13 +84,20 @@ def _cn2int(s):
 
 
 def _cn_num(n):
-    """整數轉中文（1–99），供節序「（十七）」"""
+    """整數轉中文（1–999），供節序「（十七）」「第一百零五戒」"""
     D = '〇一二三四五六七八九'
     if n < 10:
         return D[n]
     if n < 20:
         return '十' + (D[n % 10] if n % 10 else '')
-    return D[n // 10] + '十' + (D[n % 10] if n % 10 else '')
+    if n < 100:
+        return D[n // 10] + '十' + (D[n % 10] if n % 10 else '')
+    h, r = n // 100, n % 100
+    if r == 0:
+        return D[h] + '百'
+    if r < 10:
+        return D[h] + '百零' + D[r]
+    return D[h] + '百' + _cn_num(r)
 
 
 RE_TITLE_NUM = re.compile(r'第[一二三四五六七八九十百]+(?:之[一二三四五六七八九十]+)?$')
@@ -90,9 +118,29 @@ def _base_title(t):
 
 def _jie_name(s):
     """從戒條句提取短名：去「若比丘」等主語，略去「若在村落」之類條件句"""
-    s = re.sub(r'^[「『]?若(?:比丘|比丘尼)[，,]?', '', s or '')
+    s = s or ''
+    _nun = bool(re.match(r'^[「『]?若比丘尼', s))
+    # 尼律諸篇主語作「若比丘尼」，須先匹配長者，否則「比丘」先吞，餘「尼…」
+    s = re.sub(r'^[「『]?若(?:比丘尼|比丘|沙彌尼|沙彌)[，,]?', '', s)
     s = re.sub(r'[，,]?(尼薩耆波逸提|僧伽婆尸沙|波羅夷|波逸提|波羅提提舍尼|突吉羅).*$', '', s)
-    s = re.sub(r'^衣已竟[，,]?迦絺那衣已[出捨][，,]?', '', s)
+    s = re.sub(r'^衣已竟[、，,]?迦絺那衣已[出捨][、，,]?', '', s)
+    if _nun:
+        # 尼戒條多先標處所、條件（「在聚落若空處」「有染污心」），首句未必是所犯之事
+        acc = ''
+        for cl in re.split(r'[，,；;。]', s):
+            cl = cl.strip('，,。 、「」『』')
+            if not cl or re.match(r'^(?:在|於|若|除|衣已竟|迦絺那衣)', cl) and len(cl) <= 14:
+                continue
+            if len(cl) > 17:      # 一句過長（多為頓號列舉），於頓號處截，免斷字成詞
+                k = max(cl.rfind('、', 0, 18), cl.rfind('，', 0, 18))
+                cl = cl[:k] if k > 0 else cl[:17]
+            if acc and len(acc) + 1 + len(cl) > 17:
+                break
+            acc = (acc + '，' + cl) if acc else cl
+            if len(acc) >= 6:
+                break
+        acc = re.sub(r'(得持|得畜|得用)$', '', acc)
+        return re.sub(r'(者|故|已|時|而)$', '', acc)
     for cl in re.split(r'[，,；;]', s):
         cl = cl.strip('，,。 「」『』')
         if not cl or re.match(r'^若|^除|^有|^復', cl):
@@ -112,23 +160,57 @@ def _units_jing(no):
     out, prev = [], 0
     for n, cn in marks:
         body = '\n'.join(t for k, t in segs if prev < k <= n)
-        m = re.search(r'當如是說[：:]\s*([^\n。]{8,120})', body)
-        out.append({'a': prev + 1, 'b': n, 'cn': cn, 'name': _jie_name(m.group(1)) if m else ''})
+        # 底本或作「當如是說」，或作「當如此說」，或但列戒文而無發語
+        m = re.search(r'當如[是此]說[：:]\s*[『「]?([^\n。]{8,120})', body)
+        if m:
+            name = _jie_name(m.group(1))
+        else:
+            name = _crime_name(body)
+        out.append({'a': prev + 1, 'b': n, 'cn': cn, 'name': name})
         prev = n
     if prev < segs[-1][0]:
         out.append({'a': prev + 1, 'b': segs[-1][0], 'cn': '', 'name': ''})
     return out
 
 
+RE_CRIME = r'(?:波羅夷|僧伽婆尸沙|僧殘|偷蘭遮|波逸提|波羅提提舍尼|突吉羅)'
+RE_NUN = re.compile(r'若(?:比丘尼|比丘|沙彌尼|沙彌)[，,]?\s*')
+
+
 def _crime_name(body):
-    """從戒條段找「……者，波逸提」的定罪句，取前面的罪名短語"""
-    m = re.search(r'([^，。；：！？「」『』（）()]{2,18})[，,]?\s*(?:波羅夷|僧伽婆尸沙|僧殘|偷蘭遮|波逸提|波羅提提舍尼|突吉羅)', body)
-    if not m:
-        return ''
-    s = re.sub(r'\s+', '', m.group(1))
-    s = re.split(r'[，,、]', s)[-1]
-    s = re.sub(r'^(彼|若|此|諸|有)?(比丘尼?|沙彌尼?)?[，,]?', '', s)
-    return s[:14] + ('…' if len(s) > 14 else '')
+    """取戒條短名：於「若比丘尼…，某罪」中，取主語以下第一、二句。
+
+    舊法取罪名關鍵詞前十八字、再切末句，於尼律適得其反——戒條長者，末句
+    往往只是「是比丘尼犯」，故滿目「尼」「尼染污心」。今改取首句。
+    """
+    m = RE_NUN.search(body)
+    if m:
+        rest = body[m.end():]
+        mm = re.search(RE_CRIME, rest)
+        seg = rest[:mm.start()] if mm else rest[:60]
+    else:
+        mm = re.search(RE_CRIME, body)
+        if not mm:
+            return ''
+        seg = body[:mm.start()]
+    acc = ''
+    for cl in re.split(r'[。；，：！？]', seg):
+        cl = cl.strip('「」『』（）()　 ')
+        cl = re.sub(r'^(?:是|彼|此|諸|有|復|若|而|即)+', '', cl)
+        cl = re.sub(r'^(?:比丘尼|比丘|沙彌尼|沙彌)', '', cl)
+        if len(cl) < 2:
+            continue
+        # 捨墮諸戒皆冠以「衣已竟、迦絺那衣已捨」，非所犯之事
+        if re.match(r'^(?:衣已竟|迦絺那衣|除僧羯磨|除餘時)', cl):
+            continue
+        acc = (acc + '，' + cl) if acc else cl
+        if len(acc) >= 6:
+            break
+    acc = re.sub(r'(者|故|已|時|而|得持)$', '', acc)
+    if len(acc) > 18:
+        k = max(acc.rfind('、', 0, 19), acc.rfind('，', 0, 19))
+        acc = acc[:k] if k > 0 else acc[:18]
+    return acc
 
 
 def _units_tail(no):
@@ -328,6 +410,40 @@ def _units_qian(no):
 
 UNITS_CACHE = {}
 _QIEN_DONE = False
+_NUN_DONE = False
+
+# 卷末殘段（戒文跨卷而斷，或但餘總標）無「(N竟)」可據，另予短名
+FRAG_NAME = {
+    (4, 85): '沓婆摩羅子為僧知事',
+    (5, 17): '阿那律等釋種出家',
+    (7, 11): '迦留陀夷與齋優婆私',
+    (25, 1): '七滅諍法',
+    (34, 140): '度盲瞎癃躄病者',
+    (37, 148): '乞油蜜等戒同乞酥',
+}
+
+# 自動命名過短、截斷或同名重出者，另予覆寫
+JIE_FIX = {
+    (27, 4): '言人，若居士、居士兒',
+    (28, 1): '染污心，從男子受食',
+    (29, 14): '使織師織衣，自與其價',
+    (34, 49): '受請滅諍而不為滅',
+    (35, 81): '許授戒，留令勸化',
+    (35, 87): '索衣許授具足戒',
+    (36, 15): '安居竟不往僧中自恣',
+}
+
+
+def _apply_frag(no, r):
+    for u in r:
+        fix = JIE_FIX.get((no, u['a']))
+        if fix:
+            u['name'] = fix
+        elif not u.get('name') and not u.get('cn'):
+            nm = FRAG_NAME.get((no, u['a']))
+            if nm:
+                u['name'] = nm
+    return r
 
 
 def _name_qian():
@@ -355,12 +471,42 @@ def _name_qian():
             u['name'] = fam if cnt.get(fam, 1) <= 1 else '%s（%s）' % (fam, _cn_num(seq[fam]))
 
 
+def _renumber_nun():
+    """尼戒諸篇戒號續編。
+
+    底本於卷中重起戒號（如單提「第一百戒」之後復作「第一戒」），致同一戒類
+    前後兩見、卷二十七又自「第五戒」起，觀者茫然。今依重起之處累加位移，
+    使一類之中戒號蟬聯：第一百零一戒、第一百零二戒……
+    """
+    global _NUN_DONE
+    for no in range(26, 38):
+        if no not in SEG or no in UNITS_CACHE:
+            continue
+        UNITS_CACHE[no] = _apply_frag(no, _units_tail(no) if no >= 31 else _units_jing(no))
+    state = {}
+    for no in range(26, 38):
+        fam = _base_title(TITLE.get(no, ''))
+        st = state.setdefault(fam, [0, 0])   # [上一原始戒號, 累計位移]
+        for u in UNITS_CACHE.get(no) or []:
+            v = _cn2int(u.get('cn') or '')
+            if not v:
+                continue
+            if st[0] and v <= st[0]:         # 戒號回卷，新起一輪
+                st[1] += st[0]
+            u['num'] = v + st[1]
+            st[0] = v
+    _NUN_DONE = True
+
+
 def units(no):
     """回傳 [{a,b,cn,name}, ...]，保證覆蓋全篇且無重疊"""
-    global _QIEN_DONE
+    global _QIEN_DONE, _NUN_DONE
     if not _QIEN_DONE:
         _name_qian()
         _QIEN_DONE = True
+    if 26 <= no <= 37 and not _NUN_DONE:
+        _renumber_nun()
+        return UNITS_CACHE.get(no) or []
     if no in UNITS_CACHE:
         return UNITS_CACHE[no]
     segs = SEG[no]
@@ -374,6 +520,7 @@ def units(no):
         r = _units_qian(no)
     else:
         r = _units_jing(no)
+    r = _apply_frag(no, r)
     UNITS_CACHE[no] = r
     return r
 
@@ -395,11 +542,54 @@ def plain_text(no, a, b):
     return out
 
 
+# 組字式（CBETA 造字）→ 通行字。底本無 Unicode 之字，以六書之方合成方括，
+# 如「[木*奈]」即木旁加奈。此表所收，皆與通行字同字或義定無疑者。
+GLYPH_MAP = {
+    '[木*奈]': '柰', '[木*柰]': '柰', '[真/心]': '瞋', '[少/兔]': '㝹',
+    '[跍*月]': '胡', '[疊*毛]': '氎', '[穀-禾+卵]': '殼', '[禾*會]': '糩',
+    '[薜/米]': '糵', '[口*弟]': '涕', '[門@龠]': '鑰', '[袖-由+宁]': '紵',
+    '[蹲-酋+(十/田/ㄙ)]': '蹲', '[簿-尃+卑]': '箄', '[口*(隹/乃)]': '嘴',
+    '[(殼-一)/牛]': '擠', '[穀-禾+牛]': '擠', '[泳-永+瓦]': '瓶',
+    '[酉*卑]': '毘', '[毯-炎+登]': '㲪', '[利-禾+皮]': '剝', '[病-丙+帶]': '帶',
+    '[土*廷]': '埏', '[夌*欠]': '陵', '[馬*奔]': '奔', '[金*咨]': '鎡',
+    '[金*慈]': '鎡', '[卄/積]': '積', '[貝*為]': '賭', '[土*瓦]': '罐',
+    '[竺-二+韋]': '葦', '[口*束]': '吮',
+}
+
+GLYPH_TITLE = GLYPH_MAP
+
+
+def glyph_fix(s):
+    """組字式代通行字；未收者仍存原式，以存底本之真。"""
+    if not s or '[' not in s:
+        return s
+    for k, v in GLYPH_MAP.items():
+        if k in s:
+            s = s.replace(k, v)
+    return s
+
+
+def _title_glyph(s):
+    """節題用字清理：組字式代通行字、去未閉合之引號括號。"""
+    s = glyph_fix(s)
+    s = re.sub(r'\[[^\]]*$', '', s)          # 去截斷之組字式殘片
+    s = re.sub(r'\[[^\]]{1,12}\]', '', s)
+    for a, b in ('「」', '『』', '（）', '〈〉', '《》'):
+        if s.count(a) > s.count(b) and s.rfind(a) > 0:
+            s = s[:s.rfind(a)]
+    return re.sub(r'[，、；：]$', '', s)
+
+
 def unit_label(u):
     """節的顯示名（不含段範圍）"""
+    if u.get('num'):
+        h = f'第{_cn_num(u["num"])}戒'
+        if u.get('name'):
+            h += f'　{_title_glyph(u["name"])}'
+        return h
     if u.get('cn'):
         h = f'第{u["cn"]}戒'
         if u.get('name'):
-            h += f'　{u["name"]}'
+            h += f'　{_title_glyph(u["name"])}'
         return h
-    return '　'.join(x for x in (u.get('name'), u.get('topic')) if x)
+    return '　'.join(_title_glyph(x) for x in (u.get('name'), u.get('topic')) if x)
