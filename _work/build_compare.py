@@ -317,7 +317,8 @@ def render_src(n, u):
     segs = [(k, t) for k, t in SRC_SEG[n] if u['a'] <= k <= u['b']]
     if not segs:
         return []
-    L = [f'<details class="art-src"><summary>四分律原文　段{u["a"]}–{u["b"]}（{len(segs)} 段）</summary>', '']
+    L = [f'<details class="art-src" role="region" aria-label="四分律原文，段{u["a"]}至段{u["b"]}">'
+         f'<summary>四分律原文　段{u["a"]}–{u["b"]}（{len(segs)} 段）</summary>', '']
     for k, t in segs:
         L.append(f'<sub>段{k}</sub>　{t}')
         L.append('')
@@ -330,7 +331,8 @@ def render_plain(n, u):
     ps = src_plain(n, u['a'], u['b'])
     if not ps:
         return []
-    L = [f'<details class="art-plain"><summary>白話　段{u["a"]}–{u["b"]}</summary>', '']
+    L = [f'<details class="art-plain" role="region" aria-label="白話直譯，段{u["a"]}至段{u["b"]}">'
+         f'<summary>白話　段{u["a"]}–{u["b"]}</summary>', '']
     for p in ps:
         for ln in p.split('\n'):
             ln = ln.strip()
