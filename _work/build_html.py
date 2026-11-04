@@ -654,6 +654,21 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
             if any(_c == _j for _j, _f in JUAN):
                 _cur = _c
     nav = build_nav(md_text, is_full, _cur)
+
+    # 分卷頁不含卷首凡例，故於正文前附一則小凡例，免〔十誦 A〕一類標記無所解
+    _banner = '' if is_full else """
+<details class="art-toc" style="margin:.4rem 0 1.4rem">
+<summary>本卷凡例（狀態代號、項號與錨點）</summary>
+<p><b>狀態</b>　<b>A</b> 同條增異——同條而內容有實質差異（判罪輕重、程序先後、法數多寡、人物結局）；
+<b>B</b> 同條開緣——同條而另立開許或新增限制；<b>C</b> 四分所無——四分律無此戒此制而他部有之；
+<b>D</b> 同條減略。四目沿用各稿原判，A 與 D 之界不嚴，讀者當以「差異說明」為準。</p>
+<p><b>〔某律 X〕</b>　方括號內為該項所屬之律與狀態，如「〔十誦 A〕」謂此項出十誦、狀態為 A。</p>
+<p><b>項號</b>　<code>D-</code> 屬第一部（按四分篇次），<code>S-</code> 屬第二部（按所屬律），
+<code>M-</code> 為矩陣編號。項號全書連續，可跨卷徑引。</p>
+<p><b>錨點</b>　<code>#p008</code> 為篇、<code>#u008-24</code> 為節、<code>#d-0201</code> 為項，可作外部深鏈。</p>
+<p><b>全書凡例</b>　見<a href="五部律差異對照本.html">合冊</a>卷首（名義、引文、狀態、錨點、文本處理凡十四條）。</p>
+</details>
+"""
     page = f"""<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -711,6 +726,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 </div>
 </nav>
 <main id="main">
+{_banner}
 {body}
 {FOOTER}
 </main>
