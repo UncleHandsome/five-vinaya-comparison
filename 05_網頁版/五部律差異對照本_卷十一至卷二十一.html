@@ -38,6 +38,12 @@ nav a{display:block; padding:.22rem 1rem .22rem 1.6rem; color:var(--fg2);
   text-decoration:none; border-left:2px solid transparent; font-size:13.5px}
 nav a:hover{background:#ece8dd; color:var(--accent)}
 nav a.on{border-left-color:var(--accent); color:var(--accent); background:#efeade}
+nav button{display:block; width:100%; box-sizing:border-box; text-align:left;
+  padding:.22rem 1rem .22rem 1.6rem; background:none; border:0;
+  border-left:2px solid transparent; font-family:inherit; font-size:13.5px;
+  color:var(--accent); cursor:pointer}
+nav button:hover{background:#ece8dd}
+nav button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 nav details.navj{margin:0}
 nav details.navj>summary{padding:.28rem 1rem; cursor:pointer; color:var(--fg2);
   font-size:13px; list-style:none; user-select:none}
@@ -206,7 +212,7 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 </details>
 <details class="navj"><summary>015　九十單提法之三<span class="jcnt">11</span></summary>
 <a href="#u015-1" class="jie">第二十二戒　為僧差教授比丘尼</a>
-<a href="#u015-9" class="jie">第二十三戒　語諸比丘作如是語</a>
+<a href="#u015-9" class="jie">第二十三戒　譏謗教授比丘尼</a>
 <a href="#u015-15" class="jie">第二十四戒　與比丘尼衣</a>
 <a href="#u015-25" class="jie">第二十五戒　與比丘尼作衣</a>
 <a href="#u015-34" class="jie">第二十六戒　與比丘尼在屏處坐</a>
@@ -233,7 +239,7 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u017-51" class="jie">第四十三戒　在食家中有寶強安坐</a>
 <a href="#u017-60" class="jie">第四十四戒　食家中有寶在屏處坐</a>
 <a href="#u017-69" class="jie">第四十五戒　獨與女人露地坐</a>
-<a href="#u017-78" class="jie">第四十六戒　語餘比丘如是語</a>
+<a href="#u017-78" class="jie">第四十六戒　許食不與</a>
 <a href="#u017-86" class="jie">第四十七戒　應受四月請、因緣請與藥</a>
 <a href="#u017-104" class="jie">第四十八戒　往觀軍陣</a>
 <a href="#u017-113" class="jie">第四十九戒　聽至軍中二宿、三宿</a>
@@ -264,9 +270,9 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="#u019-66" class="jie">第七十戒　作是言婬欲非障道</a>
 </details>
 <details class="navj"><summary>020　九十單提法之八<span class="jcnt">12</span></summary>
-<a href="#u020-1" class="jie">第七十一戒　餘比丘如法諫時如是語</a>
-<a href="#u020-8" class="jie">第七十二戒　說戒時作是語</a>
-<a href="#u020-14" class="jie">第七十三戒　說戒時作如是語</a>
+<a href="#u020-1" class="jie">第七十一戒　不學戒</a>
+<a href="#u020-8" class="jie">第七十二戒　謗毀雜碎戒</a>
+<a href="#u020-14" class="jie">第七十三戒　說戒時言始知</a>
 <a href="#u020-20" class="jie">第七十四戒　共同羯磨已後作如是語</a>
 <a href="#u020-29" class="jie">第七十五戒　眾僧斷事未竟起去</a>
 <a href="#u020-38" class="jie">第七十六戒　與欲已後悔</a>
@@ -363,8 +369,8 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <a href="index.html">← 回目錄</a>
 </div>
 <div class="grp" style="margin-top:1.2rem">
-<a href="#" id="toggle" role="button" aria-controls="main" style="color:var(--accent)">全部展開／收起</a>
-<a href="#" id="width" role="button" style="color:var(--accent)">切換寬屏</a>
+<button type="button" id="toggle" aria-controls="main">全部展開／收起</button>
+<button type="button" id="width">切換寬屏</button>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
 <label for="jump" class="sr-only">跳至指定編號</label>
@@ -4294,7 +4300,7 @@ href="#d-0501"><code>D-0501</code></a>　施衣受請之判罪增「衣直」一
 段73「若日未沒，生未沒想教誡，不犯」——全段無開緣</li>
 </ul>
 <p><a id="u015-9"></a></p>
-<h5 id="第二十三戒-語諸比丘作如是語">第二十三戒　語諸比丘作如是語</h5>
+<h5 id="第二十三戒-譏謗教授比丘尼">第二十三戒　譏謗教授比丘尼</h5>
 <p><sub>段9–14　本節差異 2 項</sub></p>
 <details class="art-src"><summary>四分律原文　段9–14（6 段）</summary>
 
@@ -7517,7 +7523,7 @@ id="第四十四戒-食家中有寶在屏處坐">第四十四戒　食家中有�
 段21：『若比丘有食家中，獨與一女人共坐，三事起，一波逸提：一者有食家，二者獨共一女人，三者深處坐。』（十誦此戒屬食家，不屬空靜處）</li>
 </ul>
 <p><a id="u017-78"></a></p>
-<h5 id="第四十六戒-語餘比丘如是語">第四十六戒　語餘比丘如是語</h5>
+<h5 id="第四十六戒-許食不與">第四十六戒　許食不與</h5>
 <p><sub>段78–85　本節差異 1 項</sub></p>
 <details class="art-src"><summary>四分律原文　段78–85（8 段）</summary>
 
@@ -10539,8 +10545,7 @@ href="#d-0662"><code>D-0662</code></a>　捉寶犯相以「磨治、有絃、堪
 </details>
 
 <p><a id="u020-1"></a></p>
-<h5
-id="第七十一戒-餘比丘如法諫時如是語">第七十一戒　餘比丘如法諫時如是語</h5>
+<h5 id="第七十一戒-不學戒">第七十一戒　不學戒</h5>
 <p><sub>段1–7　本節差異 3 項</sub></p>
 <details class="art-src"><summary>四分律原文　段1–7（7 段）</summary>
 
@@ -10654,7 +10659,7 @@ id="第七十一戒-餘比丘如法諫時如是語">第七十一戒　餘比丘�
 段22「不得露形揩。犯者，突吉羅」；段82「聽用編繩」——十誦聽編繩自揩，與此禁一切揩石相反。</li>
 </ul>
 <p><a id="u020-8"></a></p>
-<h5 id="第七十二戒-說戒時作是語">第七十二戒　說戒時作是語</h5>
+<h5 id="第七十二戒-謗毀雜碎戒">第七十二戒　謗毀雜碎戒</h5>
 <p><sub>段8–13　本節差異 2 項</sub></p>
 <details class="art-src"><summary>四分律原文　段8–13（6 段）</summary>
 
@@ -10735,7 +10740,7 @@ vol06#4</sub></p>
 段35：『若比丘，說戒時作是言：「何用是雜碎戒為？半月說時，令諸比丘疑悔惱熱，憂愁不樂生捨戒心。」作是輕呵戒者，波夜提。』</li>
 </ul>
 <p><a id="u020-14"></a></p>
-<h5 id="第七十三戒-說戒時作如是語">第七十三戒　說戒時作如是語</h5>
+<h5 id="第七十三戒-說戒時言始知">第七十三戒　說戒時言始知</h5>
 <p><sub>段14–19　本節差異 3 項</sub></p>
 <details class="art-src"><summary>四分律原文　段14–19（6 段）</summary>
 
