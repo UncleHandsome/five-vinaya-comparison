@@ -205,7 +205,7 @@ python _work/build_tex.py          # LaTeX 版，約 5 分鐘
 
 ## 九、接手建議
 
-1. 先跑 `python _work/rebuild_all.py --no-pdf` 確認腳本可跑（8 秒）
+1. 先跑 `python _work/rebuild_all.py --no-pdf` 確認腳本可跑（約 15 秒；跑完 `git status` 應乾淨）
 2. 改內容一律走 `errata.py`，改完重跑
 3. 改完必驗：MD 與 9 個 HTML 錨點零失效、三書項數一致
 4. 審閱意見先回原文核，再決定改不改——過去五輪審閱中，約三成是誤判
