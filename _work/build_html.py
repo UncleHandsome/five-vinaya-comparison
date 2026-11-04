@@ -49,6 +49,8 @@ body{
   font-family:"KaiTi","STKaiti","Kaiti SC","Songti SC","SimSun",serif;
   font-size:18px; line-height:1.85;
   -webkit-font-smoothing:antialiased;
+  /* 長段引文（十誦、根有多長句）在窄屏不得撐破版面 */
+  overflow-x:hidden; overflow-wrap:break-word; word-break:break-word;
 }
 /* ── 版面 ── */
 .wrap{display:flex; min-height:100vh}
@@ -285,13 +287,29 @@ def cn2num(s):
     return _CN_D.get(s, 0)
 
 
-def build_nav(md_text, is_full):
+def build_nav(md_text, is_full, cur=None):
     """從 Markdown 提取目錄結構，生成側邊欄"""
     parts = []
     parts.append('<h1><a href="index.html">五部律差異對照本</a></h1>')
     parts.append('<div class="grp"><b>全書</b>')
     parts.append('<a href="index.html">目錄與說明</a>')
     parts.append('</div>')
+
+    # 分卷檔加前後卷導覽：單篇成檔時，讀者從搜尋引擎進來會成孤島
+    _names = [j for j, _f in JUAN]
+    if cur in _names:
+        _i = _names.index(cur)
+        _prev = _names[_i - 1] if _i > 0 else None
+        _next = _names[_i + 1] if _i + 1 < len(_names) else None
+        if _prev or _next:
+            parts.append('<div class="grp"><b>分卷</b>')
+            if _prev:
+                parts.append(f'<a href="五部律差異對照本_{htmlmod.escape(_prev)}.html">'
+                             f'← {htmlmod.escape(_prev)}</a>')
+            if _next:
+                parts.append(f'<a href="五部律差異對照本_{htmlmod.escape(_next)}.html">'
+                             f'→ {htmlmod.escape(_next)}</a>')
+            parts.append('</div>')
 
     if is_full:
         # 合冊：卷次下嵌該卷篇目（可折疊）
@@ -372,12 +390,20 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
     # 否則 text mode 會把 \n 再轉成 \r\n，成 \r\r\n（雙重回車）。
     body = p.stdout.decode('utf-8').replace('\r\n', '\n')
 
-    nav = build_nav(md_text, is_full)
+    _cur = None
+    if not is_full:
+        _b = os.path.basename(out_path)
+        if _b.startswith('五部律差異對照本_') and _b.endswith('.html'):
+            _c = _b[len('五部律差異對照本_'):-5]
+            if any(_c == _j for _j, _f in JUAN):
+                _cur = _c
+    nav = build_nav(md_text, is_full, _cur)
     page = f"""<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>{htmlmod.escape(title)}</title>
 <style>{CSS}</style>
 </head>
@@ -453,7 +479,7 @@ def build_index():
 <tr><td><a href="五部律差異對照本.html"><strong>五部律差異對照本</strong></a></td>
 <td>按四分律七十五篇次第讀。每篇有篇旨，每項有差異、原文、他部對照。適合<strong>讀律時查</strong>。</td></tr>
 <tr><td><a href="五部律綜合異同矩陣.html"><strong>五部律綜合異同矩陣</strong></a></td>
-<td>每列一項，五欄記各律有無。可按狀態、主稿、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
+<td>每列一項，五欄記各律有無。可按狀態、所屬律、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
 </table>
 
 <h2>怎麼用</h2>
@@ -494,6 +520,7 @@ def build_index():
 <html lang="zh-Hant">
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>五部律差異對照本</title>
 <style>{CSS}</style></head>
 <body><div class="wrap">

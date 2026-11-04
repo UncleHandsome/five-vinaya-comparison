@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>五部律差異對照本</title>
 <style>
 :root{
@@ -16,6 +17,8 @@ body{
   font-family:"KaiTi","STKaiti","Kaiti SC","Songti SC","SimSun",serif;
   font-size:18px; line-height:1.85;
   -webkit-font-smoothing:antialiased;
+  /* 長段引文（十誦、根有多長句）在窄屏不得撐破版面 */
+  overflow-x:hidden; overflow-wrap:break-word; word-break:break-word;
 }
 /* ── 版面 ── */
 .wrap{display:flex; min-height:100vh}
@@ -191,7 +194,7 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <tr><td><a href="五部律差異對照本.html"><strong>五部律差異對照本</strong></a></td>
 <td>按四分律七十五篇次第讀。每篇有篇旨，每項有差異、原文、他部對照。適合<strong>讀律時查</strong>。</td></tr>
 <tr><td><a href="五部律綜合異同矩陣.html"><strong>五部律綜合異同矩陣</strong></a></td>
-<td>每列一項，五欄記各律有無。可按狀態、主稿、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
+<td>每列一項，五欄記各律有無。可按狀態、所屬律、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
 </table>
 
 <h2>怎麼用</h2>
