@@ -151,11 +151,24 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
   font-family:"Songti SC","SimSun",serif}
 #colophon p{margin:.5em 0}
 #colophon b{color:var(--fg); font-size:14px; letter-spacing:.08em}
+/* ── 檢索命中 ── */
+.hitflash{background:#fff2b8 !important; box-shadow:0 0 0 3px #ffe680;
+  transition:background .5s, box-shadow .5s; border-radius:2px}
+/* ── 對讀：原文與白話左右並列 ── */
+body.par details.art-src,
+body.par details.art-plain{float:left; width:calc(50% - .5rem); box-sizing:border-box;
+  margin:0 .9rem .7rem 0}
+body.par details.art-plain{margin-right:0}
+body.par details.art-src + *:not(details.art-plain),
+body.par details.art-plain + *{clear:both}
+body.par main:after{content:""; display:block; clear:both}
 /* ── 窄屏 ── */
 @media(max-width:1100px){
   nav{display:none}
   main{padding:1.4rem 1.1rem 4rem}
   body{font-size:16px}
+  body.par details.art-src,
+  body.par details.art-plain{float:none; width:auto; margin-right:0}
 }
 /* ── 打印（供 PDF 用，若直接打印本頁）── */
 @media print{
@@ -371,12 +384,21 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 <div class="grp" style="margin-top:1.2rem">
 <button type="button" id="toggle" aria-controls="main">全部展開／收起</button>
 <button type="button" id="width">切換寬屏</button>
+<button type="button" id="par" aria-pressed="false">對讀：原文並白話</button>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
 <label for="jump" class="sr-only">跳至指定編號</label>
 <input type="text" id="jump" placeholder="跳至 D-0450" aria-label="跳至指定編號，如 D-0450"
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
+</div>
+<div class="grp" style="padding:.4rem 1rem 0">
+<label for="find" class="sr-only">全文檢索</label>
+<input type="search" id="find" placeholder="全文檢索（Enter 逐處）" aria-label="全文檢索，含折疊內容"
+  style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
+  font-size:12.5px;font-family:inherit;background:#fff">
+<div id="findinfo" role="status" aria-live="polite"
+  style="font-size:11.5px;color:#8a8278;padding:.25rem .1rem 0;min-height:1.2em"></div>
 </div>
 </nav>
 <main id="main">
@@ -15403,7 +15425,6 @@ vol22#12</sub></p>
 段4：「云何罪處所？彼比丘此罪，與作舉、作憶念者是。」</li>
 </ul>
 
-</main>
 
 <footer id="colophon">
 <hr>
@@ -15413,6 +15434,12 @@ vol22#12</sub></p>
 摩訶僧祇律（T22 no. 1425，東晉 天竺三藏佛陀跋陀羅共法顯譯）、
 十誦律（T23 no. 1435，後秦 三藏弗若多羅共鳩摩羅什譯）、
 根本說一切有部毘奈耶（T23 no. 1442，唐 三藏義淨譯）。</p>
+<p><b>譯出年代與歷時性</b>　前四部皆出於五世紀初二十餘年間（約 404–423），
+同屬漢地早期所傳廣律；根本說一切有部律則遲至八世紀初（約 701–710）方由義淨譯出，
+去前四部近三百年。二者之間非僅部派之別，亦有文獻層累之異：根有律所據，
+本屬印度佛教晚期高度文學化、譬喻化之律本，長篇本生、譬喻、占相、因明諸門層見疊出；
+前四部則多存古本質樸之體。故本書所見根有之「繁」，半由部派，半由時代，
+讀者幸勿以同一歷史斷面之平行作品視之。</p>
 <p>大正藏之電子化，為中華電子佛典協會（CBETA）多年經營之成果；本書四分律文字與校記，
 並據 CBETA T22 no. 1428 電子檔覆核行文、校記與用字，謹致謝忱。CBETA 電子佛典依
 Creative Commons「姓名標示—非商業性—相同方式分享」授權釋出，本書引用處依同一方式標明出處。</p>
@@ -15420,8 +15447,17 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 等各表一藏本；凡本書引及異文，均照錄原式，不省代號。</p>
 <p>本書之標點、分段、篇題、篇旨、對照欄位、異同矩陣與白話譯文，皆編者所加，非底本原有；
 引據時請以 CBETA 原書覆核。若有訛失，乞方家賜正。</p>
+<p><b>授權</b>　本書所增之標點、分段、篇題、篇旨、對照欄位、異同矩陣、白話譯文與檢索程式，
+依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
+引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
+<p><b>建議引用格式</b><br>
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 3a713f0-dirty（2026-11-04）. 線上資料庫.
+<a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 3a713f0-dirty」。
+項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 </footer>
 
+</main>
 </div>
 <a href="#top-anchor" id="top" aria-label="回到頂部">↑</a>
 <script>
@@ -15488,6 +15524,108 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       var anyClosed = Array.prototype.some.call(ds, function(d){ return !d.open; });
       Array.prototype.forEach.call(ds, function(d){ d.open = anyClosed; });
       bar.textContent = anyClosed ? '全部收起' : '全部展開';
+    });
+  }
+  // 對讀：原文與白話左右並列
+  var pbtn = document.getElementById('par');
+  if (pbtn){
+    if (localStorage.getItem('wb_par') === '1') document.body.classList.add('par');
+    var syncP = function(){
+      var on = document.body.classList.contains('par');
+      pbtn.textContent = on ? '對讀：開' : '對讀：原文並白話';
+      pbtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+    syncP();
+    pbtn.addEventListener('click', function(){
+      document.body.classList.toggle('par');
+      var on = document.body.classList.contains('par');
+      localStorage.setItem('wb_par', on ? '1' : '0');
+      if (on){
+        // 對讀時把原文與白話兩塊一併打開，否則並列亦無可讀
+        Array.prototype.forEach.call(
+          document.querySelectorAll('details.art-src, details.art-plain'),
+          function(d){ d.open = true; });
+      }
+      syncP();
+    });
+  }
+  // 全文檢索：含折疊（未展開）內容，命中則自動展開並跳至該處
+  var fbox = document.getElementById('find');
+  var finfo = document.getElementById('findinfo');
+  if (fbox){
+    var hits = [], cur = -1, timer = null, LIMIT = 3000;
+
+    var collect = function(q){
+      var root = document.getElementById('main') || document.body;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      var out = [], n, lq = q.toLowerCase();
+      while ((n = w.nextNode())){
+        var pe = n.parentElement;
+        if (!pe) continue;
+        var t = pe.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'NOSCRIPT') continue;
+        if (n.data && n.data.toLowerCase().indexOf(lq) >= 0){
+          out.push(n);
+          if (out.length >= LIMIT) break;
+        }
+      }
+      return out;
+    };
+
+    var reveal = function(node){
+      var el = node.parentElement;
+      while (el){
+        if (el.tagName === 'DETAILS') el.open = true;
+        el = el.parentElement;
+      }
+    };
+
+    var go = function(i){
+      if (!hits.length) return;
+      cur = ((i % hits.length) + hits.length) % hits.length;
+      var node = hits[cur];
+      reveal(node);
+      var pe = node.parentElement;
+      pe.classList.add('hitflash');
+      // 展開 details 會使上方版面變高，瀏覽器的 scroll anchoring 隨之補償，
+      // 把剛跳到的位置又推走；此處暫停 anchoring，並於兩帧後再校正一次。
+      // 展開 details 之後，上方內容的高度往往要到數百毫秒後才定；scrollIntoView
+      // 於此時會落在舊座標。改以絕對座標直接捲動，並在版面穩定前後各校正一次。
+      var de = document.documentElement;
+      var oldAnchor = de.style.overflowAnchor;
+      de.style.overflowAnchor = 'none';
+      var jump = function(){
+        var y = pe.getBoundingClientRect().top + window.pageYOffset
+                - Math.max(80, (window.innerHeight - pe.offsetHeight) / 2);
+        window.scrollTo(0, Math.max(0, y));
+      };
+      jump();
+      [120, 350, 700, 1200, 2000].forEach(function(t){ setTimeout(jump, t); });
+      setTimeout(function(){
+        pe.classList.remove('hitflash');
+        de.style.overflowAnchor = oldAnchor;
+      }, 2600);
+      finfo.textContent = '第 ' + (cur + 1) + ' / ' + hits.length + ' 處' +
+        (hits.length >= LIMIT ? '（已達上限，請加長關鍵詞）' : '');
+    };
+
+    var run = function(jump){
+      var q = fbox.value.trim();
+      if (q.length < 1){ hits = []; cur = -1; finfo.textContent = ''; return; }
+      if (q !== run.last){
+        hits = collect(q); cur = -1; run.last = q;
+      }
+      if (!hits.length){ finfo.textContent = '「' + q + '」：0 處'; return; }
+      go(jump ? cur + 1 : 0);
+    };
+
+    fbox.addEventListener('input', function(){
+      clearTimeout(timer);
+      timer = setTimeout(function(){ run(false); }, 320);
+    });
+    fbox.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.preventDefault(); run(true); }
+      if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
     });
   }
 })();

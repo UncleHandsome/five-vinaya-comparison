@@ -150,11 +150,24 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
   font-family:"Songti SC","SimSun",serif}
 #colophon p{margin:.5em 0}
 #colophon b{color:var(--fg); font-size:14px; letter-spacing:.08em}
+/* ── 檢索命中 ── */
+.hitflash{background:#fff2b8 !important; box-shadow:0 0 0 3px #ffe680;
+  transition:background .5s, box-shadow .5s; border-radius:2px}
+/* ── 對讀：原文與白話左右並列 ── */
+body.par details.art-src,
+body.par details.art-plain{float:left; width:calc(50% - .5rem); box-sizing:border-box;
+  margin:0 .9rem .7rem 0}
+body.par details.art-plain{margin-right:0}
+body.par details.art-src + *:not(details.art-plain),
+body.par details.art-plain + *{clear:both}
+body.par main:after{content:""; display:block; clear:both}
 /* ── 窄屏 ── */
 @media(max-width:1100px){
   nav{display:none}
   main{padding:1.4rem 1.1rem 4rem}
   body{font-size:16px}
+  body.par details.art-src,
+  body.par details.art-plain{float:none; width:auto; margin-right:0}
 }
 /* ── 打印（供 PDF 用，若直接打印本頁）── */
 @media print{
@@ -235,7 +248,7 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 　·　
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">線上版</a>
 </p>
-</main>
+
 
 <footer id="colophon">
 <hr>
@@ -245,6 +258,12 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 摩訶僧祇律（T22 no. 1425，東晉 天竺三藏佛陀跋陀羅共法顯譯）、
 十誦律（T23 no. 1435，後秦 三藏弗若多羅共鳩摩羅什譯）、
 根本說一切有部毘奈耶（T23 no. 1442，唐 三藏義淨譯）。</p>
+<p><b>譯出年代與歷時性</b>　前四部皆出於五世紀初二十餘年間（約 404–423），
+同屬漢地早期所傳廣律；根本說一切有部律則遲至八世紀初（約 701–710）方由義淨譯出，
+去前四部近三百年。二者之間非僅部派之別，亦有文獻層累之異：根有律所據，
+本屬印度佛教晚期高度文學化、譬喻化之律本，長篇本生、譬喻、占相、因明諸門層見疊出；
+前四部則多存古本質樸之體。故本書所見根有之「繁」，半由部派，半由時代，
+讀者幸勿以同一歷史斷面之平行作品視之。</p>
 <p>大正藏之電子化，為中華電子佛典協會（CBETA）多年經營之成果；本書四分律文字與校記，
 並據 CBETA T22 no. 1428 電子檔覆核行文、校記與用字，謹致謝忱。CBETA 電子佛典依
 Creative Commons「姓名標示—非商業性—相同方式分享」授權釋出，本書引用處依同一方式標明出處。</p>
@@ -252,6 +271,15 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 等各表一藏本；凡本書引及異文，均照錄原式，不省代號。</p>
 <p>本書之標點、分段、篇題、篇旨、對照欄位、異同矩陣與白話譯文，皆編者所加，非底本原有；
 引據時請以 CBETA 原書覆核。若有訛失，乞方家賜正。</p>
+<p><b>授權</b>　本書所增之標點、分段、篇題、篇旨、對照欄位、異同矩陣、白話譯文與檢索程式，
+依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
+引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
+<p><b>建議引用格式</b><br>
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 3a713f0-dirty（2026-11-04）. 線上資料庫.
+<a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 3a713f0-dirty」。
+項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 </footer>
 
+</main>
 </div></body></html>

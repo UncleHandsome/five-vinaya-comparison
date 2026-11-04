@@ -11,12 +11,31 @@
 
 輸出：05_網頁版/五部律綜合異同矩陣.html
 """
-import os, re, html as H
+import os, re, subprocess, datetime, html as H
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
 SRC = os.path.join(ROOT, '03_成品', '五部律綜合異同矩陣.md')
 OUT = os.path.join(ROOT, '05_網頁版', '五部律綜合異同矩陣.html')
+
+SITE_URL = 'https://unclehandsome.github.io/five-vinaya-comparison/'
+
+
+def _stamp():
+    h = ''
+    try:
+        h = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT,
+                           capture_output=True, text=True, timeout=10).stdout.strip()
+        if h and subprocess.run(['git', 'status', '--porcelain'], cwd=ROOT,
+                                capture_output=True, text=True, timeout=20).stdout.strip():
+            h += '-dirty'
+    except Exception:
+        h = ''
+    return (h or 'nogit'), datetime.date.today().isoformat()
+
+
+VER, DATE = _stamp()
+SITE = SITE_URL
 
 SEGS = ['五分', '十誦', '僧祇', '根有']
 ST_NAME = {'A': '同條增異', 'B': '同條開緣', 'C': '四分所無', 'D': '同條減略'}
@@ -270,6 +289,8 @@ def main():
 本書四分律文字與校記並據 CBETA T22 no. 1428 電子檔覆核，謹致謝忱。
 CBETA 電子佛典依 Creative Commons「姓名標示—非商業性—相同方式分享」授權釋出。</p>
 <p>本矩陣之項目劃分、狀態判別與差異按語，皆編者所加，非底本原有；引據時請以 CBETA 原書覆核。</p>
+<p><b>授權與引用</b>　本矩陣依 CC BY-NC-SA 4.0 釋出。建議引用：UncleHandsome（編）.
+《五部律綜合異同矩陣》. 版本 {VER}（{DATE}）. {SITE}</p>
 </footer>
 </main>
 </div>
