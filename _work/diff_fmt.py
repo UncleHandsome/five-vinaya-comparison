@@ -38,12 +38,22 @@ def _sets(row):
 def expand_refs(text, row):
     """「兩律」→具體律名；「本律」「此律」→本稿律名。無法判定者原樣保留。"""
     others, whole = _sets(row)
+    no = sorted([n for k, n in CANONS if n != row.get('canon') and row.get(k) == '無'],
+                key=ORDER.index)
+    yes = sorted([n for k, n in CANONS if n != row.get('canon') and row.get(k) == '有'],
+                 key=ORDER.index)
 
     def sub(m):
         n = NUM[m.group(1)]
         # 「二部律」為專名（比丘、比丘尼二部之律），不可拆
         if m.group(2) and m.group(1) == '二':
             return m.group(0)
+        # 先看本句語氣：句中有「無」「不」者取無此制之律，言「有」「同」者取有之律
+        seg = re.split(r'[。；]', text[m.end():])[0]
+        if re.search(r'[無不缺乏闕未]', seg) and len(no) == n:
+            return '、'.join(no)
+        if re.match(r'^[^，。；]{0,4}(有|同)', seg) and len(yes) == n:
+            return '、'.join(yes)
         if len(others) == n:
             return '、'.join(others)
         if len(whole) == n:
@@ -249,6 +259,53 @@ def merge_tail(lines, max_len=14, cap=120):
     return lines
 
 
+RE_LIST_LEAD = re.compile(r'^(?P<lead>[^：，。；]{2,16})：(?P<body>[^。；]+)。$')
+
+
+def _split_dun(body):
+    """依頂層頓號切分（括號、引號內者不切）"""
+    out, buf, d = [], '', 0
+    for ch in body:
+        if ch in '（「『〈《':
+            d += 1
+        elif ch in '）」』〉》':
+            d = max(0, d - 1)
+        buf += ch
+        if ch == '、' and d == 0:
+            out.append(buf[:-1])
+            buf = ''
+    if buf:
+        out.append(buf)
+    return out
+
+
+def listify(line, maxlen=34):
+    """把「主句：A、B、C……」之長列舉拆為縮排小列，字句不動。
+
+    一句列二十餘法目，通欄而下則難尋其目；此處只分行，不改一字。
+    回傳 (引導行, [小列…]) 或 None（不合此形者原樣）。
+    """
+    m = RE_LIST_LEAD.match(line)
+    if not m:
+        return None
+    body = m.group('body')
+    if body.count('、') < 8:
+        return None
+    items = _split_dun(body)
+    n = len(items)
+    k = max(2, (n + 5) // 6)          # 每列約五六目，末列不使孤懸一二目
+    base, rem = divmod(n, k)
+    chunks, i = [], 0
+    for j in range(k):
+        size = base + (1 if j < rem else 0)
+        chunks.append('、'.join(items[i:i + size]))
+        i += size
+    if len(chunks) < 2:
+        return None
+    chunks[-1] += '。'
+    return f"- {m.group('lead')}：", [f'  - {c}' for c in chunks]
+
+
 def diff_lines(row, bold=True, expand=True, limit=110):
     """回傳可直接寫入 Markdown 的行（不含尾隨空行）。"""
     text = (row.get('diff_full') or row.get('diff') or '').replace('\n', ' ').strip()
@@ -284,10 +341,19 @@ def diff_lines(row, bold=True, expand=True, limit=110):
         lines = out_b
     if not lines:
         return []
-    if len(lines) == 1:
+    parts, nested = [], False
+    for s in lines:
+        lf = listify(s)
+        if lf:
+            nested = True
+            parts.append(lf[0])
+            parts.extend(lf[1])
+        else:
+            parts.append(f'- {s}')
+    if len(lines) == 1 and not nested:
         out = [f'**差異**：{lines[0]}']
     else:
-        out = ['**差異**'] + [f'- {s}' for s in lines]
+        out = ['**差異**'] + parts
     if tag:
         out += ['', f'<sub>異在：{tag}</sub>']
     return out

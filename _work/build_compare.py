@@ -15,7 +15,7 @@
   五部律差異對照本_卷一至卷十.md 等 6 個分卷檔
 """
 import json, re, os, glob
-from errata import apply as apply_errata, ERRATA, ERRATA_POS, clean_title, cn2num
+from errata import apply as apply_errata, ERRATA, ERRATA_POS, clean_title, cn2num, split_title
 from collections import defaultdict, Counter, OrderedDict
 from norm_ref import normalize as norm_ref
 from section_intro import INTRO as SEC_INTRO
@@ -296,9 +296,16 @@ except Exception:
     PLAIN_QC = {}
 PLAIN_QC_MIN = 0.12
 
+# 人工覆核：cosine 雖低，而白話實為本節之譯。此三節或為定義式（詞面與原文少合），
+# 或原文極短（037 段148 只一句），cosine 自低，非錯配，故不從缺。
+PLAIN_QC_OK = {'023-147', '028-22', '037-148'}
+
 
 def plain_doubt(n, u):
-    q = PLAIN_QC.get('%03d-%d' % (n, u['a']))
+    k = '%03d-%d' % (n, u['a'])
+    if k in PLAIN_QC_OK:
+        return False
+    q = PLAIN_QC.get(k)
     return q is not None and q < PLAIN_QC_MIN
 
 
@@ -377,6 +384,14 @@ for c in ['五分', '十誦', '僧祇', '根有']:
 
 
 # ---------- 單項渲染 ----------
+def title_md(t, rid=None):
+    """標題渲染：主標題加粗，副標題接於其後；無副標題者原樣。"""
+    main, sub = split_title(t, rid)
+    if not sub:
+        return main
+    return f'**{main}**　{sub}'
+
+
 def render_item(r, no_prefix, compact=False):
     """渲染一項"""
     r = apply_errata(r)
@@ -387,7 +402,7 @@ def render_item(r, no_prefix, compact=False):
     lines = []
     lines.append(f'<a id="{_aid}"></a>')
     lines.append('')
-    lines.append(f'**{no_prefix}**　{clean_title(fix_terms(r["title"], r["canon"]), r["id"])}{gt_tag}')
+    lines.append(f'**{no_prefix}**　{title_md(clean_title(fix_terms(r["title"], r["canon"]), r["id"]), r["id"])}{gt_tag}')
     lines.append('')
     p_ = PLACED.get(r['id'])
     loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
@@ -410,6 +425,10 @@ def render_item(r, no_prefix, compact=False):
             _dl[_idx] += _tail
         lines.extend(_dl)
         lines.append('')
+        _note = r.get('_fayi')
+        if _note:
+            lines.append(f'> **按語**　{_note}')
+            lines.append('')
     if compact:
         # 簡版：錄原文與白話（折疊），不錄他部對照
         o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
@@ -514,7 +533,8 @@ def render_gt_block(g, ids):
             continue
         r = apply_errata(r)
         _ref = D_NO.get(i) or S_NO.get(i)
-        _link = f'　[`{_ref}`](#{_ref.lower()})' if _ref else ''
+        # 同組重出者不另編 D/S 號，改標矩陣編號，俾可查證
+        _link = f'　[`{_ref}`](#{_ref.lower()})' if _ref else f'　編號 `{i}`'
         out.append(f'##### {r["canon"]}　{r["title"]}{_link}')
         out.append('')
         p_ = PLACED.get(r['id'])
@@ -524,6 +544,10 @@ def render_gt_block(g, ids):
         diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
         if diff:
             out.extend(diff_lines(dict(r, diff_full=diff)))
+            out.append('')
+        _note = r.get('_fayi')
+        if _note:
+            out.append(f'> **按語**　{_note}')
             out.append('')
         o = ORIG.get(f"{r['canon']}|{r['unit']}|{r['no']}", {})
         orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
@@ -668,6 +692,10 @@ def build_front():
              '序號 `D-` 屬第一部（按四分篇次），`S-` 屬第二部（按主稿）。白話以摺疊塊呈現，不佔篇幅；'
              '五稿皆已具白話，無有闕者。')
     L.append('')
+    L.append('　　標題分主標題與副標題：主標題在十六字以內，**加粗**以標其目；副標題接於其後，'
+             '述其曲折與法數。篇內目錄只列主標題，俾長篇數十百項亦一目可盡；'
+             '欲知其詳，按目錄跳至本項，副標題自見。')
+    L.append('')
     L.append('三、**引文**：本稿原文錄主稿（該項所屬之律）之文，四分對照錄四分律之文，他部對照錄該部之文，'
              '皆逐字迻錄，出自各稿 findings，已經程式回錨底本，逐句可覆核。'
              '引文過長者存其要，以「……」標省略；跨段者段前標段號。')
@@ -693,7 +721,9 @@ def build_front():
              f'`S-0001` 至 `S-{_n_abs_body:04d}` 為第二部（按主稿），'
              f'`G1`、`G3`–`G7`／`T1`–`T3` 為第三部歸併組。'
              '項號全書唯一且連續，可徑引作「《五部律差異對照本》D-0450」。'
-             '每項皆有錨點，`D-0450` 與 `[D-0450](#d-0450)` 相通。')
+             '每項皆有錨點，`D-0450` 與 `[D-0450](#d-0450)` 相通。'
+             '第三部歸併組之組員，其主項已具 `S-` 號者不再另編，逕標矩陣編號 `M-####`，'
+             '以免與矩陣之列數相牴。')
     L.append('')
     L.append('八、**與矩陣之關係**：本書為《五部律綜合異同矩陣》之閱讀本。矩陣重證據（五欄有無、逐列可查），'
              '本書重閱讀（按四分篇次、一處一覽）。二者同源，編號可互查：矩陣 `M-####`，本書 `D-####`／`S-####`。')
@@ -710,14 +740,18 @@ def build_front():
              '末條若僅為「判罪輕重不同」一類的分類語，不含新事，則降為項末小字「異在：…」，'
              '以存其目而不贅其文。')
     L.append('')
+    L.append('　　一句之中列舉法目十餘事者（如「二十七門」「十種不名貿易」之屬），'
+             '於「某者：」之下析為數行小列，每行五六目，字句次序一仍其舊，但分行以便尋檢。')
+    L.append('')
     L.append('十、**資料限制**：四分律尼律單提第一至八十六戒僅存戒條列表，緣起從缺；'
              '卷三十八至卷四十九以下諸揵度，間有底本殘脫處，皆據他部對照存其異同。')
     L.append('')
     L.append('十一、**文本處理**：五部原文據大正藏電子文本。底本無 Unicode 之字，舊以組字式'
              '（方括夾注部件）合成，如「木」「奈」合為「柰」、「真」「心」合為「瞋」；'
-             '本書節題與正文一律代以通行字，所據為 CBETA 造字對照表。其字罕見、'
-             '唯存於 Unicode 增補區而通行字體不能顯示者，仍存組字式，惟其中「*」'
-             '改用全角「＊」，以免與 Markdown 之強調標記相混。'
+             '本書節題與正文一律代以通行字，所據為 CBETA 造字對照表。'
+             '五部原文所見組字式共 801 處（121 種），已代通行字 755 處（95 種）；'
+             '其字罕見、唯存於 Unicode 增補區 F、G 而通行字體不能顯示者，餘 46 處（26 種），'
+             '仍存組字式，惟其中「*」改用全角「＊」，以免與 Markdown 之強調標記相混。'
              '標題末之底稿段號已移入「本稿位置」一欄，以免與項號相混。'
              '篇號（000–074）為本書所編之內容序，**非四分律卷次**；篇與卷之對應見附錄三。')
     L.append('')
@@ -737,6 +771,13 @@ def build_front():
     L.append('> 須辨者：白話與原文非逐句對應——譯者或合數段為一，或析一段為數，'
              '今按文意錨定於段，略有參差；其對應未確者寧缺，標「暫從缺」以存疑，'
              '不以甲戒之白話充乙戒。白話但求可讀，考據仍以原文為斷。')
+    L.append('')
+    L.append('十四、**按語**：少數項於「差異說明」之後別出「按語」一段，以與敘事相別。'
+             '差異說明但陳五部之異同，按語則進揭其判準所在：或指明所爭不在有無而在立法之方'
+             '（如隨方毘尼，四分逐事開緣而五分總立一原則），'
+             '或指明所斷本同而判準之名異（如二漿，四分曰殺心、僧祇曰智慧，所指皆「明知而故為」），'
+             '或指明兩比之中一為同事、一非同事（如取籌與樗蒲，前者成罪時點異，後者所斷非同一行）。'
+             '按語為編者所加，非底本所有，亦不改易任何判定；所稱引者皆可覆核原文。')
     L.append('')
     L.append('<a id="front6"></a>'); L.append(''); L.append('### 六、五部律罪名異譯對照')
     L.append('')
@@ -909,7 +950,7 @@ def build_part1(seg_filter=None):
                 for _s2, _r2 in _items:
                     _no2 = D_NO[_r2['id']]
                     _t2 = clean_title(fix_terms(apply_errata(_r2)["title"], _r2["canon"]), _r2["id"])
-                    L.append(f'- [`{_no2}`](#{_no2.lower()})　{esc(_t2)}')
+                    L.append(f'- [`{_no2}`](#{_no2.lower()})　{esc(split_title(_t2, _r2["id"])[0])}')
                 L.append('')
                 L.append('</details>')
                 L.append('')
