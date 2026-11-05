@@ -155,41 +155,56 @@ def main():
                 if _n and (_nm, _n) not in gu_pos:
                     gu_pos[(_nm, _n)] = _p
 
+    MK_MAP = {}
+    _mp = os.path.join(WORK, 'mk_index.json')
+    if os.path.exists(_mp):
+        _raw = json.load(open(_mp, encoding='utf-8'))
+        MK_MAP = {k: ({int(a): b for a, b in v.items()} if isinstance(v, dict) else v)
+                  for k, v in _raw.items()}
+
     fill, ledger = {}, []
     for r in rows:
         need = [k for k in ('vMK', 'vGU') if r.get(k) == '未比']
         if not need:
             continue
-        # 根有：戒條且可定位者，按學處序補有
-        if 'vGU' in need and r.get('lv') == '戒條' and r['id'] in place:
+        fam = i = None
+        if r.get('lv') == '戒條' and r['id'] in place:
             nm = jie_name(*place[r['id']])
-            for fam, pref in FAMS.items():
+            for f0, pref in FAMS.items():
                 if (pref, nm) in rev:
-                    i = rev[(pref, nm)]
-                    j = GU_MAP.get(fam, {}).get(i)
-                    if j and (fam, j) in gu_pos:
-                        _p = gu_pos[(fam, j)]
-                        fill.setdefault(r['id'], {})['vGU'] = {
-                            'v': '有', 'cite': '根有 卷%d' % vol_of(GP, _p),
-                            'term': '學處第%d' % j,
-                            'ctx': GU[max(0, _p - 16):_p + 8]}
+                    fam, i = f0, rev[(pref, nm)]
                     break
-        # 僧祇：查詢詞回檢
-        if 'vMK' in need and r['id'] in MK_OK:
-            for t in query_terms(r):
-                if t in GEN or BAD.search(t):
-                    continue
-                n = MK.count(t)
-                if not (1 <= n <= 12):
-                    continue
-                i = MK.find(t)
-                ctx = MK[max(0, i - 60):i + len(t) + 60]
-                if not RULE.search(ctx):
-                    continue
+        # 根有：按學處序補有
+        if 'vGU' in need and fam:
+            j = GU_MAP.get(fam, {}).get(i)
+            if j and (fam, j) in gu_pos:
+                _p = gu_pos[(fam, j)]
+                fill.setdefault(r['id'], {})['vGU'] = {
+                    'v': '有', 'cite': '根有 卷%d' % vol_of(GP, _p),
+                    'term': '學處第%d' % j,
+                    'ctx': GU[max(0, _p - 16):_p + 8]}
+        # 僧祇：先依戒本對照表；無表可據者，再以查詢詞回檢
+        if 'vMK' in need:
+            j = MK_MAP.get(re.sub(r'^比丘', '', fam), {}).get(i) if fam else None
+            if j:
                 fill.setdefault(r['id'], {})['vMK'] = {
-                    'v': '有', 'cite': '僧祇 卷%d' % vol_of(MP, i),
-                    'term': t, 'ctx': ctx}
-                break
+                    'v': '有', 'cite': '僧祇戒本 第%d' % j,
+                    'term': '戒本第%d' % j, 'ctx': ''}
+            elif r['id'] in MK_OK:
+                for t in query_terms(r):
+                    if t in GEN or BAD.search(t):
+                        continue
+                    n = MK.count(t)
+                    if not (1 <= n <= 12):
+                        continue
+                    i2 = MK.find(t)
+                    ctx = MK[max(0, i2 - 60):i2 + len(t) + 60]
+                    if not RULE.search(ctx):
+                        continue
+                    fill.setdefault(r['id'], {})['vMK'] = {
+                        'v': '有', 'cite': '僧祇 卷%d' % vol_of(MP, i2),
+                        'term': t, 'ctx': ctx}
+                    break
 
     with open(os.path.join(WORK, 'mk_gu_fill.json'), 'w',
               encoding='utf-8', newline='\n') as _f:

@@ -1117,8 +1117,16 @@ def build_part1(seg_filter=None):
                         _no3 = D_NO.get(_r3['id']) or _r3['id']
                         _e3 = apply_errata(_r3)
                         _t3 = clean_title(fix_terms(_e3['title'], _r3['canon']), _r3['id'])
+                        # 一句話差異：取差異說明首句，截 32 字，置於標題與狀態之間
+                        _g3 = _e3.get('diff_full') or ''
+                        _g3 = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', _g3)
+                        _g3 = re.sub(r'\s+', '', _g3.replace('**', '').replace('`', ''))
+                        _g3 = re.split(r'[。；]', _g3)[0]
+                        if len(_g3) > 30:
+                            _g3 = _g3[:30] + '…'
+                        _gap3 = f'　— {esc(_g3)}' if _g3 else ''
                         L.append(f'- [`{_no3}`](#{str(_no3).lower()})　'
-                                 f'{esc(split_title(_t3, _r3["id"])[0])}'
+                                 f'{esc(split_title(_t3, _r3["id"])[0])}{_gap3}'
                                  f'　〔{esc(_r3["canon"])} {_e3.get("st", "")}〕')
                     L.append('')
                     L.append('</details>')
@@ -1471,7 +1479,7 @@ def build_appendix():
              '較按號碼推尋為確。')
     L.append('')
     # 附錄五／六由 tools/build_appendices.py 產出，缺檔時靜默略過
-    for _fn in ('appendix5.md', 'appendix6.md'):
+    for _fn in ('appendix5.md', 'appendix6.md', 'appendix7.md'):
         _ap = os.path.join(BASE, _fn)
         if os.path.exists(_ap):
             L.append(open(_ap, encoding='utf-8').read())
