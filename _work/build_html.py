@@ -352,6 +352,20 @@ body.par main:after{content:""; display:block; clear:both}
   #top{background:#2a2825; color:var(--fg)}
   img{opacity:.92}
 }
+/* ── 首頁檢索 ── */
+.homefind{display:flex; gap:.5rem; flex-wrap:wrap; margin:1rem 0 .4rem}
+.homefind input[type=search]{flex:1 1 320px; min-width:200px; font:inherit; font-size:15px;
+  padding:.55rem .8rem; border:1px solid var(--line); border-radius:4px;
+  background:#fff; color:var(--fg)}
+.homefind input[type=search]:focus{outline:2px solid var(--accent2); outline-offset:1px}
+.homefind button{font:inherit; font-size:14px; padding:.55rem 1.1rem; cursor:pointer;
+  border:1px solid var(--accent); border-radius:4px; background:var(--accent); color:#fff}
+.homefind button:hover{background:var(--accent2); border-color:var(--accent2)}
+.hint{font-size:13px; color:var(--fg2); margin:.1rem 0 1.2rem; line-height:1.75}
+.hint code{background:var(--code); padding:.05rem .3rem; border-radius:2px}
+@media (prefers-color-scheme: dark){
+  .homefind input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
+}
 /* ── 窄屏 ── */
 @media(max-width:1100px){
   nav{display:none}
@@ -686,6 +700,17 @@ JS = r"""
       if (e.key === 'Enter'){ e.preventDefault(); run(true); }
       if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
     });
+
+    // 由首頁表單 ?q= 帶入，自動執行一次（不必再按 Enter）
+    (function(){
+      var m = (location.search || '').match(/[?&]q=([^&]*)/);
+      if (!m) return;
+      var q0 = '';
+      try { q0 = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err){ return; }
+      if (!q0) return;
+      fbox.value = q0;
+      setTimeout(function(){ run(false); }, 260);
+    })();
   }
   // 列印前自動展開全部折疊（CSS 對 closed details 的內容未必生效），列印後復原
   (function(){
@@ -955,6 +980,18 @@ def build_index():
 <h1>五部律差異對照本</h1>
 <blockquote><p><strong>以《四分律》為閱讀主線，一冊在手，遍知五部之異同。</strong></p>
 <p>讀四分律至某篇某戒，翻至本書同篇，即見其餘四部於此處有何增、減、開、異。</p></blockquote>
+
+<h2>全書檢索</h2>
+<form class="homefind" action="五部律差異對照本.html" method="get" role="search">
+  <input type="search" name="q" id="homeq" required
+    placeholder="例：摩那埵 波逸提　或　迦絺那 -四分"
+    aria-label="全書檢索：空白分隔多詞，減號排除，引號片語">
+  <button type="submit">搜尋</button>
+</form>
+<p class="hint">支援<strong>多關鍵字</strong>（空白分隔，須全部命中）、
+<strong>排除</strong>（<code>-四分</code>）、<strong>片語</strong>（<code>"非親里"</code>），
+並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）。
+送出後於合冊檢索並跳至首處；合冊較大，首次載入需數秒。</p>
 
 <h2>五部律</h2>
 <table>
