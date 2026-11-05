@@ -300,30 +300,38 @@ def build6():
         e = errata.apply(r)
         if e['st'] == 'B' or (KEY.search(e.get('diff_full') or '') and e.get('lv') == '戒條'):
             picked.append(e)
-    # 僧祇／根有補比（見 tools/fill_mk_gu.py）：只補「有」，附卷次與檢得詞
+    # 僧祇／根有／十誦補比（見 tools/fill_mk_gu.py）：只補「有」，附卷次與檢得詞
     fp = os.path.join(WORK, 'mk_gu_fill.json')
     FILL = json.load(open(fp, encoding='utf-8')) if os.path.exists(fp) else {}
+    n_mk = sum(1 for v in FILL.values() if 'vMK' in v)
+    n_gu = sum(1 for v in FILL.values() if 'vGU' in v)
+    n_s10 = sum(1 for v in FILL.values() if 'v10' in v)
+    n_all = sum(len(v) for v in FILL.values())
     L = ['### 附錄六　五部律開遮持犯差異表（差異導向）', '',
-         '> **範圍**：只列「有差異可說」者——同條開緣（狀態 B）或差異說明涉及'
+         '> **範圍**：只列「有差異可說」者——同條開緣，或差異說明涉及'
          '不犯／開緣／罪名輕重之戒條項。此表**不是**逐戒全表；'
          '空白一律為「未比」（未經比勘），**非謂該部無此開緣**（凡例六）。',
          '>',
-         '> **讀法**：「有／無」記該部於此項是否見其制；欲知其實，循「證據」欄'
-         '（所屬律卷檔#項序）回矩陣，再按附錄四之法反查本書正文。',
+         '> **讀法**：「有／無」記該部於此項是否見其制；「證據」欄首列項號'
+         '（如 D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之法'
+         '反查本書正文。',
          '>',
-         '> **本輪補比**：僧祇、根有兩欄原多「未比」。今補 **%d** 格為「有」'
-         '（僧祇 %d、根有 %d）：根有依其「學處第N」編次與四分戒序對位，'
+         '> **本輪補比**：僧祇、根有、十誦三欄原多「未比」。今補 **%d** 格為「有」'
+         '（僧祇 %d、根有 %d、十誦 %d）：根有依其「學處第N」編次與四分戒序對位，'
          '僧祇則以查詢詞回原典檢得制戒語者為限；皆附卷次。'
-         '**未檢得者仍標「未比」，不據以斷無**；補比明細見'
-         '`_work/審閱/僧祇根有補比.csv`。' % (
-             sum(len(v) for v in FILL.values()),
-             sum(1 for v in FILL.values() if 'vMK' in v),
-             sum(1 for v in FILL.values() if 'vGU' in v)),
+         '**未檢得者仍標「未比」，不據以斷無**。' % (n_all, n_mk, n_gu, n_s10),
+         '>',
+         '> **「三律所無」之讀法**：差異說明中云「三律所無」者，指該項**細節**'
+         '（如某種判法、某項開緣）為他三部所無，非謂此戒不存在；'
+         '故該部欄仍作「有」。此為本表最易誤讀處，特揭於此。',
+         '>',
+         '> **補比明細與本表之關係**：附錄六之一、之二列全書補比諸項，'
+         '本表只取其中有差異可說者，故項號不必盡見於上表。',
          '',
-         '| 事由 | 狀態 | 四分 | 五分 | 十誦 | 僧祇 | 根有 | 差異類型 | 證據 |',
+         '| 項號 | 事由 | 四分 | 五分 | 十誦 | 僧祇 | 根有 | 差異類型 | 證據 |',
          '|---|---|---|---|---|---|---|---|---|']
     for e in picked:
-        t = (e.get('title') or '').replace('|', '／')[:38]
+        t = (e.get('title') or '').replace('|', '／')
         f = FILL.get(e['id'], {})
         v = [e.get(k, '') for k in ('v4', 'v5', 'v10', 'vMK', 'vGU')]
         v = ['未比' if x == '未比' else x for x in v]
@@ -331,41 +339,64 @@ def build6():
             if k in f:
                 v[i] = f[k]['v']
         dt = {'A': '同條增異', 'B': '同條開緣', 'C': '四分所無', 'D': '同條減略'}.get(e['st'], e['st'])
-        ev = '%s %s#%s' % (e['canon'], e['unit'], e['no'])
-        for k, nm in (('vMK', '僧祇'), ('vGU', '根有')):
+        ev = '%s　%s %s#%s' % (e['id'], e['canon'], e['unit'], e['no'])
+        # 附四分出處（ref4 之首段），免「五部皆有何以只列一處」
+        m4 = re.search(r'(\d{3})_[^`]*\.txt`?\s*第?(\d+)段', e.get('ref4') or '')
+        if m4:
+            ev += '；四分 %s 段%s' % (m4.group(1), m4.group(2))
+        for k, nm in (('vMK', '僧祇'), ('vGU', '根有'), ('v10', '十誦')):
             if k in f:
-                ev += '；%s「%s」' % (f[k]['cite'], f[k]['term'])
+                cite, term = f[k]['cite'], f[k].get('term') or ''
+                # 檢得詞與出處同義者不再重複（舊版「僧祇戒本 第1「戒本第1」」）
+                _t = re.sub(r'\s+', '', term)
+                _c = re.sub(r'\s+', '', cite)
+                if term and _t not in _c:
+                    ev += '；%s「%s」' % (cite, term)
+                else:
+                    ev += '；%s' % cite
         L.append('| %s | %s | %s | %s | %s | %s | %s | %s | %s |' %
-                 (t, e['st'], *v, dt, ev))
+                 (e['id'], t, *v, dt, ev))
     L += ['', '> 共 **%d** 列。表內「未比」不得讀作「無」；'
           '若欲逐戒全表（每戒 × 五部 × 制／開／犯／不犯），'
           '須另立資料層，非本次差異項抽取所能任。' % len(picked), '']
 
-    # 補比一覽：僧祇 22 格全列；根有僅列分佈
+    # 補比一覽
     if FILL:
         mk = [(mid, d['vMK']) for mid, d in sorted(FILL.items()) if 'vMK' in d]
         gu = [(mid, d['vGU']) for mid, d in sorted(FILL.items()) if 'vGU' in d]
+        s10 = [(mid, d['v10']) for mid, d in sorted(FILL.items()) if 'v10' in d]
         idx = {r['id']: r for r in rows}
-        L += ['#### 附錄六之一　僧祇・根有補比', '',
-              '> 只補「有」，不補「無」。根有 %d 格，依「學處第N」定位；'
-              '僧祇 %d 格，逐條覆核上下文確為制戒語者。' % (len(gu), len(mk)), '']
+        L += ['#### 附錄六之一　僧祇・十誦補比明細', '',
+              '> 只補「有」，不補「無」。僧祇 %d 格、十誦 %d 格；'
+              '僧祇逐條覆核上下文確為制戒語者，十誦依戒本對位。' % (len(mk), len(s10)), '']
         if mk:
-            L += ['**僧祇（%d 格）**' % len(mk), '',
+            L += ['#### 附錄六之一甲　僧祇補比明細（%d 格）' % len(mk), '',
                   '| 項號 | 事由 | 出處 | 檢得詞 |', '|---|---|---|---|']
             for mid, d in mk:
                 r = idx[mid]
                 L.append('| %s | %s | %s | %s |' %
-                         (mid, (r.get('title') or '')[:30], d['cite'], d['term']))
+                         (mid, (r.get('title') or '').replace('|', '／'),
+                          d['cite'], d.get('term') or ''))
+            L.append('')
+        if s10:
+            L += ['#### 附錄六之一乙　十誦補比明細（%d 格）' % len(s10), '',
+                  '| 項號 | 事由 | 出處 |', '|---|---|---|']
+            for mid, d in s10:
+                r = idx[mid]
+                L.append('| %s | %s | %s |' %
+                         (mid, (r.get('title') or '').replace('|', '／'), d['cite']))
             L.append('')
         if gu:
             import collections as _c
-            cc = _c.Counter(d['cite'].rsplit(' ', 1)[-1] for _, d in gu)
-            L += ['**根有（%d 格，依卷分佈）**' % len(gu), '',
-                  '| 卷 | 格數 |', '|---|---|']
+            cc = _c.Counter(d['cite'] for _, d in gu)
+            L += ['#### 附錄六之二　根有補比卷次／學處統計', '',
+                  '> 根有 %d 格，依「學處第N」定位：比丘按卷次，'
+                  '比丘尼按學處序（根有尼律學處自成一系）。' % len(gu), '',
+                  '| 卷次／學處 | 格數 |', '|---|---|']
             for k in sorted(cc):
                 L.append('| %s | %d |' % (k, cc[k]))
-            L += ['', '> 逐格明細（項號、學處序、上下文）見 `_work/審閱/僧祇根有補比.csv`。', '']
-    print('附錄六', len(picked), '列；補比', sum(len(v) for v in FILL.values()), '格')
+            L.append('')
+    print('附錄六', len(picked), '列；補比', n_all, '格')
     return '\n'.join(L)
 
 

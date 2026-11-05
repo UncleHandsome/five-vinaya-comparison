@@ -66,7 +66,7 @@ main{padding:2rem 2.2rem 5rem}
 .tools .count{margin-left:auto; font-size:12px; color:var(--fg2); white-space:nowrap}
 .tools button{font:inherit; font-size:12px; padding:.3rem .6rem; cursor:pointer;
   border:1px solid var(--line); border-radius:3px; background:#fff; color:var(--fg)}
-.scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
+.scroll{overflow:auto; max-height:80vh; -webkit-overflow-scrolling:touch;
   border:1px solid var(--line); border-radius:4px}
 .tbl-wrap table{font-size:13px; background:#fff; min-width:860px}
 .tbl-wrap th,.tbl-wrap td{border-bottom:1px solid var(--line); padding:.42rem .6rem;
@@ -380,6 +380,8 @@ def build_page(cfg):
                     cls.append('bad')
                 if re.match(r'^\d{3}-', plain(v)):
                     cls.append('nowrap')
+                if re.match(r'^[\d,]+$', plain(v)):
+                    cls.append('num')
                 out.append(f'<td{" class=\"" + " ".join(cls) + "\"" if cls else ""}>{esc(v)}</td>')
             out.append('</tr>')
         out.append('</tbody>')
