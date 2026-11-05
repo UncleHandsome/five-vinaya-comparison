@@ -4,15 +4,16 @@
 一鍵重建全部成品。
 
 順序有依賴，不可調換：
-  1. 附錄表資料     ← tools/build_appendices.py 產出 appendix5/6.md
-  2. 對照本 MD      ← matrix_built.json + _locate.json + originals_index.json（並讀附錄表）
-  3. 矩陣 MD        ← matrix_built.json（套 errata）
-  4. 矩陣 CSV       ← 套 errata 至既有 CSV
-  5. 對照本 HTML    ← 對照本 MD
-  6. 矩陣 HTML      ← 矩陣 MD
-  7. 專題表 HTML    ← tools/build_tables_html.py 讀 appendix5/6.md
-  8. PDF 分卷       ← 對照本 MD
-  9. PDF 合冊       ← 對照本 MD
+  1. 戒名表         ← tools/build_jie_names.py 產出 jie_names.json
+  2. 附錄表資料     ← tools/build_appendices.py 產出 appendix5/6.md
+  3. 對照本 MD      ← matrix_built.json + _locate.json + originals_index.json（並讀附錄表）
+  4. 矩陣 MD        ← matrix_built.json（套 errata）
+  5. 矩陣 CSV       ← 套 errata 至既有 CSV
+  6. 對照本 HTML    ← 對照本 MD
+  7. 矩陣 HTML      ← 矩陣 MD
+  8. 專題表 HTML    ← tools/build_tables_html.py 讀 appendix5/6.md
+  9. PDF 分卷       ← 對照本 MD
+ 10. PDF 合冊       ← 對照本 MD
 
 用法：
   python rebuild_all.py             # 全部
@@ -26,6 +27,7 @@ ROOT = os.path.dirname(W)
 TOOLS = os.path.join(ROOT, 'tools')
 
 STEPS = [
+    ('戒名表', [sys.executable, os.path.join(TOOLS, 'build_jie_names.py')]),
     ('附錄表資料', [sys.executable, os.path.join(TOOLS, 'build_appendices.py')]),
     ('對照本 MD', [sys.executable, 'build_compare.py']),
     ('矩陣 MD', [sys.executable, 'matrix_md.py']),

@@ -21,10 +21,42 @@ _JIE_PATH = os.path.join(BASE, 'jie_names.json')
 JIE_NAMES = json.load(open(_JIE_PATH, encoding='utf-8')) if os.path.exists(_JIE_PATH) else {}
 
 
-def jie_family(no):
-    """篇號 → 簡稱表之聚類鍵。目前只登錄三十捨墮（篇 008–012）。"""
+# 尼單提有八節，底本戒末標作「(十)」「(十一)」而無「竟」字，切節時合為一節，
+# 致前一戒（掘地、壞生種等）隱於後一戒名下。此處不改節界（免動錨點與白話），
+# 僅令標籤併列所含二戒，以存其實。
+JIE_MULTI = {(31, 11), (31, 21), (31, 31), (32, 7), (32, 27), (32, 92),
+             (33, 1), (35, 41)}
+
+
+def jie_family(no, u=None):
+    """篇號 → 簡稱表之聚類鍵。僅登錄「一戒一節」之聚類。
+
+    眾學（篇 022–024）在本書合為 58 節、滅諍（篇 025）合為 1 節、
+    尼提舍尼合為 2 節，一節含多戒，故不登錄，仍用原節題，免以單一戒名冠多戒。
+    篇 021 前八節為單提 83–90、段 66 起為四提舍尼；篇 037 末二節為尼提舍尼。
+    """
+    if 1 <= no <= 2:
+        return '比丘波羅夷'
+    if 3 <= no <= 6:
+        return '比丘僧殘'
+    if no == 7:
+        return '比丘不定'
     if 8 <= no <= 12:
-        return '捨墮'
+        return '比丘捨墮'
+    if 13 <= no <= 20:
+        return '比丘單提'
+    if no == 21:
+        return '比丘單提' if (u and u.get('a', 0) <= 65) else '比丘提舍尼'
+    if no == 26:
+        return '尼波羅夷'
+    if 27 <= no <= 28:
+        return '尼僧殘'
+    if 29 <= no <= 30:
+        return '尼捨墮'
+    if 31 <= no <= 36:
+        return '尼單提'
+    if no == 37:
+        return '尼單提' if (u and u.get('a', 0) <= 140) else None
     return None
 
 # ---------- 載入 ----------
@@ -793,10 +825,17 @@ def unit_label(u, no=None):
     （如篇 010 第十九戒 →「十九、貿錢寶戒」）。未登錄者仍用原節題。
     """
     if no is not None:
-        fam = jie_family(no)
-        cn = (u.get('cn') or '').strip()
-        if fam and cn and (fam + '|' + cn) in JIE_NAMES:
-            return JIE_NAMES[fam + '|' + cn]
+        fam = jie_family(no, u)
+        if fam:
+            # 尼單提用續編號 num（戒序 1–178）；比丘用 cn 轉數字
+            seq = u.get('num') or _cn2int((u.get('cn') or '').strip())
+            if seq and (no, u['a']) in JIE_MULTI:
+                _a = JIE_NAMES.get(fam + '|' + str(seq - 1))
+                _b = JIE_NAMES.get(fam + '|' + str(seq))
+                if _a and _b:
+                    return _a + '／' + _b
+            if seq and (fam + '|' + str(seq)) in JIE_NAMES:
+                return JIE_NAMES[fam + '|' + str(seq)]
     if u.get('num'):
         h = f'第{_cn_num(u["num"])}戒'
         if u.get('name'):
