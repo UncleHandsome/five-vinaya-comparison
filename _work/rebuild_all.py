@@ -4,13 +4,15 @@
 一鍵重建全部成品。
 
 順序有依賴，不可調換：
-  1. 對照本 MD      ← matrix_built.json + _locate.json + originals_index.json
-  2. 矩陣 MD        ← matrix_built.json（套 errata）
-  3. 矩陣 CSV       ← 套 errata 至既有 CSV
-  4. 對照本 HTML    ← 對照本 MD
-  5. 矩陣 HTML      ← 矩陣 MD
-  6. PDF 分卷       ← 對照本 MD
-  7. PDF 合冊       ← 對照本 MD
+  1. 附錄表資料     ← tools/build_appendices.py 產出 appendix5/6.md
+  2. 對照本 MD      ← matrix_built.json + _locate.json + originals_index.json（並讀附錄表）
+  3. 矩陣 MD        ← matrix_built.json（套 errata）
+  4. 矩陣 CSV       ← 套 errata 至既有 CSV
+  5. 對照本 HTML    ← 對照本 MD
+  6. 矩陣 HTML      ← 矩陣 MD
+  7. 專題表 HTML    ← tools/build_tables_html.py 讀 appendix5/6.md
+  8. PDF 分卷       ← 對照本 MD
+  9. PDF 合冊       ← 對照本 MD
 
 用法：
   python rebuild_all.py             # 全部
@@ -20,13 +22,17 @@
 import os, subprocess, sys, time
 
 W = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(W)
+TOOLS = os.path.join(ROOT, 'tools')
 
 STEPS = [
+    ('附錄表資料', [sys.executable, os.path.join(TOOLS, 'build_appendices.py')]),
     ('對照本 MD', [sys.executable, 'build_compare.py']),
     ('矩陣 MD', [sys.executable, 'matrix_md.py']),
     ('矩陣 CSV', [sys.executable, 'fix_csv.py']),
     ('對照本 HTML', [sys.executable, 'build_html.py']),
     ('矩陣 HTML', [sys.executable, 'build_matrix_html.py']),
+    ('專題表 HTML', [sys.executable, os.path.join(TOOLS, 'build_tables_html.py')]),
     ('PDF 分卷', [sys.executable, 'build_pdf.py']),
     ('PDF 合冊', [sys.executable, '-c',
                   "import build_pdf as P, os, shutil;"

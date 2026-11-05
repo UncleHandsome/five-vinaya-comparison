@@ -834,6 +834,17 @@ def build_index():
 <td>每列一項，五欄記各律有無。可按狀態、所屬律、層級篩選，適合<strong>查證與統計</strong>。</td></tr>
 </table>
 
+<h2>專題表（可搜尋、篩選、排序）</h2>
+<table>
+<tr><th>表</th><th>內容</th></tr>
+<tr><td><a href="比丘比丘尼戒對照表.html"><strong>比丘／比丘尼戒對照表</strong></a></td>
+<td>只列<strong>共戒</strong>：對位 39 組，逐組標罪名異同（如摩觸戒比丘結僧殘、比丘尼結波羅夷），
+並附眾學法全 58 目。可依罪屬、罪名異同篩選。原為附錄五。</td></tr>
+<tr><td><a href="五部律開遮持犯表.html"><strong>五部律開遮持犯表</strong></a></td>
+<td>差異導向，657 列，五欄記各律有無；可依狀態、差異類型、各部欄篩選，點表頭排序。
+空白一律為「未比」（未經比勘），<strong>非謂該部無此開緣</strong>。原為附錄六。</td></tr>
+</table>
+
 <h2>怎麼用</h2>
 <ol>
 <li><strong>讀律時查</strong>：讀四分律至某篇，翻至本書同篇。每篇先有「篇旨」述其內容，次依四分段號列差異。</li>
@@ -864,6 +875,9 @@ def build_index():
            '<a href="index.html">目錄與說明</a>'
            '<a href="五部律差異對照本.html">對照本合冊</a>'
            '<a href="五部律綜合異同矩陣.html">異同矩陣</a></div>'
+           '<div class="grp"><b>專題表</b>'
+           '<a href="比丘比丘尼戒對照表.html">比丘／比丘尼戒對照</a>'
+           '<a href="五部律開遮持犯表.html">開遮持犯表</a></div>'
            '<div class="grp"><b>分卷</b>'
            + ''.join(f'<a href="{h}">{j}</a>' for j, h, _ in rows)
            + '</div>')
