@@ -81,12 +81,20 @@ def main():
         })
 
     idx = {
-        '波羅夷': {i: i for i in range(1, 5)},
-        '僧殘': {i: i for i in range(1, 11)},
-        '捨墮': MK_SHEDUO,
-        '單提': {i: j for i, j in MK_DAN.items() if j},
-        '來源': 'T22 no. 1426 摩訶僧祇律大比丘戒本',
+        '比丘波羅夷': {i: i for i in range(1, 5)},
+        '比丘僧殘': {i: i for i in range(1, 11)},
+        '比丘捨墮': MK_SHEDUO,
+        '比丘單提': {i: j for i, j in MK_DAN.items() if j},
+        '來源': 'T22 no. 1426 摩訶僧祇律大比丘戒本／T22 no. 1427 比丘尼戒本',
     }
+    # 尼戒：波羅夷 8、提舍尼 8 同序；單提用 ni_dan_map.json（AI 對位、已抽核）
+    idx['尼波羅夷'] = {i: i + 1 for i in range(1, 9)}
+    idx['尼提舍尼'] = {i: 200 + i for i in range(1, 9)}
+    _np = os.path.join(WORK, 'ni_dan_map.json')
+    if os.path.exists(_np):
+        _nd = json.load(open(_np, encoding='utf-8'))
+        idx['尼單提'] = {int(k): int(v) for k, v in _nd['map'].items()}
+
     with open(os.path.join(WORK, 'mk_index.json'), 'w', encoding='utf-8',
               newline='\n') as f:
         json.dump(idx, f, ensure_ascii=False, indent=1)

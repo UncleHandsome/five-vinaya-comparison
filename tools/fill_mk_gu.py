@@ -137,8 +137,8 @@ def main():
                         return nm
         return None
 
-    FAMS = {'波羅夷': '比丘波羅夷', '僧殘': '比丘僧殘', '捨墮': '比丘捨墮',
-            '單提': '比丘單提', '提舍尼': '比丘提舍尼'}
+    FAMS = ['比丘波羅夷', '比丘僧殘', '比丘捨墮', '比丘單提', '比丘提舍尼',
+            '尼波羅夷', '尼僧殘', '尼捨墮', '尼單提', '尼提舍尼']
 
     MK, MP = load('摩訶僧祇律', '摩訶僧祇律')
     GU, GP = load('根本說一切有部毘奈耶', '根本說一切有部毘奈耶')
@@ -170,25 +170,26 @@ def main():
         fam = i = None
         if r.get('lv') == '戒條' and r['id'] in place:
             nm = jie_name(*place[r['id']])
-            for f0, pref in FAMS.items():
-                if (pref, nm) in rev:
-                    fam, i = f0, rev[(pref, nm)]
+            for f0 in FAMS:
+                if (f0, nm) in rev:
+                    fam, i = f0, rev[(f0, nm)]
                     break
         # 根有：按學處序補有
-        if 'vGU' in need and fam:
-            j = GU_MAP.get(fam, {}).get(i)
-            if j and (fam, j) in gu_pos:
-                _p = gu_pos[(fam, j)]
+        if 'vGU' in need and fam and fam.startswith('比丘'):
+            _c = fam.replace('比丘', '')
+            j = GU_MAP.get(_c, {}).get(i)
+            if j and (_c, j) in gu_pos:
+                _p = gu_pos[(_c, j)]
                 fill.setdefault(r['id'], {})['vGU'] = {
                     'v': '有', 'cite': '根有 卷%d' % vol_of(GP, _p),
                     'term': '學處第%d' % j,
                     'ctx': GU[max(0, _p - 16):_p + 8]}
         # 僧祇：先依戒本對照表；無表可據者，再以查詢詞回檢
         if 'vMK' in need:
-            j = MK_MAP.get(re.sub(r'^比丘', '', fam), {}).get(i) if fam else None
+            j = MK_MAP.get(fam, {}).get(i) if fam else None
             if j:
                 fill.setdefault(r['id'], {})['vMK'] = {
-                    'v': '有', 'cite': '僧祇戒本 第%d' % j,
+                    'v': '有', 'cite': ('僧祇尼戒本 第%d' if fam.startswith('尼') else '僧祇戒本 第%d') % j,
                     'term': '戒本第%d' % j, 'ctx': ''}
             elif r['id'] in MK_OK:
                 for t in query_terms(r):
