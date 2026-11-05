@@ -16,6 +16,17 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 SIFEN_DIR = os.path.join(BASE, 'sifen')
 PLAIN_JSON = os.path.join(BASE, 'sifen_plain.json')
 
+# 戒條正式簡稱表（側邊欄與節題共用）。缺檔時靜默退化為原節題，不補造。
+_JIE_PATH = os.path.join(BASE, 'jie_names.json')
+JIE_NAMES = json.load(open(_JIE_PATH, encoding='utf-8')) if os.path.exists(_JIE_PATH) else {}
+
+
+def jie_family(no):
+    """篇號 → 簡稱表之聚類鍵。目前只登錄三十捨墮（篇 008–012）。"""
+    if 8 <= no <= 12:
+        return '捨墮'
+    return None
+
 # ---------- 載入 ----------
 SEG = {}      # 篇號 -> [(段號, 文字), ...]
 TITLE = {}    # 篇號 -> 篇題（取自檔名，如「衣揵度之二」）
@@ -775,8 +786,17 @@ def _title_glyph(s):
     return re.sub(r'[，、；：]$', '', s)
 
 
-def unit_label(u):
-    """節的顯示名（不含段範圍）"""
+def unit_label(u, no=None):
+    """節的顯示名（不含段範圍）。
+
+    no 為篇號；若該聚類已登錄正式簡稱，則優先回傳之
+    （如篇 010 第十九戒 →「十九、貿錢寶戒」）。未登錄者仍用原節題。
+    """
+    if no is not None:
+        fam = jie_family(no)
+        cn = (u.get('cn') or '').strip()
+        if fam and cn and (fam + '|' + cn) in JIE_NAMES:
+            return JIE_NAMES[fam + '|' + cn]
     if u.get('num'):
         h = f'第{_cn_num(u["num"])}戒'
         if u.get('name'):

@@ -1095,7 +1095,7 @@ def build_part1(seg_filter=None):
             _lo, _hi = _us[0]['a'], _us[-1]['b']
             for _u in _us:
                 _grp = [(s, r) for s, r in _items if _u['a'] <= s <= _u['b']]
-                _lbl = src_label(_u)
+                _lbl = src_label(_u, n)
                 _h = f'##### {_lbl}' if _lbl else f'##### 段{_u["a"]}–{_u["b"]}'
                 L.append(f'<a id="u{n:03d}-{_u["a"]}"></a>')
                 L.append('')
