@@ -259,6 +259,27 @@ def merge_tail(lines, max_len=14, cap=120):
     return lines
 
 
+def merge_short_parallel(lines, max_len=12, cap=80):
+    """連續的極短並列條併為一條，免滿篇單行碎句。
+
+    如「四分律舉八種。」「五分律舉四種。」本是並列舉數，各占一行則散；
+    併為「四分律舉八種；五分律舉四種。」較便掃讀。
+    結論句（故、此、是、所異…）不併，以免把收束語黏進前一事。
+    """
+    out = []
+    for s in lines:
+        if (out
+                and len(re.sub(r'\W', '', out[-1])) <= max_len
+                and len(re.sub(r'\W', '', s)) <= max_len
+                and out[-1].endswith('。') and s.endswith('。')
+                and len(out[-1]) + len(s) <= cap
+                and not re.match(r'^(故|此|是|所異|按|然|其)', s)):
+            out[-1] = out[-1][:-1] + '；' + s
+        else:
+            out.append(s)
+    return out
+
+
 RE_LIST_LEAD = re.compile(r'^(?P<lead>[^：，。；]{2,16})：(?P<body>[^。；]+)。$')
 
 
@@ -329,6 +350,7 @@ def diff_lines(row, bold=True, expand=True, limit=110):
 
     lines = merge_topic(lines)
     lines = merge_tail(lines)
+    lines = merge_short_parallel(lines)
 
     if bold:
         out_b, prev = [], None

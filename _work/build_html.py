@@ -14,7 +14,26 @@
   python build_html.py            # 生成合冊 + 分卷 + 索引頁
   python build_html.py --single   # 只生成合冊
 """
-import os, re, subprocess, sys, json, html as htmlmod
+import os, re, subprocess, sys, json, glob, shutil, html as htmlmod
+
+
+def _pandoc_exe():
+    """找 pandoc。WinGet 升級後 PATH 常仍指舊版空目錄，故加一層搜尋。"""
+    p = shutil.which('pandoc')
+    if p:
+        return p
+    pats = [
+        os.path.expandvars(
+            r'%LOCALAPPDATA%\Microsoft\WinGet\Packages'
+            r'\JohnMacFarlane.Pandoc_*\pandoc-*\pandoc.exe'),
+        r'C:\Program Files\Pandoc\pandoc.exe',
+        r'C:\ProgramData\chocolatey\bin\pandoc.exe',
+    ]
+    for pat in pats:
+        hits = sorted(glob.glob(pat))
+        if hits:
+            return hits[-1]        # 取版號最大者
+    return 'pandoc'                # 讓原 FileNotFoundError 如實浮出
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -655,7 +674,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 
     # pandoc：gfm → html5 片段（不帶 standalone，我們自己包）
     p = subprocess.run(
-        ['pandoc', '-f', 'gfm', '-t', 'html5', '--no-highlight'],
+        [_pandoc_exe(), '-f', 'gfm', '-t', 'html5', '--no-highlight'],
         input=md_text.encode('utf-8'), capture_output=True
     )
     if p.returncode != 0:

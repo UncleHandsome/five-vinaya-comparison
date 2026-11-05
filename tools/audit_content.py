@@ -62,7 +62,16 @@ def load_pools():
     for p in sorted(glob.glob(os.path.join(WORK, 'sifen', '*.txt'))):
         extra.append(open(p, encoding='utf-8', errors='ignore').read())
     pools['四分'] += _norm(''.join(extra))
-    pools['*'] = ''.join(pools[k] for k in CANON_DIR)
+    pools['原典'] = ''.join(pools[k] for k in CANON_DIR)
+    # 凡例三：本稿原文與他部對照錄自各稿 findings 去重合冊，非直接取自整卷原典。
+    # 故回查池必須含稿本層，否則會把「稿本節引」誤報為誤引（先導掃描曾誤報 186 筆）。
+    draft = []
+    for pat in ('02_去重稿/*.md', '_work/findings/*.md', '_work/findings_ss/*.md',
+                '_work/findings_mk/*.md', '_work/findings_gu/*.md'):
+        for p in sorted(glob.glob(os.path.join(ROOT, pat))):
+            draft.append(open(p, encoding='utf-8', errors='ignore').read())
+    pools['稿本'] = _norm(''.join(draft))
+    pools['*'] = pools['原典'] + pools['稿本']
     return pools
 
 
