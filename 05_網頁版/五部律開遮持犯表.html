@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>五部律開遮持犯表　｜　五部律差異對照本</title>
 <meta name="description" content="差異導向之開遮持犯一覽。原為《五部律差異對照本》附錄六。">
 <meta name="citation_title" content="五部律開遮持犯表">
@@ -280,8 +280,8 @@ body.par main:after{content:""; display:block; clear:both}
 }
 
 
-/* ── 專題表頁 ── */
-main{max-width:1180px; margin:0 auto; padding:2rem 2.2rem 5rem}
+/* ── 專題表頁（只補共用樣式不足之處，不重複宣告 main／table） ── */
+main{padding:2rem 2.2rem 5rem}
 .tbl-wrap{margin:1.4rem 0 2.4rem}
 .tbl-wrap h2{margin:0 0 .2rem; font-size:20px; color:var(--fg)}
 .tbl-wrap .note{font-size:13px; color:var(--fg2); margin:.2rem 0 .8rem; line-height:1.7}
@@ -296,35 +296,45 @@ main{max-width:1180px; margin:0 auto; padding:2rem 2.2rem 5rem}
   border:1px solid var(--line); border-radius:3px; background:#fff; color:var(--fg)}
 .scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
   border:1px solid var(--line); border-radius:4px}
-table{border-collapse:collapse; width:100%; font-size:13px; background:#fff}
-th,td{border-bottom:1px solid var(--line); padding:.42rem .6rem; text-align:left;
-  vertical-align:top; line-height:1.55}
-th{background:#f0ece2; color:var(--fg); font-weight:600; white-space:nowrap;
+.tbl-wrap table{font-size:13px; background:#fff; min-width:860px}
+.tbl-wrap th,.tbl-wrap td{border-bottom:1px solid var(--line); padding:.42rem .6rem;
+  text-align:left; vertical-align:top; line-height:1.55}
+.tbl-wrap th{background:#f0ece2; color:var(--fg); font-weight:600; white-space:nowrap;
   position:sticky; top:0; cursor:pointer; user-select:none}
-th:hover{background:#e8e2d4}
-th.sorted::after{content:' ▲'; font-size:10px; color:var(--accent)}
-th.sorted.desc::after{content:' ▼'}
-tbody tr:hover{background:#faf6ec}
-tbody tr[hidden]{display:none}
-td.num{text-align:right; white-space:nowrap}
-td.bad{color:#a33; font-weight:600}
+.tbl-wrap th:hover{background:#e8e2d4}
+.tbl-wrap th.sorted::after{content:' ▲'; font-size:10px; color:var(--accent)}
+.tbl-wrap th.sorted.desc::after{content:' ▼'}
+.tbl-wrap tbody tr:hover{background:#faf6ec}
+.tbl-wrap tbody tr[hidden]{display:none}
+.tbl-wrap tfoot td{background:#f7f3e9; font-weight:600; border-top:2px solid var(--line)}
+.tbl-wrap td.bad{color:#a33; font-weight:600}
+.tbl-wrap td.nowrap{white-space:nowrap}
+.tbl-wrap td:last-child{min-width:7.5em}
+.tbl-wrap caption{caption-side:top; text-align:left; font-size:12px; color:var(--fg2);
+  padding:.2rem .1rem .5rem}
 .home{display:inline-block; margin:0 0 1rem; font-size:13px; color:var(--accent)}
-@media print{.tools{display:none} th{position:static} .scroll{overflow:visible}}
+@media print{
+  .tools{display:none} th{position:static} .scroll{overflow:visible}
+  /* 表格須能跨頁；只禁單列被切斷 */
+  .tbl-wrap tr{break-inside:avoid; page-break-inside:avoid}
+  .tbl-wrap thead{display:table-header-group}
+}
 @media (prefers-color-scheme: dark){
   .tools{background:#1e1d1b; border-color:var(--line)}
   .tools input[type=search],.tools select,.tools button{background:#232120; color:var(--fg);
     border-color:var(--line)}
-  table{background:#1a1918}
-  th{background:#26241f}
-  th:hover{background:#302d27}
-  tbody tr:hover{background:#242220}
-  td,th{border-bottom-color:var(--line)}
-  td.bad{color:#e08a7a}
+  .tbl-wrap table{background:#1a1918}
+  .tbl-wrap th{background:#26241f}
+  .tbl-wrap th:hover{background:#302d27}
+  .tbl-wrap tbody tr:hover{background:#242220}
+  .tbl-wrap tfoot td{background:#242220}
+  .tbl-wrap td,.tbl-wrap th{border-bottom-color:var(--line)}
+  .tbl-wrap td.bad{color:#e08a7a}
 }
 </style>
 </head>
 <body><div class="wrap">
-<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>專題表</b><a href="index.html">← 回目錄</a><a href="五部律差異對照本.html">對照本合冊</a><a href="比丘比丘尼戒對照表.html">戒對照表</a><a href="五部律開遮持犯表.html">開遮持犯表</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div></nav>
+<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>專題表</b><a href="index.html">← 回目錄</a><a href="五部律差異對照本.html">對照本合冊</a><a href="比丘比丘尼戒對照表.html">戒對照表</a><a href="五部律開遮持犯表.html" class="on">開遮持犯表</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div></nav>
 <main>
 <a class="home" href="index.html">← 回目錄</a>
 <h1>五部律開遮持犯表</h1>
@@ -342,8 +352,10 @@ td.bad{color:#a33; font-weight:600}
 <label>僧祇</label><select data-col="5" aria-label="篩選僧祇"><option value="">全部</option><option value="有">有</option><option value="未比">未比</option></select>
 <label>根有</label><select data-col="6" aria-label="篩選根有"><option value="">全部</option><option value="有">有</option><option value="未比">未比</option><option value="無">無</option></select>
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄六　五部律開遮持犯差異表（差異導向）（657 列）</caption>
+<thead><tr>
 <th scope="col">事由</th>
 <th scope="col">狀態</th>
 <th scope="col">四分</th>
@@ -7581,15 +7593,18 @@ td.bad{color:#a33; font-weight:600}
 <td>同條減略</td>
 <td>根有 vol48-49#1；僧祇戒本 第82「戒本第82」</td>
 </tr>
-</tbody></table></div></section>
+</tbody>
+</table></div></section>
 <section class="tbl-wrap" data-tbl="2">
 <h2>附錄六之一　僧祇・根有補比</h2>
 <p class="note">只補「有」，不補「無」。根有 396 格，依「學處第N」定位；僧祇 290 格，逐條覆核上下文確為制戒語者。</p>
 <div class="tools">
 <label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄六之一　僧祇・根有補比（290 列）</caption>
+<thead><tr>
 <th scope="col">項號</th>
 <th scope="col">事由</th>
 <th scope="col">出處</th>
@@ -9335,15 +9350,18 @@ td.bad{color:#a33; font-weight:600}
 <td>僧祇戒本 第82</td>
 <td>戒本第82</td>
 </tr>
-</tbody></table></div></section>
+</tbody>
+</table></div></section>
 <section class="tbl-wrap" data-tbl="3">
 <h2>附錄六之一　僧祇・根有補比</h2>
 <p class="note">只補「有」，不補「無」。根有 396 格，依「學處第N」定位；僧祇 290 格，逐條覆核上下文確為制戒語者。</p>
 <div class="tools">
 <label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄六之一　僧祇・根有補比（41 列）</caption>
+<thead><tr>
 <th scope="col">卷</th>
 <th scope="col">格數</th>
 </tr></thead><tbody>
@@ -9511,7 +9529,8 @@ td.bad{color:#a33; font-weight:600}
 <td>學處第95</td>
 <td>1</td>
 </tr>
-</tbody></table></div></section>
+</tbody>
+</table></div></section>
 
 <footer id="colophon">
 <hr>
@@ -9538,9 +9557,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 4892729（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 add619b（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 4892729」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 add619b」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -9548,7 +9567,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 4892729（2026-11-05）}<br>
+　note = {版本 add619b（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -9676,11 +9695,48 @@ window.VS = (function(){
   // 檢索核心與對照本共用（正規化、同義詞、模糊）
   var norm = function(x){ return VS.norm(x); };
 
+  // 中文數字（供「020-八十一」這種編號排序）
+  var CN = {'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+  function cn2i(s){
+    if (!s) return 0;
+    if (s.indexOf('百') >= 0){
+      var p = s.split('百'), n = (CN[p[0]] || 1) * 100, r = p[1] || '';
+      if (r.charAt(0) === '零') r = r.slice(1);
+      if (!r) return n;
+      if (r.indexOf('十') >= 0){
+        var q = r.split('十');
+        return n + (CN[q[0]] || 1) * 10 + (CN[q[1]] || 0);
+      }
+      return n + (CN[r] || 0);
+    }
+    if (s.indexOf('十') >= 0){
+      var t = s.split('十');
+      return (CN[t[0]] || 1) * 10 + (CN[t[1]] || 0);
+    }
+    return CN[s] || 0;
+  }
+  // 排序鍵：篇-節（如 020-八十一）＞ 純數字 ＞ 文字
+  function sortKey(s){
+    var m = s.match(/^(\d{1,3})-(\S+)$/);
+    if (m) return [0, parseInt(m[1], 10), cn2i(m[2]), s];
+    if (/^[\d.,]+$/.test(s)) return [1, parseFloat(s.replace(/,/g, '')), 0, s];
+    return [2, 0, 0, s];
+  }
+  function cmp(x, y){
+    var a = sortKey(x), b = sortKey(y);
+    for (var i = 0; i < 4; i++){
+      if (a[i] < b[i]) return -1;
+      if (a[i] > b[i]) return 1;
+    }
+    return 0;
+  }
+
   document.querySelectorAll('.tbl-wrap').forEach(function(wrap){
-    var tid = wrap.getAttribute('data-tbl');
     var table = wrap.querySelector('table');
-    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
-    var heads = Array.prototype.slice.call(table.querySelectorAll('th'));
+    var tb = table.querySelector('tbody');
+    var rows = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+    var orig = rows.slice();
+    var heads = Array.prototype.slice.call(table.querySelectorAll('thead th'));
     var box = wrap.querySelector('input[type=search]');
     var sels = Array.prototype.slice.call(wrap.querySelectorAll('select[data-col]'));
     var cnt = wrap.querySelector('.count');
@@ -9688,7 +9744,8 @@ window.VS = (function(){
 
     function refresh(){
       var pq = VS.parseQuery(box.value || '');
-      var n = 0;
+      var n = 0, anySel = false;
+      sels.forEach(function(s){ if (s.value) anySel = true; });
       rows.forEach(function(tr){
         var ok = true;
         if (pq.n || pq.exc.length){
@@ -9715,29 +9772,46 @@ window.VS = (function(){
         tr.hidden = !ok;
         if (ok) n++;
       });
-      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' +
-        (n === 0 && pq.n > 1 ? '（多詞須同一列全部命中，可減少詞數）' : '');
+      var hint = '';
+      if (n === 0 && !anySel && pq.n > 1){
+        hint = '（多詞須同一列全部命中，可減少詞數）';
+      }
+      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' + hint;
     }
     box.addEventListener('input', refresh);
+    box.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') e.preventDefault();   // 免行動鍵盤觸發頁面重載
+    });
     sels.forEach(function(s){ s.addEventListener('change', refresh); });
     wrap.querySelector('button.reset').addEventListener('click', function(){
-      box.value = ''; sels.forEach(function(s){ s.value = ''; }); refresh();
+      box.value = ''; sels.forEach(function(s){ s.value = ''; });
+      sortCol = -1; sortDesc = false;
+      heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
+      orig.forEach(function(r){ tb.appendChild(r); });
+      rows = orig.slice();
+      refresh();
     });
     heads.forEach(function(th, i){
       th.addEventListener('click', function(){
-        if (sortCol === i) sortDesc = !sortDesc;
-        else { sortCol = i; sortDesc = false; }
-        heads.forEach(function(h){ h.classList.remove('sorted','desc'); });
+        // 三態：升冪 → 降冪 → 還原原文序
+        if (sortCol !== i){ sortCol = i; sortDesc = false; }
+        else if (!sortDesc){ sortDesc = true; }
+        else {
+          sortCol = -1; sortDesc = false;
+          heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
+          orig.forEach(function(r){ tb.appendChild(r); });
+          rows = orig.slice();
+          refresh();
+          return;
+        }
+        heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
         th.classList.add('sorted'); if (sortDesc) th.classList.add('desc');
-        rows.sort(function(a,b){
+        rows.sort(function(a, b){
           var x = a.cells[i] ? a.cells[i].textContent.trim() : '';
           var y = b.cells[i] ? b.cells[i].textContent.trim() : '';
-          var nx = parseFloat(x.replace(/,/g,''));
-          var ny = parseFloat(y.replace(/,/g,''));
-          var c = (!isNaN(nx) && !isNaN(ny)) ? nx - ny : x.localeCompare(y, 'zh-Hant');
+          var c = cmp(x, y);
           return sortDesc ? -c : c;
         });
-        var tb = table.querySelector('tbody');
         rows.forEach(function(r){ tb.appendChild(r); });
         refresh();
       });

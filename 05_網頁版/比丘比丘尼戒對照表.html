@@ -2,9 +2,9 @@
 <html lang="zh-Hant">
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>比丘／比丘尼戒對照表　｜　五部律差異對照本</title>
-<meta name="description" content="共戒對位與罪名異同，附眾學法全目。原為《五部律差異對照本》附錄五。">
+<meta name="description" content="共戒對位與罪名異同，附眾學法已分節之目。原為《五部律差異對照本》附錄五。">
 <meta name="citation_title" content="比丘／比丘尼戒對照表">
 <meta name="citation_author" content="UncleHandsome">
 <meta name="citation_publication_date" content="2026-11-05">
@@ -280,8 +280,8 @@ body.par main:after{content:""; display:block; clear:both}
 }
 
 
-/* ── 專題表頁 ── */
-main{max-width:1180px; margin:0 auto; padding:2rem 2.2rem 5rem}
+/* ── 專題表頁（只補共用樣式不足之處，不重複宣告 main／table） ── */
+main{padding:2rem 2.2rem 5rem}
 .tbl-wrap{margin:1.4rem 0 2.4rem}
 .tbl-wrap h2{margin:0 0 .2rem; font-size:20px; color:var(--fg)}
 .tbl-wrap .note{font-size:13px; color:var(--fg2); margin:.2rem 0 .8rem; line-height:1.7}
@@ -296,382 +296,1079 @@ main{max-width:1180px; margin:0 auto; padding:2rem 2.2rem 5rem}
   border:1px solid var(--line); border-radius:3px; background:#fff; color:var(--fg)}
 .scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
   border:1px solid var(--line); border-radius:4px}
-table{border-collapse:collapse; width:100%; font-size:13px; background:#fff}
-th,td{border-bottom:1px solid var(--line); padding:.42rem .6rem; text-align:left;
-  vertical-align:top; line-height:1.55}
-th{background:#f0ece2; color:var(--fg); font-weight:600; white-space:nowrap;
+.tbl-wrap table{font-size:13px; background:#fff; min-width:860px}
+.tbl-wrap th,.tbl-wrap td{border-bottom:1px solid var(--line); padding:.42rem .6rem;
+  text-align:left; vertical-align:top; line-height:1.55}
+.tbl-wrap th{background:#f0ece2; color:var(--fg); font-weight:600; white-space:nowrap;
   position:sticky; top:0; cursor:pointer; user-select:none}
-th:hover{background:#e8e2d4}
-th.sorted::after{content:' ▲'; font-size:10px; color:var(--accent)}
-th.sorted.desc::after{content:' ▼'}
-tbody tr:hover{background:#faf6ec}
-tbody tr[hidden]{display:none}
-td.num{text-align:right; white-space:nowrap}
-td.bad{color:#a33; font-weight:600}
+.tbl-wrap th:hover{background:#e8e2d4}
+.tbl-wrap th.sorted::after{content:' ▲'; font-size:10px; color:var(--accent)}
+.tbl-wrap th.sorted.desc::after{content:' ▼'}
+.tbl-wrap tbody tr:hover{background:#faf6ec}
+.tbl-wrap tbody tr[hidden]{display:none}
+.tbl-wrap tfoot td{background:#f7f3e9; font-weight:600; border-top:2px solid var(--line)}
+.tbl-wrap td.bad{color:#a33; font-weight:600}
+.tbl-wrap td.nowrap{white-space:nowrap}
+.tbl-wrap td:last-child{min-width:7.5em}
+.tbl-wrap caption{caption-side:top; text-align:left; font-size:12px; color:var(--fg2);
+  padding:.2rem .1rem .5rem}
 .home{display:inline-block; margin:0 0 1rem; font-size:13px; color:var(--accent)}
-@media print{.tools{display:none} th{position:static} .scroll{overflow:visible}}
+@media print{
+  .tools{display:none} th{position:static} .scroll{overflow:visible}
+  /* 表格須能跨頁；只禁單列被切斷 */
+  .tbl-wrap tr{break-inside:avoid; page-break-inside:avoid}
+  .tbl-wrap thead{display:table-header-group}
+}
 @media (prefers-color-scheme: dark){
   .tools{background:#1e1d1b; border-color:var(--line)}
   .tools input[type=search],.tools select,.tools button{background:#232120; color:var(--fg);
     border-color:var(--line)}
-  table{background:#1a1918}
-  th{background:#26241f}
-  th:hover{background:#302d27}
-  tbody tr:hover{background:#242220}
-  td,th{border-bottom-color:var(--line)}
-  td.bad{color:#e08a7a}
+  .tbl-wrap table{background:#1a1918}
+  .tbl-wrap th{background:#26241f}
+  .tbl-wrap th:hover{background:#302d27}
+  .tbl-wrap tbody tr:hover{background:#242220}
+  .tbl-wrap tfoot td{background:#242220}
+  .tbl-wrap td,.tbl-wrap th{border-bottom-color:var(--line)}
+  .tbl-wrap td.bad{color:#e08a7a}
 }
 </style>
 </head>
 <body><div class="wrap">
-<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>專題表</b><a href="index.html">← 回目錄</a><a href="五部律差異對照本.html">對照本合冊</a><a href="比丘比丘尼戒對照表.html">戒對照表</a><a href="五部律開遮持犯表.html">開遮持犯表</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div></nav>
+<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>專題表</b><a href="index.html">← 回目錄</a><a href="五部律差異對照本.html">對照本合冊</a><a href="比丘比丘尼戒對照表.html" class="on">戒對照表</a><a href="五部律開遮持犯表.html">開遮持犯表</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div></nav>
 <main>
 <a class="home" href="index.html">← 回目錄</a>
 <h1>比丘／比丘尼戒對照表</h1>
-<blockquote><p>共戒對位與罪名異同，附眾學法全目。原為《五部律差異對照本》附錄五。</p></blockquote>
+<blockquote><p>共戒對位與罪名異同，附眾學法已分節之目。原為《五部律差異對照本》附錄五。</p></blockquote>
 <section class="tbl-wrap" data-tbl="1">
 <h2>附錄五　比丘／比丘尼共戒對位表</h2>
-<p class="note"><strong>範圍</strong>：只列二部共有之戒（共戒）；比丘獨有、比丘尼獨有者不列。波羅夷、僧殘、捨墮、<strong>單提（波逸提）</strong>、提舍尼各類皆已逐條覆核；眾學法見附錄五之三。<br><strong>判準</strong>：以《含注戒本》一系之正式戒名為據（見 `jie_names.json`），依罪類與二部編次對位，再逐條核其戒名；同名者為「同序對位」，戒名小異而實同一戒者註「戒名小異」，異名跨罪者註「編者判定」。「罪名異同」一欄為本表重點——同題之戒，二部所結之罪未必相同。凡未能確定者不列，<strong>不強配</strong>（凡例六）。</p>
+<p class="note"><strong>範圍</strong>：只列二部共有之戒（共戒）；比丘獨有、比丘尼獨有者不列。波羅夷、僧殘、捨墮、<strong>單提（波逸提）</strong>、提舍尼各類皆逐條核名；眾學法見附錄五之三。<br><strong>判準</strong>：以《四分》二部戒名為據，同罪類內按戒名相似度作<strong>單調對位</strong>（次序不得顛倒），再逐條覆核。戒名全同者註「同題對位」；同一戒而用字有異者（如「壞生種」↔「壞生草木」）註「戒名小異」；戒名懸殊或跨罪而經內容核定者註「編者判定」。「罪名異同」一欄為本表重點——同題之戒，二部所結之罪未必相同。凡未能確定者不列，<strong>不強配</strong>（凡例六）。<br><strong>「同題」非「同序」</strong>：二部編次自單提中段起即不相當（如比丘 31 對尼 21），故本表所稱「對位」指<strong>同一戒條</strong>，不指編號相同。<br><strong>編號讀法</strong>：「001-一」為「篇號-節號」，即本書正文之篇次與該篇節次，非大正藏卷頁；循此可回《五部律差異對照本》相應篇節覆核。<br><strong>比丘尼品（比丘單提 21–30）</strong>：此十戒（教誡尼、與尼衣、與尼同行同船等）為比丘對尼眾之制，尼律無同條可對；其對待之制（如尼「半月往僧中求教授」）散見尼單提，非同一戒，故不入本表，亦不列為「共戒」。</p>
 <div class="tools">
 <label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
-<label>罪名異同</label><select data-col="6" aria-label="篩選罪名異同"><option value="">全部</option><option value="**異**">**異**</option><option value="同">同</option></select>
-<label>罪屬</label><select data-col="2" aria-label="篩選罪屬"><option value="">全部</option><option value="僧殘">僧殘</option><option value="捨墮">捨墮</option><option value="波羅夷">波羅夷</option></select>
+<label>罪屬</label><select data-col="2" aria-label="篩選罪屬"><option value="">全部</option><option value="僧殘">僧殘</option><option value="單提">單提</option><option value="捨墮">捨墮</option><option value="波羅夷">波羅夷</option></select>
+<label>尼罪屬</label><select data-col="5" aria-label="篩選尼罪屬"><option value="">全部</option><option value="僧殘">僧殘</option><option value="單提">單提</option><option value="捨墮">捨墮</option><option value="波羅夷">波羅夷</option></select>
+<label>罪名異同</label><select data-col="6" aria-label="篩選罪名異同"><option value="">全部</option><option value="同">同</option><option value="異">異</option></select>
+<label>依據</label><select data-col="7" aria-label="篩選依據"><option value="">全部</option><option value="同題對位">同題對位</option><option value="戒名小異">戒名小異</option><option value="編者判定：戒名雖異，實同一戒">編者判定：戒名雖異，實同一戒</option></select>
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄五　比丘／比丘尼共戒對位表（99 列）</caption>
+<thead><tr>
 <th scope="col">比丘</th>
 <th scope="col">比丘戒名</th>
-<th scope="col">罪屬</th>
+<th scope="col">比丘·罪屬</th>
 <th scope="col">比丘尼</th>
 <th scope="col">比丘尼戒名</th>
-<th scope="col">罪屬</th>
+<th scope="col">比丘尼·罪屬</th>
 <th scope="col">罪名異同</th>
 <th scope="col">依據</th>
 </tr></thead><tbody>
 <tr>
-<td>001-一</td>
+<td class="nowrap">001-一</td>
 <td>婬戒</td>
 <td>波羅夷</td>
-<td>026-一</td>
+<td class="nowrap">026-一</td>
 <td>婬戒</td>
 <td>波羅夷</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>001-二</td>
+<td class="nowrap">001-二</td>
 <td>盜戒</td>
 <td>波羅夷</td>
-<td>026-二</td>
+<td class="nowrap">026-二</td>
 <td>盜戒</td>
 <td>波羅夷</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>002-三</td>
+<td class="nowrap">002-三</td>
 <td>殺人戒</td>
 <td>波羅夷</td>
-<td>026-三</td>
+<td class="nowrap">026-三</td>
 <td>殺人戒</td>
 <td>波羅夷</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>002-四</td>
+<td class="nowrap">002-四</td>
 <td>大妄語戒</td>
 <td>波羅夷</td>
-<td>026-四</td>
+<td class="nowrap">026-四</td>
 <td>大妄語戒</td>
 <td>波羅夷</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>004-五</td>
-<td>媒嫁戒</td>
-<td>僧殘</td>
-<td>027-一</td>
-<td>媒嫁戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>005-八</td>
-<td>無根謗戒</td>
-<td>僧殘</td>
-<td>027-二</td>
-<td>無根謗戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>005-九</td>
-<td>假根謗戒</td>
-<td>僧殘</td>
-<td>027-三</td>
-<td>假根謗戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>006-十</td>
-<td>破僧違諫戒</td>
-<td>僧殘</td>
-<td>028-十一</td>
-<td>破僧違諫戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>006-十一</td>
-<td>助破僧違諫戒</td>
-<td>僧殘</td>
-<td>028-十二</td>
-<td>助破僧違諫戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>006-十二</td>
-<td>污家擯謗違諫戒</td>
-<td>僧殘</td>
-<td>028-十三</td>
-<td>污家擯謗違諫戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>006-十三</td>
-<td>惡性拒諫戒</td>
-<td>僧殘</td>
-<td>028-十四</td>
-<td>惡性拒諫戒</td>
-<td>僧殘</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>003-二</td>
+<td class="nowrap">003-二</td>
 <td>女身相觸戒</td>
 <td>僧殘</td>
-<td>026-五</td>
+<td class="nowrap">026-五</td>
 <td>染心摩觸戒</td>
 <td>波羅夷</td>
 <td class="bad"><strong>異</strong></td>
 <td>編者判定：罪名由僧殘升為波羅夷</td>
 </tr>
 <tr>
-<td>008-一</td>
+<td class="nowrap">004-五</td>
+<td>媒嫁戒</td>
+<td>僧殘</td>
+<td class="nowrap">027-一</td>
+<td>媒嫁戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">005-八</td>
+<td>無根謗戒</td>
+<td>僧殘</td>
+<td class="nowrap">027-二</td>
+<td>無根謗戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">005-九</td>
+<td>假根謗戒</td>
+<td>僧殘</td>
+<td class="nowrap">027-三</td>
+<td>假根謗戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">006-十</td>
+<td>破僧違諫戒</td>
+<td>僧殘</td>
+<td class="nowrap">028-十一</td>
+<td>破僧違諫戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">006-十一</td>
+<td>助破僧違諫戒</td>
+<td>僧殘</td>
+<td class="nowrap">028-十二</td>
+<td>助破僧違諫戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">006-十二</td>
+<td>污家擯謗違諫戒</td>
+<td>僧殘</td>
+<td class="nowrap">028-十三</td>
+<td>污家擯謗違諫戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">006-十三</td>
+<td>惡性拒諫戒</td>
+<td>僧殘</td>
+<td class="nowrap">028-十四</td>
+<td>惡性拒諫戒</td>
+<td>僧殘</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">008-一</td>
 <td>長衣過限戒</td>
 <td>捨墮</td>
-<td>029-一</td>
+<td class="nowrap">029-一</td>
 <td>長衣過限戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>008-二</td>
+<td class="nowrap">008-二</td>
 <td>離三衣宿戒</td>
 <td>捨墮</td>
-<td>029-二</td>
+<td class="nowrap">029-二</td>
 <td>離五衣宿戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>戒名小異</td>
 </tr>
 <tr>
-<td>008-三</td>
+<td class="nowrap">008-三</td>
 <td>月望衣戒</td>
 <td>捨墮</td>
-<td>029-三</td>
+<td class="nowrap">029-三</td>
 <td>月望衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>009-六</td>
+<td class="nowrap">009-六</td>
 <td>從非親俗人乞衣戒</td>
 <td>捨墮</td>
-<td>029-四</td>
+<td class="nowrap">029-四</td>
 <td>從非親里居士乞衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>戒名小異</td>
 </tr>
 <tr>
-<td>009-七</td>
+<td class="nowrap">009-七</td>
 <td>過分取衣戒</td>
 <td>捨墮</td>
-<td>029-五</td>
+<td class="nowrap">029-五</td>
 <td>過分取衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>009-八</td>
+<td class="nowrap">009-八</td>
 <td>勸增衣價戒</td>
 <td>捨墮</td>
-<td>029-六</td>
+<td class="nowrap">029-六</td>
 <td>勸增衣價戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>009-九</td>
+<td class="nowrap">009-九</td>
 <td>勸二家增衣價戒</td>
 <td>捨墮</td>
-<td>029-七</td>
+<td class="nowrap">029-七</td>
 <td>勸二家增衣價戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>009-十</td>
+<td class="nowrap">009-十</td>
 <td>過限忽切索衣價戒</td>
 <td>捨墮</td>
-<td>029-八</td>
+<td class="nowrap">029-八</td>
 <td>過限忽切索衣價戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>010-十八</td>
+<td class="nowrap">010-十八</td>
 <td>畜錢寶戒</td>
 <td>捨墮</td>
-<td>029-九</td>
+<td class="nowrap">029-九</td>
 <td>畜錢寶戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>010-十九</td>
+<td class="nowrap">010-十九</td>
 <td>貿錢寶戒</td>
 <td>捨墮</td>
-<td>029-十</td>
+<td class="nowrap">029-十</td>
 <td>貿錢寶戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>010-二十</td>
+<td class="nowrap">010-二十</td>
 <td>販賣戒</td>
 <td>捨墮</td>
-<td>029-十一</td>
+<td class="nowrap">029-十一</td>
 <td>販賣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>011-二十一</td>
-<td>畜長鉢過限戒</td>
-<td>捨墮</td>
-<td>030-二十四</td>
-<td>畜長鉢戒</td>
-<td>捨墮</td>
-<td>同</td>
-<td>同序對位</td>
-</tr>
-<tr>
-<td>011-二十二</td>
+<td class="nowrap">011-二十二</td>
 <td>減五綴乞新鉢戒</td>
 <td>捨墮</td>
-<td>029-十二</td>
+<td class="nowrap">029-十二</td>
 <td>減五綴乞新鉢戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>011-二十三</td>
+<td class="nowrap">011-二十三</td>
 <td>非親織師作衣戒</td>
 <td>捨墮</td>
-<td>029-十三</td>
+<td class="nowrap">029-十三</td>
 <td>自乞縷使非親織衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>戒名小異</td>
 </tr>
 <tr>
-<td>011-二十四</td>
+<td class="nowrap">011-二十四</td>
 <td>勸織師增織衣戒</td>
 <td>捨墮</td>
-<td>029-十四</td>
+<td class="nowrap">029-十四</td>
 <td>勸非親織師增織衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>戒名小異</td>
 </tr>
 <tr>
-<td>011-二十五</td>
+<td class="nowrap">011-二十五</td>
 <td>奪衣戒</td>
 <td>捨墮</td>
-<td>029-十五</td>
+<td class="nowrap">029-十五</td>
 <td>奪衣戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>012-二十六</td>
+<td class="nowrap">012-二十六</td>
 <td>乞藥過七日戒</td>
 <td>捨墮</td>
-<td>029-十六</td>
+<td class="nowrap">029-十六</td>
 <td>乞藥過七日戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>012-二十八</td>
+<td class="nowrap">012-二十八</td>
 <td>畜急施衣過限戒</td>
 <td>捨墮</td>
-<td>029-十七</td>
+<td class="nowrap">029-十七</td>
 <td>畜急施衣過限戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
 <tr>
-<td>012-三十</td>
+<td class="nowrap">012-三十</td>
 <td>迴僧物入己戒</td>
 <td>捨墮</td>
-<td>029-十八</td>
+<td class="nowrap">029-十八</td>
 <td>迴僧物入己戒</td>
 <td>捨墮</td>
 <td>同</td>
-<td>同序對位</td>
+<td>同題對位</td>
 </tr>
-</tbody></table></div></section>
+<tr>
+<td class="nowrap">013-一</td>
+<td>故妄語戒</td>
+<td>單提</td>
+<td class="nowrap">031-一</td>
+<td>故妄語戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">013-二</td>
+<td>毀呰戒</td>
+<td>單提</td>
+<td class="nowrap">031-二</td>
+<td>毀呰戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">013-三</td>
+<td>兩舌戒</td>
+<td>單提</td>
+<td class="nowrap">031-三</td>
+<td>兩舌戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">013-四</td>
+<td>與婦女同室宿戒</td>
+<td>單提</td>
+<td class="nowrap">031-四</td>
+<td>共男子同室宿戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">013-五</td>
+<td>與未具人宿過限戒</td>
+<td>單提</td>
+<td class="nowrap">031-五</td>
+<td>共未受戒女同宿過限戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">013-六</td>
+<td>與未受戒人共誦戒</td>
+<td>單提</td>
+<td class="nowrap">031-六</td>
+<td>與未受戒人共誦戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">013-七</td>
+<td>說他麤罪戒</td>
+<td>單提</td>
+<td class="nowrap">031-七</td>
+<td>說他麤罪戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">013-八</td>
+<td>向未具說自證戒</td>
+<td>單提</td>
+<td class="nowrap">031-八</td>
+<td>向未受具說得道戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">013-九</td>
+<td>與女人過說法戒</td>
+<td>單提</td>
+<td class="nowrap">031-九</td>
+<td>與女人過說法戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">013-十</td>
+<td>掘地戒</td>
+<td>單提</td>
+<td class="nowrap">031-十一</td>
+<td>掘地戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十一</td>
+<td>壞生種戒</td>
+<td>單提</td>
+<td class="nowrap">031-十一</td>
+<td>壞生草木戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">014-十二</td>
+<td>異語惱他戒</td>
+<td>單提</td>
+<td class="nowrap">031-十二</td>
+<td>異語惱僧戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">014-十三</td>
+<td>嫌罵知事人戒</td>
+<td>單提</td>
+<td class="nowrap">031-十三</td>
+<td>嫌罵知事人戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十四</td>
+<td>露敷臥具不舉戒</td>
+<td>單提</td>
+<td class="nowrap">031-十四</td>
+<td>露敷僧物不舉戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">014-十五</td>
+<td>房中敷具不舉戒</td>
+<td>單提</td>
+<td class="nowrap">031-十五</td>
+<td>房中敷具不舉戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十六</td>
+<td>強奪止宿戒</td>
+<td>單提</td>
+<td class="nowrap">031-十六</td>
+<td>強奪止宿戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十七</td>
+<td>牽他出房戒</td>
+<td>單提</td>
+<td class="nowrap">031-十七</td>
+<td>牽他出房戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十八</td>
+<td>重閣坐脫腳牀戒</td>
+<td>單提</td>
+<td class="nowrap">031-十八</td>
+<td>重閣坐脫腳牀戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-十九</td>
+<td>蟲水澆泥草戒</td>
+<td>單提</td>
+<td class="nowrap">031-十九</td>
+<td>蟲水澆泥草戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">014-二十</td>
+<td>覆房過三節戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十一</td>
+<td>過三節覆房戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">015-三十一</td>
+<td>過受一食施戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十一</td>
+<td>過受一食施戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">016-三十三</td>
+<td>別眾食戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十二</td>
+<td>別眾食戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">016-三十四</td>
+<td>過三鉢受請戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十三</td>
+<td>過三鉢受請戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">016-三十七</td>
+<td>非時食戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十四</td>
+<td>非時食戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">016-三十八</td>
+<td>殘宿食戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十五</td>
+<td>殘宿食戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-三十九</td>
+<td>自取食戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十六</td>
+<td>自取食戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十二</td>
+<td>詣餘家不囑授戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十七</td>
+<td>詣餘家不囑授戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十三</td>
+<td>食家強坐戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十八</td>
+<td>食家強坐戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十四</td>
+<td>食家屏坐戒</td>
+<td>單提</td>
+<td class="nowrap">031-二十九</td>
+<td>食家屏坐戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十五</td>
+<td>獨與女人坐戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十一</td>
+<td>獨與女人坐戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十六</td>
+<td>故使他不獲食戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十一</td>
+<td>故使他不獲食戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十七</td>
+<td>過請受藥戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十二</td>
+<td>過請受藥戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十八</td>
+<td>觀軍陣戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十三</td>
+<td>觀軍陣戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">017-四十九</td>
+<td>軍中過三宿戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十四</td>
+<td>軍中過三宿戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十</td>
+<td>看軍鬥戰戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十五</td>
+<td>看軍鬥戰戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十一</td>
+<td>飲酒戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十六</td>
+<td>飲酒戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十二</td>
+<td>水中戲戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十七</td>
+<td>水中戲戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十三</td>
+<td>指擊擽戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十八</td>
+<td>指擊擽戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十四</td>
+<td>不受諫戒</td>
+<td>單提</td>
+<td class="nowrap">031-三十九</td>
+<td>不受諫戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十五</td>
+<td>恐怖他戒</td>
+<td>單提</td>
+<td class="nowrap">031-四十</td>
+<td>恐怖他戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十六</td>
+<td>過洗浴戒</td>
+<td>單提</td>
+<td class="nowrap">031-四十一</td>
+<td>半月洗浴戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十七</td>
+<td>露地然火戒</td>
+<td>單提</td>
+<td class="nowrap">031-四十二</td>
+<td>露地然火戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十八</td>
+<td>藏他物戒</td>
+<td>單提</td>
+<td class="nowrap">031-四十三</td>
+<td>藏他物戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-五十九</td>
+<td>輙著淨施衣戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十四</td>
+<td>淨施衣戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">018-六十</td>
+<td>著新衣不壞色戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十五</td>
+<td>著未壞色衣戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">018-六十一</td>
+<td>故斷畜生命戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十六</td>
+<td>故斷畜生命戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">018-六十二</td>
+<td>飲用蟲水戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十七</td>
+<td>飲用蟲水戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十三</td>
+<td>故生疑惱他戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十八</td>
+<td>故生疑惱他戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十四</td>
+<td>覆藏他麤罪戒</td>
+<td>單提</td>
+<td class="nowrap">032-四十九</td>
+<td>覆藏他麤罪戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十六</td>
+<td>共諍斷後悔戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十一</td>
+<td>共諍斷後悔戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十七</td>
+<td>同賊伴行戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十一</td>
+<td>同賊伴行戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十八</td>
+<td>惡見不捨戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十二</td>
+<td>惡見不捨戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-六十九</td>
+<td>隨順擯人戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十三</td>
+<td>隨順擯人戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">019-七十</td>
+<td>畜被擯沙彌戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十四</td>
+<td>畜被擯沙彌戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十一</td>
+<td>拒諫難問戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十五</td>
+<td>拒諫難問戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十二</td>
+<td>輕訶說戒戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十六</td>
+<td>輕訶說戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十三</td>
+<td>無知自謗戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十七</td>
+<td>無知自謗戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十四</td>
+<td>違反羯磨戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十八</td>
+<td>違反羯磨戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十五</td>
+<td>不與欲輒去戒</td>
+<td>單提</td>
+<td class="nowrap">032-五十九</td>
+<td>不與欲輒去戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十六</td>
+<td>與欲後悔戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十</td>
+<td>與欲後悔戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十七</td>
+<td>屏聽諍語戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十一</td>
+<td>屏聽諍語戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十八</td>
+<td>瞋打比丘戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十二</td>
+<td>瞋打尼戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">020-七十九</td>
+<td>瞋搏比丘戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十三</td>
+<td>以手搏尼戒</td>
+<td>單提</td>
+<td>同</td>
+<td>編者判定：戒名雖異，實同一戒</td>
+</tr>
+<tr>
+<td class="nowrap">020-八十</td>
+<td>無根僧殘謗戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十四</td>
+<td>無根僧殘謗戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">020-八十一</td>
+<td>輙入宮閾戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十五</td>
+<td>入王宮戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">020-八十二</td>
+<td>捉寶物戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十六</td>
+<td>捉寶戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+<tr>
+<td class="nowrap">021-八十三</td>
+<td>非時入聚落戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十七</td>
+<td>非時入聚落戒</td>
+<td>單提</td>
+<td>同</td>
+<td>同題對位</td>
+</tr>
+<tr>
+<td class="nowrap">021-八十四</td>
+<td>作高牀戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十八</td>
+<td>床足過量戒</td>
+<td>單提</td>
+<td>同</td>
+<td>編者判定：戒名雖異，實同一戒</td>
+</tr>
+<tr>
+<td class="nowrap">021-八十五</td>
+<td>兜羅綿貯褥戒</td>
+<td>單提</td>
+<td class="nowrap">032-六十九</td>
+<td>兜羅綿貯戒</td>
+<td>單提</td>
+<td>同</td>
+<td>戒名小異</td>
+</tr>
+</tbody>
+</table></div></section>
 <section class="tbl-wrap" data-tbl="2">
 <h2>附錄五之二　各類對位與獨有之數</h2>
 <div class="tools">
 <label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄五之二　各類對位與獨有之數（5 列）</caption>
+<thead><tr>
 <th scope="col">罪類</th>
 <th scope="col">比丘</th>
-<th scope="col">已對位</th>
+<th scope="col">比丘·已對位</th>
 <th scope="col">比丘獨有</th>
 <th scope="col">比丘尼</th>
-<th scope="col">已對位</th>
+<th scope="col">比丘尼·已對位</th>
 <th scope="col">比丘尼獨有</th>
 </tr></thead><tbody>
 <tr>
@@ -695,20 +1392,20 @@ td.bad{color:#a33; font-weight:600}
 <tr>
 <td>捨墮</td>
 <td>30</td>
-<td>19</td>
-<td>11</td>
+<td>18</td>
+<td>12</td>
 <td>30</td>
-<td>19</td>
-<td>11</td>
+<td>18</td>
+<td>12</td>
 </tr>
 <tr>
 <td>單提</td>
 <td>90</td>
-<td>0</td>
-<td>90</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
+<td>69</td>
+<td>21</td>
+<td>178</td>
+<td>69</td>
+<td>109</td>
 </tr>
 <tr>
 <td>提舍尼</td>
@@ -719,320 +1416,426 @@ td.bad{color:#a33; font-weight:600}
 <td>0</td>
 <td>8</td>
 </tr>
+</tbody>
+<tfoot>
 <tr>
-<td><strong>合計</strong></td>
+<td><strong>五篇合計</strong></td>
 <td><strong>141</strong></td>
-<td><strong>31</strong></td>
-<td><strong>110</strong></td>
-<td><strong>63</strong></td>
-<td><strong>31</strong></td>
-<td><strong>32</strong></td>
+<td><strong>99</strong></td>
+<td><strong>42</strong></td>
+<td><strong>241</strong></td>
+<td><strong>99</strong></td>
+<td><strong>142</strong></td>
 </tr>
-</tbody></table></div></section>
+</tfoot>
+</table></div></section>
 <section class="tbl-wrap" data-tbl="3">
-<h2>附錄五之三　眾學法（二部共遵，無對位可列）</h2>
-<p class="note">查尼律諸篇（026–037）<strong>全無「眾學／式叉迦羅尼／應當學」之獨立條目</strong>；眾學法為二部共遵之威儀法，比丘尼不另立戒條。故本表無「比丘眾學 ↔ 尼眾學」之對位——非遺漏，乃體例如是。為便讀者掌握，下列比丘眾學全部 58 目（篇 022–024），尼眾亦同遵此批威儀。</p>
+<h2>附錄五之二　各類對位與獨有之數</h2>
+<p class="note"><strong>合計之義</strong>：上表只計波羅夷、僧殘、捨墮、單提、提舍尼五篇，故比丘 141、比丘尼 241，<strong>非二部戒條總數</strong>。比丘更加不定 2、眾學 100、滅諍 7，共 <strong>250 戒</strong>；比丘尼無不定，加眾學 100、滅諍 7，共 <strong>348 戒</strong>。（尼單提一欄作 178 者，依戒本之數；本書正文分節得 176 目，二目未能分立，詳附錄五之三。）</p>
 <div class="tools">
 <label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
-<label>篇</label><select data-col="0" aria-label="篩選篇"><option value="">全部</option><option value="022">022</option><option value="023">023</option><option value="024">024</option></select>
 <button type="button" class="reset">清除</button>
-<span class="count"></span></div>
-<div class="scroll"><table><thead><tr>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄五之二　各類對位與獨有之數（4 列）</caption>
+<thead><tr>
+<th scope="col">罪類</th>
+<th scope="col">比丘</th>
+<th scope="col">比丘尼</th>
+<th scope="col">說明</th>
+</tr></thead><tbody>
+<tr>
+<td>不定</td>
+<td>2</td>
+<td>0</td>
+<td>尼律無不定法，故無可對</td>
+</tr>
+<tr>
+<td>眾學</td>
+<td>100</td>
+<td>100</td>
+<td>二部共遵，尼律不別立條目（見附錄五之三）</td>
+</tr>
+<tr>
+<td>滅諍</td>
+<td>7</td>
+<td>7</td>
+<td>二部共遵，名目法式全同，不另對位</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>250</strong></td>
+<td><strong>348</strong></td>
+<td>四分律二部戒條之數</td>
+</tr>
+</tbody>
+</table></div></section>
+<section class="tbl-wrap" data-tbl="4">
+<h2>附錄五之三　眾學法（二部共遵，無對位可列）</h2>
+<p class="note">查尼律諸篇（026–037）<strong>未見「眾學／式叉迦羅尼／應當學」之獨立條目</strong>；眾學法為二部共遵之威儀法，四分廣律於尼律不別立條目。（然《四分比丘尼戒本》一系仍完整誦出百眾學，故此言「廣律不別立」，非謂尼眾不持。）本表無「比丘眾學 ↔ 尼眾學」之對位，非遺漏，乃體例如是。<br><strong>此表只列本書已分節者 58 目</strong>，非百眾學之全。眾學法定 100 條；本書分節於篇 022 得 8、篇 023 得 32、篇 024 得 18，末目（段 107–178）實含後 42 條未分節之威儀（塔寺、說法諸戒），故段次跨度特大，非一條橫跨七十二段。</p>
+<div class="tools">
+<label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
+<label>篇</label><select data-col="1" aria-label="篩選篇"><option value="">全部</option><option value="022">022 入白衣舍威儀</option><option value="023">023 坐食威儀</option><option value="024">024 塔寺與說法威儀</option></select>
+<button type="button" class="reset">清除</button>
+<span class="count" role="status" aria-live="polite"></span></div>
+<div class="scroll"><table>
+<caption>附錄五之三　眾學法（二部共遵，無對位可列）（58 列）</caption>
+<thead><tr>
+<th scope="col">序</th>
 <th scope="col">篇</th>
 <th scope="col">眾學目</th>
 <th scope="col">段次</th>
 </tr></thead><tbody>
 <tr>
+<td>1</td>
 <td>022</td>
 <td>當齊整著涅槃僧</td>
 <td>1–8</td>
 </tr>
 <tr>
+<td>2</td>
 <td>022</td>
 <td>當齊整著三衣</td>
 <td>9–15</td>
 </tr>
 <tr>
+<td>3</td>
 <td>022</td>
 <td>不得反抄衣行入白衣舍</td>
 <td>16–23</td>
 </tr>
 <tr>
+<td>4</td>
 <td>022</td>
 <td>不得反抄衣行入白衣舍坐</td>
 <td>24–24</td>
 </tr>
 <tr>
+<td>5</td>
 <td>022</td>
 <td>不得衣纏頸入白衣舍</td>
 <td>25–31</td>
 </tr>
 <tr>
+<td>6</td>
 <td>022</td>
 <td>不得衣纏頸入白衣舍坐</td>
 <td>32–32</td>
 </tr>
 <tr>
+<td>7</td>
 <td>022</td>
 <td>不得覆頭入白衣舍</td>
 <td>33–40</td>
 </tr>
 <tr>
+<td>8</td>
 <td>022</td>
 <td>不得覆頭入白衣舍坐</td>
 <td>41–41</td>
 </tr>
 <tr>
+<td>9</td>
 <td>023</td>
 <td>不得跳行入白衣舍</td>
 <td>1–8</td>
 </tr>
 <tr>
+<td>10</td>
 <td>023</td>
 <td>不得跳行入白衣舍坐</td>
 <td>9–9</td>
 </tr>
 <tr>
+<td>11</td>
 <td>023</td>
 <td>不得白衣舍內蹲坐</td>
 <td>10–17</td>
 </tr>
 <tr>
+<td>12</td>
 <td>023</td>
 <td>不得叉腰行入白衣舍</td>
 <td>18–25</td>
 </tr>
 <tr>
+<td>13</td>
 <td>023</td>
 <td>不得叉腰行入白衣舍坐</td>
 <td>26–26</td>
 </tr>
 <tr>
+<td>14</td>
 <td>023</td>
 <td>不得搖身行入白衣舍</td>
 <td>27–34</td>
 </tr>
 <tr>
+<td>15</td>
 <td>023</td>
 <td>不得搖身行入白衣舍坐</td>
 <td>35–35</td>
 </tr>
 <tr>
+<td>16</td>
 <td>023</td>
 <td>不得掉臂行入白衣舍</td>
 <td>36–42</td>
 </tr>
 <tr>
+<td>17</td>
 <td>023</td>
 <td>不得掉臂行入白衣舍坐</td>
 <td>43–43</td>
 </tr>
 <tr>
+<td>18</td>
 <td>023</td>
 <td>好覆身入白衣舍</td>
 <td>44–51</td>
 </tr>
 <tr>
+<td>19</td>
 <td>023</td>
 <td>好覆身入白衣舍坐</td>
 <td>52–52</td>
 </tr>
 <tr>
+<td>20</td>
 <td>023</td>
 <td>不得左右顧視行入白衣舍</td>
 <td>53–60</td>
 </tr>
 <tr>
+<td>21</td>
 <td>023</td>
 <td>不得左右顧視行入白衣舍坐</td>
 <td>61–61</td>
 </tr>
 <tr>
+<td>22</td>
 <td>023</td>
 <td>靜默入白衣舍</td>
 <td>62–68</td>
 </tr>
 <tr>
+<td>23</td>
 <td>023</td>
 <td>靜默入白衣舍坐</td>
 <td>69–69</td>
 </tr>
 <tr>
+<td>24</td>
 <td>023</td>
 <td>不得戲笑行入白衣舍</td>
 <td>70–76</td>
 </tr>
 <tr>
+<td>25</td>
 <td>023</td>
 <td>不得戲笑行入白衣舍坐</td>
 <td>77–77</td>
 </tr>
 <tr>
+<td>26</td>
 <td>023</td>
 <td>用意受食</td>
 <td>78–84</td>
 </tr>
 <tr>
+<td>27</td>
 <td>023</td>
 <td>當平鉢受食</td>
 <td>85–91</td>
 </tr>
 <tr>
+<td>28</td>
 <td>023</td>
 <td>平鉢受羹</td>
 <td>92–97</td>
 </tr>
 <tr>
+<td>29</td>
 <td>023</td>
 <td>羹飯等食</td>
 <td>98–104</td>
 </tr>
 <tr>
+<td>30</td>
 <td>023</td>
 <td>以次食</td>
 <td>105–111</td>
 </tr>
 <tr>
+<td>31</td>
 <td>023</td>
 <td>不得挑鉢中而食</td>
 <td>112–118</td>
 </tr>
 <tr>
+<td>32</td>
 <td>023</td>
 <td>不得自為己索羹飯</td>
 <td>119–125</td>
 </tr>
 <tr>
+<td>33</td>
 <td>023</td>
 <td>不得以飯覆羹</td>
 <td>126–132</td>
 </tr>
 <tr>
+<td>34</td>
 <td>023</td>
 <td>不得視比坐鉢中</td>
 <td>133–139</td>
 </tr>
 <tr>
+<td>35</td>
 <td>023</td>
 <td>當繫鉢想食</td>
 <td>140–146</td>
 </tr>
 <tr>
+<td>36</td>
 <td>023</td>
 <td>不得大摶飯食</td>
 <td>147–153</td>
 </tr>
 <tr>
+<td>37</td>
 <td>023</td>
 <td>不得大張口待飯食</td>
 <td>154–159</td>
 </tr>
 <tr>
+<td>38</td>
 <td>023</td>
 <td>不得含飯語</td>
 <td>160–165</td>
 </tr>
 <tr>
+<td>39</td>
 <td>023</td>
 <td>不得摶飯遙擲口中</td>
 <td>166–170</td>
 </tr>
 <tr>
+<td>40</td>
 <td>023</td>
 <td>不得遺落飯食</td>
 <td>171–176</td>
 </tr>
 <tr>
+<td>41</td>
 <td>024</td>
 <td>不得頰食食</td>
 <td>1–6</td>
 </tr>
 <tr>
+<td>42</td>
 <td>024</td>
 <td>不得嚼飯作聲食</td>
 <td>7–11</td>
 </tr>
 <tr>
+<td>43</td>
 <td>024</td>
 <td>不得大噏飯食</td>
 <td>12–17</td>
 </tr>
 <tr>
+<td>44</td>
 <td>024</td>
 <td>不得舌舐食</td>
 <td>18–23</td>
 </tr>
 <tr>
+<td>45</td>
 <td>024</td>
 <td>不得振手食</td>
 <td>24–27</td>
 </tr>
 <tr>
+<td>46</td>
 <td>024</td>
 <td>不得手把散飯食</td>
 <td>28–33</td>
 </tr>
 <tr>
+<td>47</td>
 <td>024</td>
 <td>不得污手捉飲器</td>
 <td>34–39</td>
 </tr>
 <tr>
+<td>48</td>
 <td>024</td>
 <td>不得洗鉢水棄白衣舍內</td>
 <td>40–45</td>
 </tr>
 <tr>
+<td>49</td>
 <td>024</td>
 <td>不得大小便涕唾生草菜上</td>
 <td>46–51</td>
 </tr>
 <tr>
+<td>50</td>
 <td>024</td>
 <td>不得水中大小便涕唾</td>
 <td>52–57</td>
 </tr>
 <tr>
+<td>51</td>
 <td>024</td>
 <td>不得立大小便</td>
 <td>58–63</td>
 </tr>
 <tr>
+<td>52</td>
 <td>024</td>
 <td>不得與反抄衣不恭敬人說法</td>
 <td>64–67</td>
 </tr>
 <tr>
+<td>53</td>
 <td>024</td>
 <td>不得在佛塔中止宿</td>
 <td>68–80</td>
 </tr>
 <tr>
+<td>54</td>
 <td>024</td>
 <td>不得藏財物置佛塔中</td>
 <td>81–86</td>
 </tr>
 <tr>
+<td>55</td>
 <td>024</td>
 <td>不得著革屣入佛塔中</td>
 <td>87–91</td>
 </tr>
 <tr>
+<td>56</td>
 <td>024</td>
 <td>不得塔下坐食</td>
 <td>92–101</td>
 </tr>
 <tr>
+<td>57</td>
 <td>024</td>
 <td>不得擔死屍從塔下過</td>
 <td>102–106</td>
 </tr>
 <tr>
+<td>58</td>
 <td>024</td>
 <td>不得持死人衣及床從塔下過</td>
-<td>107–178</td>
+<td>107–178（含後 42 條未分節）</td>
 </tr>
-</tbody></table></div></section>
+</tbody>
+</table></div></section>
 
 <footer id="colophon">
 <hr>
@@ -1059,9 +1862,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 4892729（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 add619b（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 4892729」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 add619b」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -1069,7 +1872,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 4892729（2026-11-05）}<br>
+　note = {版本 add619b（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -1197,11 +2000,48 @@ window.VS = (function(){
   // 檢索核心與對照本共用（正規化、同義詞、模糊）
   var norm = function(x){ return VS.norm(x); };
 
+  // 中文數字（供「020-八十一」這種編號排序）
+  var CN = {'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+  function cn2i(s){
+    if (!s) return 0;
+    if (s.indexOf('百') >= 0){
+      var p = s.split('百'), n = (CN[p[0]] || 1) * 100, r = p[1] || '';
+      if (r.charAt(0) === '零') r = r.slice(1);
+      if (!r) return n;
+      if (r.indexOf('十') >= 0){
+        var q = r.split('十');
+        return n + (CN[q[0]] || 1) * 10 + (CN[q[1]] || 0);
+      }
+      return n + (CN[r] || 0);
+    }
+    if (s.indexOf('十') >= 0){
+      var t = s.split('十');
+      return (CN[t[0]] || 1) * 10 + (CN[t[1]] || 0);
+    }
+    return CN[s] || 0;
+  }
+  // 排序鍵：篇-節（如 020-八十一）＞ 純數字 ＞ 文字
+  function sortKey(s){
+    var m = s.match(/^(\d{1,3})-(\S+)$/);
+    if (m) return [0, parseInt(m[1], 10), cn2i(m[2]), s];
+    if (/^[\d.,]+$/.test(s)) return [1, parseFloat(s.replace(/,/g, '')), 0, s];
+    return [2, 0, 0, s];
+  }
+  function cmp(x, y){
+    var a = sortKey(x), b = sortKey(y);
+    for (var i = 0; i < 4; i++){
+      if (a[i] < b[i]) return -1;
+      if (a[i] > b[i]) return 1;
+    }
+    return 0;
+  }
+
   document.querySelectorAll('.tbl-wrap').forEach(function(wrap){
-    var tid = wrap.getAttribute('data-tbl');
     var table = wrap.querySelector('table');
-    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
-    var heads = Array.prototype.slice.call(table.querySelectorAll('th'));
+    var tb = table.querySelector('tbody');
+    var rows = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+    var orig = rows.slice();
+    var heads = Array.prototype.slice.call(table.querySelectorAll('thead th'));
     var box = wrap.querySelector('input[type=search]');
     var sels = Array.prototype.slice.call(wrap.querySelectorAll('select[data-col]'));
     var cnt = wrap.querySelector('.count');
@@ -1209,7 +2049,8 @@ window.VS = (function(){
 
     function refresh(){
       var pq = VS.parseQuery(box.value || '');
-      var n = 0;
+      var n = 0, anySel = false;
+      sels.forEach(function(s){ if (s.value) anySel = true; });
       rows.forEach(function(tr){
         var ok = true;
         if (pq.n || pq.exc.length){
@@ -1236,29 +2077,46 @@ window.VS = (function(){
         tr.hidden = !ok;
         if (ok) n++;
       });
-      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' +
-        (n === 0 && pq.n > 1 ? '（多詞須同一列全部命中，可減少詞數）' : '');
+      var hint = '';
+      if (n === 0 && !anySel && pq.n > 1){
+        hint = '（多詞須同一列全部命中，可減少詞數）';
+      }
+      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' + hint;
     }
     box.addEventListener('input', refresh);
+    box.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') e.preventDefault();   // 免行動鍵盤觸發頁面重載
+    });
     sels.forEach(function(s){ s.addEventListener('change', refresh); });
     wrap.querySelector('button.reset').addEventListener('click', function(){
-      box.value = ''; sels.forEach(function(s){ s.value = ''; }); refresh();
+      box.value = ''; sels.forEach(function(s){ s.value = ''; });
+      sortCol = -1; sortDesc = false;
+      heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
+      orig.forEach(function(r){ tb.appendChild(r); });
+      rows = orig.slice();
+      refresh();
     });
     heads.forEach(function(th, i){
       th.addEventListener('click', function(){
-        if (sortCol === i) sortDesc = !sortDesc;
-        else { sortCol = i; sortDesc = false; }
-        heads.forEach(function(h){ h.classList.remove('sorted','desc'); });
+        // 三態：升冪 → 降冪 → 還原原文序
+        if (sortCol !== i){ sortCol = i; sortDesc = false; }
+        else if (!sortDesc){ sortDesc = true; }
+        else {
+          sortCol = -1; sortDesc = false;
+          heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
+          orig.forEach(function(r){ tb.appendChild(r); });
+          rows = orig.slice();
+          refresh();
+          return;
+        }
+        heads.forEach(function(h){ h.classList.remove('sorted', 'desc'); });
         th.classList.add('sorted'); if (sortDesc) th.classList.add('desc');
-        rows.sort(function(a,b){
+        rows.sort(function(a, b){
           var x = a.cells[i] ? a.cells[i].textContent.trim() : '';
           var y = b.cells[i] ? b.cells[i].textContent.trim() : '';
-          var nx = parseFloat(x.replace(/,/g,''));
-          var ny = parseFloat(y.replace(/,/g,''));
-          var c = (!isNaN(nx) && !isNaN(ny)) ? nx - ny : x.localeCompare(y, 'zh-Hant');
+          var c = cmp(x, y);
           return sortDesc ? -c : c;
         });
-        var tb = table.querySelector('tbody');
         rows.forEach(function(r){ tb.appendChild(r); });
         refresh();
       });
