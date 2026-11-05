@@ -47,103 +47,156 @@ def compatible(fb, fn):
 
 
 def build5():
-    """附錄五：以正式戒名與二部編次對位，逐條覆核。
+    """附錄五：二部共戒對位。
 
-    舊版以戒文首句作 bigram 相似度（門檻 0.40），只得 39 組；實則二部共戒
-    遠多於此。今改以 jie_names 之正式戒名為據，先依罪類與編次建立對位，
-    再核其戒名；異名而確為共戒者另註（如摩觸）。
+    以《四分》二部戒名為據，先依罪類作單調名合（同名、異名皆計分），
+    再以編者核定之別名補足（如「壞生種」↔「壞生草木」）；跨罪者另註
+    （如女身相觸戒比丘結僧殘、比丘尼結波羅夷）。凡不能確定者不列。
     """
     import difflib
     import sifen_src as S
     names = json.load(open(os.path.join(WORK, 'jie_names.json'), encoding='utf-8'))
+    nim = json.load(open(os.path.join(WORK, 'ni_jie_map.json'), encoding='utf-8'))
+    FAMS = ['波羅夷', '僧殘', '捨墮', '單提', '提舍尼']
+    TOT_N = {'波羅夷': 8, '僧殘': 17, '捨墮': 30, '單提': 178, '提舍尼': 8}
 
-    def cn2i(x):
-        D = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
-             '六': 6, '七': 7, '八': 8, '九': 9}
-        if '百' in x:
-            h, _, r = x.partition('百')
-            n = (D.get(h, 1) if h else 1) * 100
-            if r.startswith('零'):
-                r = r[1:]
-            if not r:
-                return n
-            if '十' in r:
-                t, _, o = r.partition('十')
-                return n + (D.get(t, 1) if t else 1) * 10 + (D.get(o, 0) if o else 0)
-            return n + D.get(r, 0)
-        if '十' in x:
-            t, _, o = x.partition('十')
-            return (D.get(t, 1) if t else 1) * 10 + (D.get(o, 0) if o else 0)
-        return D.get(x, 0)
+    def clean(x):
+        return re.sub(r'^(?:[一二三四五六七八九十百零]+、)+', '', x or '').strip()
 
-    def seq(lo, hi):
-        """戒序 → 節。戒序取自節題（jie_names 所生），合併節之兩戒同指一節。"""
-        m = {}
-        for no in range(lo, hi + 1):
-            for u in S.units(no):
-                fam = S.jie_family(no, u)
-                if not fam:
+    B = {f: [] for f in FAMS}
+    for no in range(1, 26):
+        for u in S.units(no):
+            fam = S.jie_family(no, u)
+            if not fam:
+                continue
+            f = fam.replace('比丘', '')
+            if f not in B:
+                continue
+            lb = S.unit_label(u, no) or ''
+            for x in re.findall(r'(?:^|／)([一二三四五六七八九十百零]+)、', lb):
+                i = S._cn2int(x)
+                if not i:
                     continue
+                B[f].append({'no': no, 'cn': u['cn'], 'a': u['a'], 'i': i,
+                             'name': clean(names.get('%s|%d' % (fam, i)))})
+
+    N = {f: [] for f in FAMS}
+    for no in range(26, 38):
+        for u in S.units(no):
+            fam = S.jie_family(no, u)
+            if not fam:
+                continue
+            f = fam.replace('尼', '')
+            if f not in N:
+                continue
+            if f == '單提':
+                for nm in nim.get('%d|%d' % (no, u['a']), []):
+                    N[f].append({'no': no, 'cn': u['cn'], 'a': u['a'], 'name': nm})
+            else:
                 lb = S.unit_label(u, no) or ''
-                for x in re.findall(r'(?:^|／)([一二三四五六七八九十百零]+)、', lb):
-                    i = cn2i(x)
-                    if not i:
-                        continue
-                    nm = names.get('%s|%d' % (fam, i)) or ''
-                    nm = re.sub(r'^[一二三四五六七八九十百]+、', '', nm)
-                    m[(fam, i)] = {'no': no, 'i': i, 'cn': S._cn_num(i),
-                                   'name': nm, 'fam': fam}
-        return m
+                m = re.match(r'([一二三四五六七八九十百零]+)、', lb)
+                if m:
+                    N[f].append({'no': no, 'cn': u['cn'], 'a': u['a'],
+                                 'i': S._cn2int(m.group(1)), 'name': clean(lb)})
 
-    B = seq(1, 25)
-    N = seq(26, 37)
+    # 編者核定之別名（比丘名片段, 尼名片段）
+    ALIAS = [
+        ('壞生種', '壞生草木'), ('異語惱他', '異語惱僧'),
+        ('露敷臥具不舉', '露敷僧物不舉'), ('覆房過三節', '過三節覆房'),
+        ('過洗浴', '半月洗浴'), ('著新衣不壞色', '著未壞色衣'),
+        ('離三衣宿', '離五衣宿'), ('從非親俗人乞衣', '從非親里居士乞衣'),
+        ('非親織師作衣', '自乞縷使非親織衣'),
+        ('勸織師增織衣', '勸非親織師增織衣'),
+        ('向未具說自證', '向未受具說得道'),
+        ('輙著淨施衣', '淨施衣'), ('兜羅綿貯褥', '兜羅綿貯'),
+        ('作高牀', '床足過量'), ('輙入宮閾', '入王宮'), ('捉寶物', '捉寶'),
+        ('瞋打比丘', '瞋打尼'), ('瞋搏比丘', '以手搏尼'),
+        ('與婦女同室宿', '共男子同室宿'),
+        ('與未具人宿過限', '共未受戒女同宿過限'),
+        ('與女人過說法', '與女人過說法'),
+    ]
 
-    PAIRS = []
-    for i in range(1, 5):                      # 波羅夷：四戒全同
-        PAIRS.append(('比丘波羅夷', i, '尼波羅夷', i, ''))
-    for b, n in [(5, 1), (8, 2), (9, 3), (10, 11), (11, 12), (12, 13), (13, 14)]:
-        PAIRS.append(('比丘僧殘', b, '尼僧殘', n, ''))
-    PAIRS.append(('比丘僧殘', 2, '尼波羅夷', 5,
-                  '編者判定：罪名由僧殘升為波羅夷'))
-    for b, n in [(1, 1), (2, 2), (3, 3), (6, 4), (7, 5), (8, 6), (9, 7), (10, 8),
-                 (18, 9), (19, 10), (20, 11), (21, 24), (22, 12), (23, 13),
-                 (24, 14), (25, 15), (26, 16), (28, 17), (30, 18)]:
-        PAIRS.append(('比丘捨墮', b, '尼捨墮', n, ''))
-    for b, n in ([(i, i) for i in range(1, 21)] +
-                 [(i, i - 10) for i in range(31, 59)] +
-                 [(i, i - 11) for i in range(60, 81)]):
-        PAIRS.append(('比丘單提', b, '尼單提', n, ''))
+    def core(x):
+        return (x or '').replace('戒', '')
 
-    def crime(fam):
-        return re.sub(r'^(比丘|尼)', '', fam)
+    def sim(a, b):
+        return difflib.SequenceMatcher(None, core(a), core(b)).ratio()
+
+    pairs = {f: {} for f in FAMS}      # 比丘 idx → (尼 idx, 依據)
+    for f in FAMS:
+        for fb, fn in ALIAS:
+            bi = next((k for k, x in enumerate(B[f]) if fb in x['name']), None)
+            nj = next((k for k, x in enumerate(N[f]) if fn in x['name']), None)
+            if bi is None or nj is None or bi in pairs[f]:
+                continue
+            if nj in [v[0] for v in pairs[f].values()]:
+                continue
+            _r = sim(B[f][bi]['name'], N[f][nj]['name'])
+            pairs[f][bi] = (nj, '戒名小異' if _r >= 0.5
+                            else '編者判定：戒名雖異，實同一戒', f)
+        # 名合：高分優先，保持單調
+        cand = []
+        for i, b in enumerate(B[f]):
+            if i in pairs[f]:
+                continue
+            for j, n in enumerate(N[f]):
+                r = sim(b['name'], n['name'])
+                if r >= 0.5:
+                    cand.append((r, i, j))
+        for r, i, j in sorted(cand, reverse=True):
+            if i in pairs[f] or j in [v[0] for v in pairs[f].values()]:
+                continue
+            if any(k < i and v[0] > j for k, v in pairs[f].items()):
+                continue
+            if any(k > i and v[0] < j for k, v in pairs[f].items()):
+                continue
+            pairs[f][i] = (j, '同題對位' if r >= 0.99 else '戒名小異', f)
+
+    # 跨罪：女身相觸（比丘僧殘）↔ 染心摩觸（尼波羅夷）
+    bi = next((k for k, x in enumerate(B['僧殘']) if '女身相觸' in x['name']), None)
+    nj = next((k for k, x in enumerate(N['波羅夷']) if '染心摩觸' in x['name']), None)
+    CROSS = None
+    if bi is not None and nj is not None:
+        CROSS = (bi, nj)
+        pairs['僧殘'][bi] = (nj, '編者判定：罪名由僧殘升為波羅夷', '波羅夷')
 
     rows = []
-    for bf, bi, nf, ni, note in PAIRS:
-        b, n = B.get((bf, bi)), N.get((nf, ni))
-        if not b or not n:
-            print('  對位缺項：', bf, bi, nf, ni)
-            continue
-        cb, cn = crime(bf), crime(nf)
-        same = '同' if cb == cn else '**異**'
-        r = difflib.SequenceMatcher(None, b['name'], n['name']).ratio()
-        why = note or ('同序對位／戒名小異' if r < 0.6 else '同序對位')
-        rows.append((b, n, cb, cn, same, why))
+    for f in FAMS:
+        for i, b in enumerate(B[f]):
+            if i not in pairs[f]:
+                continue
+            j, why, nf = pairs[f][i]
+            n = N[nf][j]
+            cb, cn = f, nf
+            same = '同' if cb == cn else '**異**'
+            rows.append((b, n, cb, cn, same, why, f))
 
     L = ['### 附錄五　比丘／比丘尼共戒對位表', '',
          '> **範圍**：只列二部共有之戒（共戒）；比丘獨有、比丘尼獨有者不列。'
-         '波羅夷、僧殘、捨墮、**單提（波逸提）**、提舍尼各類皆已逐條覆核；'
+         '波羅夷、僧殘、捨墮、**單提（波逸提）**、提舍尼各類皆逐條核名；'
          '眾學法見附錄五之三。',
          '>',
-         '> **判準**：以《含注戒本》一系之正式戒名為據（見 `jie_names.json`），'
-         '依罪類與二部編次對位，再逐條核其戒名；同名者為「同序對位」，'
-         '戒名小異而實同一戒者註「戒名小異」，異名跨罪者註「編者判定」。'
+         '> **判準**：以《四分》二部戒名為據，同罪類內按戒名相似度作**單調對位**'
+         '（次序不得顛倒），再逐條覆核。戒名全同者註「同題對位」；'
+         '同一戒而用字有異者（如「壞生種」↔「壞生草木」）註「戒名小異」；'
+         '戒名懸殊或跨罪而經內容核定者註「編者判定」。'
          '「罪名異同」一欄為本表重點——同題之戒，二部所結之罪未必相同。'
          '凡未能確定者不列，**不強配**（凡例六）。',
+         '>',
+         '> **「同題」非「同序」**：二部編次自單提中段起即不相當（如比丘 31 對尼 21），'
+         '故本表所稱「對位」指**同一戒條**，不指編號相同。',
+         '>',
+         '> **編號讀法**：「001-一」為「篇號-節號」，即本書正文之篇次與該篇節次，'
+         '非大正藏卷頁；循此可回《五部律差異對照本》相應篇節覆核。',
+         '>',
+         '> **比丘尼品（比丘單提 21–30）**：此十戒（教誡尼、與尼衣、與尼同行同船等）'
+         '為比丘對尼眾之制，尼律無同條可對；其對待之制（如尼「半月往僧中求教授」）'
+         '散見尼單提，非同一戒，故不入本表，亦不列為「共戒」。',
          '',
          '| 比丘 | 比丘戒名 | 罪屬 | 比丘尼 | 比丘尼戒名 | 罪屬 | 罪名異同 | 依據 |',
          '|---|---|---|---|---|---|---|---|']
     cnt = collections.Counter()
-    for b, n, cb, cn, same, why in rows:
+    for b, n, cb, cn, same, why, f in rows:
         cnt[same] += 1
         L.append('| %03d-%s | %s | %s | %03d-%s | %s | %s | %s | %s |' %
                  (b['no'], b['cn'], b['name'][:26], cb,
@@ -153,48 +206,68 @@ def build5():
           (len(rows), cnt['同'], cnt['**異**']), '']
 
     # 各類對位與獨有之數
-    from collections import Counter
-    tb, tn, pb, pn = Counter(), Counter(), Counter(), Counter()
-    for r in B.values():
-        tb[crime(r['fam'])] += 1
-    for r in N.values():
-        tn[crime(r['fam'])] += 1
-    tn['提舍尼'] = 8          # 尼提舍尼 8 戒合為 2 節，jie_family 未登錄
-    for b, n, *_ in rows:
-        pb[crime(b['fam'])] += 1
-        pn[crime(n['fam'])] += 1
+    tb = {f: len(B[f]) for f in FAMS}
+    pb = collections.Counter(r[6] for r in rows)
+    pn = collections.Counter()
+    for b, n, cb, cn, same, why, f in rows:
+        pn[cn if cn == '波羅夷' and f == '僧殘' else f] += 1
     L += ['#### 附錄五之二　各類對位與獨有之數', '',
           '| 罪類 | 比丘 | 已對位 | 比丘獨有 | 比丘尼 | 已對位 | 比丘尼獨有 |',
           '|---|---|---|---|---|---|---|']
-    for k in ['波羅夷', '僧殘', '捨墮', '單提', '提舍尼']:
+    for k in FAMS:
         L.append('| %s | %d | %d | %d | %d | %d | %d |' %
-                 (k, tb[k], pb[k], tb[k] - pb[k], tn[k], pn[k], tn[k] - pn[k]))
-    L.append('| **合計** | **%d** | **%d** | **%d** | **%d** | **%d** | **%d** |' %
-             (sum(tb[k] for k in tb if k in ('波羅夷','僧殘','捨墮','單提','提舍尼')),
-              sum(pb.values()),
-              sum(tb[k] - pb[k] for k in tb if k in ('波羅夷','僧殘','捨墮','單提','提舍尼')),
-              sum(tn[k] for k in tn if k in ('波羅夷','僧殘','捨墮','單提','提舍尼')),
-              sum(pn.values()),
-              sum(tn[k] - pn[k] for k in tn if k in ('波羅夷','僧殘','捨墮','單提','提舍尼'))))
-    L += ['', '> 比丘另有不定 2、眾學 100、滅諍 7；尼律無不定，眾學與滅諍二部共遵，'
-          '不另立條目，故不列於上表。尼提舍尼 8 條皆為「無病乞酥油蜜石蜜乳酪魚肉」，'
-          '與比丘四提舍尼（受尼食、不止尼代索、學家、恐處）**制各不同**，無對位可列。', '']
+                 (k, tb[k], pb[k], tb[k] - pb[k],
+                  TOT_N[k], pn[k], TOT_N[k] - pn[k]))
+    sum_b = sum(tb.values())
+    sum_n = sum(TOT_N.values())
+    L.append('| **五篇合計** | **%d** | **%d** | **%d** | **%d** | **%d** | **%d** |' %
+             (sum_b, sum(pb.values()), sum_b - sum(pb.values()),
+              sum_n, sum(pn.values()), sum_n - sum(pn.values())))
+    L += ['', '> **合計之義**：上表只計波羅夷、僧殘、捨墮、單提、提舍尼五篇，'
+          '故比丘 %d、比丘尼 %d，**非二部戒條總數**。'
+          '比丘更加不定 2、眾學 100、滅諍 7，共 **250 戒**；'
+          '比丘尼無不定，加眾學 100、滅諍 7，共 **348 戒**。'
+          '（尼單提一欄作 178 者，依戒本之數；本書正文分節得 176 目，'
+          '二目未能分立，詳附錄五之三。）' % (sum_b, sum_n), '',
+          '| 罪類 | 比丘 | 比丘尼 | 說明 |', '|---|---|---|---|',
+          '| 不定 | 2 | 0 | 尼律無不定法，故無可對 |',
+          '| 眾學 | 100 | 100 | 二部共遵，尼律不別立條目（見附錄五之三） |',
+          '| 滅諍 | 7 | 7 | 二部共遵，名目法式全同，不另對位 |',
+          '| **總計** | **250** | **348** | 四分律二部戒條之數 |', '',
+          '> **跨罪之一例**：女身相觸戒，比丘結僧殘、比丘尼結波羅夷，'
+          '故波羅夷列比丘 4、尼 5，僧殘列比丘 8、尼 7——'
+          '相差之 1 即此戒，非統計錯誤。', '',
+          '> 尼提舍尼 8 條皆為「無病乞酥油蜜石蜜乳酪魚肉」，'
+          '與比丘四提舍尼（受尼食、不止尼代索、學家、恐處）**制各不同**，'
+          '無對位可列，故「已對位」為 0。', '']
 
     # 眾學法：尼律不另立條目，須單獨交代
     xue = []
     for no in (22, 23, 24):
         for u in S.units(no):
-            xue.append((no, u.get('name') or '', u['a'], u['b']))
+            if u.get('cn'):
+                xue.append((no, u.get('name') or '', u['a'], u['b']))
+    last = xue[-1] if xue else None
     L += ['#### 附錄五之三　眾學法（二部共遵，無對位可列）', '',
-          '> 查尼律諸篇（026–037）**全無「眾學／式叉迦羅尼／應當學」之獨立條目**；'
-          '眾學法為二部共遵之威儀法，比丘尼不另立戒條。'
-          '故本表無「比丘眾學 ↔ 尼眾學」之對位——非遺漏，乃體例如是。'
-          '為便讀者掌握，下列比丘眾學全部 %d 目（篇 022–024），'
-          '尼眾亦同遵此批威儀。' % len(xue), '',
-          '| 篇 | 眾學目 | 段次 |', '|---|---|---|']
-    for no, nm, a2, b2 in xue:
-        L.append('| %03d | %s | %d–%d |' % (no, nm[:34] or '（承上省語）', a2, b2))
-    L.append('')
+          '> 查尼律諸篇（026–037）**未見「眾學／式叉迦羅尼／應當學」之獨立條目**；'
+          '眾學法為二部共遵之威儀法，四分廣律於尼律不別立條目。'
+          '（然《四分比丘尼戒本》一系仍完整誦出百眾學，'
+          '故此言「廣律不別立」，非謂尼眾不持。）'
+          '本表無「比丘眾學 ↔ 尼眾學」之對位，非遺漏，乃體例如是。',
+          '>',
+          '> **此表只列本書已分節者 %d 目**，非百眾學之全。'
+          '眾學法定 100 條；本書分節於篇 022 得 8、篇 023 得 32、篇 024 得 18，'
+          '末目（段 107–178）實含後 42 條未分節之威儀（塔寺、說法諸戒），'
+          '故段次跨度特大，非一條橫跨七十二段。' % len(xue), '',
+          '| 序 | 篇 | 眾學目 | 段次 |', '|---|---|---|---|']
+    for i, (no, nm, a2, b2) in enumerate(xue, 1):
+        span = '%d–%d' % (a2, b2)
+        if (no, nm, a2, b2) == last:
+            span = '%d–%d（含後 42 條未分節）' % (a2, b2)
+        L.append('| %d | %03d | %s | %s |' % (i, no, nm[:34] or '（承上省語）', span))
+    L += ['', '> 補記：末目以下之 42 條（不得塔中埋死屍、不得向塔燒死屍、'
+          '不得為持劍人說法等），原文自段 107 起逐段羅列，'
+          '本書尚未分節，故不列目；他日補分節，此表當增至 100 目。', '']
     return '\n'.join(L)
 
 
