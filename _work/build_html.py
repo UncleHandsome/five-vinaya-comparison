@@ -1384,6 +1384,16 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
     return True
 
 
+def _a5_pairs():
+    """附錄五共戒對位組數（讀生成物，免寫死）。"""
+    p = os.path.join(BASE, 'appendix5.md')
+    if not os.path.exists(p):
+        return 0
+    t = open(p, encoding='utf-8').read().split('#### 附錄五之二')[0]
+    return max(0, sum(1 for l in t.splitlines()
+                      if l.startswith('| ') and '---' not in l) - 1)
+
+
 def _plain(s):
     """去 Markdown 標記，留純文字（供索引摘要）。"""
     s = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', s)
@@ -1477,7 +1487,7 @@ def build_search_index():
     recs += [
         ['x', '矩陣', '五部律綜合異同矩陣', '2,124 列，五欄記各律有無，可篩選排序',
          '五部律綜合異同矩陣.html', '專題'],
-        ['x', '對照', '比丘／比丘尼戒對照表', '共戒對位 39 組，附眾學法 58 目',
+        ['x', '對照', '比丘／比丘尼戒對照表', '共戒對位 %d 組，附眾學法 58 目' % _a5_pairs(),
          '比丘比丘尼戒對照表.html', '專題表'],
         ['x', '開遮', '五部律開遮持犯表', '657 列，差異導向，五欄記各律有無',
          '五部律開遮持犯表.html', '專題表'],
@@ -1497,6 +1507,7 @@ def build_search_index():
 
 def build_index():
     """索引頁"""
+    _a5 = _a5_pairs()
     rows = []
     for jname, fn in JUAN:
         p = os.path.join(SRC, fn)
@@ -1562,7 +1573,7 @@ def build_index():
 <table>
 <tr><th>表</th><th>內容</th></tr>
 <tr><td><a href="比丘比丘尼戒對照表.html"><strong>比丘／比丘尼戒對照表</strong></a></td>
-<td>只列<strong>共戒</strong>：對位 39 組，逐組標罪名異同（如摩觸戒比丘結僧殘、比丘尼結波羅夷），
+<td>只列<strong>共戒</strong>：對位 {_a5} 組，逐組標罪名異同（如摩觸戒比丘結僧殘、比丘尼結波羅夷），
 並附眾學法全 58 目。可依罪屬、罪名異同篩選。原為附錄五。</td></tr>
 <tr><td><a href="五部律開遮持犯表.html"><strong>五部律開遮持犯表</strong></a></td>
 <td>差異導向，657 列，五欄記各律有無；可依狀態、差異類型、各部欄篩選，點表頭排序。
