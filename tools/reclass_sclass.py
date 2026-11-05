@@ -58,10 +58,11 @@ def main():
         v['依據'] = why
         ledger.append((mid, v.get('canon'), v.get('層'), v.get('title', '')[:56], cls, why))
 
-    json.dump(s, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    with open(p, 'w', encoding='utf-8', newline='\n') as _f:
+        json.dump(s, _f, ensure_ascii=False, indent=1)
     q = os.path.join(OUT, '再分類台帳.csv')
     with open(q, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator='\n')
         w.writerow(('項號', '所屬律', '層', '標題', '新類', '依據'))
         w.writerows(ledger)
 

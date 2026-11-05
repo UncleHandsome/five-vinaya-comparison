@@ -278,8 +278,8 @@ def build6():
 
 def main():
     a5, a6 = build5(), build6()
-    open(os.path.join(WORK, 'appendix5.md'), 'w', encoding='utf-8').write(a5)
-    open(os.path.join(WORK, 'appendix6.md'), 'w', encoding='utf-8').write(a6)
+    open(os.path.join(WORK, 'appendix5.md'), 'w', encoding='utf-8', newline='\n').write(a5)
+    open(os.path.join(WORK, 'appendix6.md'), 'w', encoding='utf-8', newline='\n').write(a6)
     print('附錄五／六已寫出')
 
 

@@ -191,8 +191,9 @@ def main():
                     'term': t, 'ctx': ctx}
                 break
 
-    json.dump(fill, open(os.path.join(WORK, 'mk_gu_fill.json'), 'w',
-                         encoding='utf-8'), ensure_ascii=False, indent=1)
+    with open(os.path.join(WORK, 'mk_gu_fill.json'), 'w',
+              encoding='utf-8', newline='\n') as _f:
+        json.dump(fill, _f, ensure_ascii=False, indent=1)
     for mid, d in sorted(fill.items()):
         r = next(x for x in rows if x['id'] == mid)
         for k in ('vMK', 'vGU'):
@@ -202,7 +203,7 @@ def main():
                                d[k]['ctx'][:48]))
     q = os.path.join(OUT, '僧祇根有補比.csv')
     with open(q, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator='\n')
         w.writerow(('項號', '所屬律', '標題', '欄位', '補值', '出處', '檢得詞', '上下文'))
         w.writerows(ledger)
 
