@@ -266,10 +266,10 @@ def build6():
             L.append('')
         if gu:
             import collections as _c
-            cc = _c.Counter(d['cite'].split(' ')[1] for _, d in gu)
+            cc = _c.Counter(d['cite'].rsplit(' ', 1)[-1] for _, d in gu)
             L += ['**根有（%d 格，依卷分佈）**' % len(gu), '',
                   '| 卷 | 格數 |', '|---|---|']
-            for k in sorted(cc, key=lambda x: int(x.replace('卷', '') or 0)):
+            for k in sorted(cc):
                 L.append('| %s | %d |' % (k, cc[k]))
             L += ['', '> 逐格明細（項號、學處序、上下文）見 `_work/審閱/僧祇根有補比.csv`。', '']
     print('附錄六', len(picked), '列；補比', sum(len(v) for v in FILL.values()), '格')
