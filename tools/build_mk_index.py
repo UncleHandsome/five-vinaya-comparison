@@ -16,6 +16,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(ROOT, '_work')
 XML = os.path.join(WORK, '_1426.xml')
 
+# 四分捨墮序 → 僧祇戒本捨墮序（戒本只得 26 條，餘四條未見）
+MK_SHEDUO = {
+    1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8,
+    11: 11, 12: 9, 13: 10, 14: 12, 15: 13, 16: 14, 17: 15, 18: 16,
+    19: 17, 20: 18, 21: 19, 22: 20, 23: 24, 25: 22, 26: 21, 27: 23,
+    28: 25, 30: 26,
+}
+
 # 四分單提序 → 僧祇戒本單提序（None 為未能確定）
 MK_DAN = {
     1: 1, 2: 2, 3: 3, 4: 69, 5: 42, 6: 6, 7: 8, 8: 7, 9: 5, 10: 73,
@@ -75,6 +83,7 @@ def main():
     idx = {
         '波羅夷': {i: i for i in range(1, 5)},
         '僧殘': {i: i for i in range(1, 11)},
+        '捨墮': MK_SHEDUO,
         '單提': {i: j for i, j in MK_DAN.items() if j},
         '來源': 'T22 no. 1426 摩訶僧祇律大比丘戒本',
     }
@@ -101,8 +110,33 @@ def main():
                  (r['篇'], r['節'], r['四分戒名'], r['僧祇序'],
                   re.sub(r'^[，。、；：]', '', r['僧祇起句']).replace('|', '／')))
     L += ['', '> 共 **%d** 條對位。波羅夷 4 條、僧殘前 10 條與四分同序，'
-          '開遮表補比時一併採用；捨墮、提舍尼之戒本分段未能盡合，暫缺。'
+          '開遮表補比時一併採用；提舍尼之戒本分段未能盡合，暫缺。'
           % sum(1 for r in rows if r['僧祇序']), '']
+
+    # 捨墮 26 條
+    dan2 = [p[:34] for p in t[3066:4610].split('若比丘')[1:]]
+    L += ['#### 附錄七之一　僧祇戒本對照表（比丘捨墮）', '',
+          '> 僧祇戒本捨墮只得 26 條（自稱「三十尼薩耆波夜提」），'
+          '四分 9 勸二家、10 過限忽切、24 勸織師、29 蘭若離衣四條無可對位，'
+          '不強配。', '',
+          '| 四分 | 四分戒名 | 僧祇戒本 | 僧祇起句 |', '|---|---|---|---|']
+    units2 = {}
+    for no in range(8, 13):
+        for u in S.units(no):
+            if u.get('cn') and S.jie_family(no, u) == '比丘捨墮':
+                lab = S.unit_label(u, no) or ''
+                m = re.match(r'([一二三四五六七八九十百]+)、', lab)
+                if m:
+                    units2[len(units2) + 1] = (no, u['cn'])
+    for i in range(1, 31):
+        j = MK_SHEDUO.get(i)
+        if not j:
+            continue
+        no, cn = units2.get(i, ('', ''))
+        L.append('| %03d-%s | %s | 第 %d 條 | %s |' %
+                 (no, cn, nm('比丘捨墮', i), j,
+                  re.sub(r'^[，。、；：]', '', dan2[j - 1]).replace('|', '／')))
+    L.append('')
 
     with open(os.path.join(WORK, 'appendix7.md'), 'w', encoding='utf-8',
               newline='\n') as f:
