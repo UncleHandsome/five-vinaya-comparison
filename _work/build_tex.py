@@ -20,6 +20,8 @@
   python build_tex.py --full          # 另做合冊
 """
 import os, re, subprocess, sys, shutil
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_html import _pandoc_exe
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -45,7 +47,10 @@ FULL = '五部律差異對照本.md'
 def prep(md):
     """轉為 LaTeX 友善的 Markdown"""
     # 本篇目錄在 PDF 無用，整段移除
-    md = re.sub(r'<details class="art-toc">.*?</details>\s*', '', md, flags=re.S)
+    # 目錄與「本節差異一覽」皆為導覽用，PDF 線性閱讀不需要，整塊移除；
+    # 只認 class="art-toc" 會漏掉 art-toc art-diff，留下失衡的 <details>。
+    md = re.sub(r'<details class="art-(?:toc|diff)[^"]*">.*?</details>\s*', '',
+                md, flags=re.S)
     # 四分律原文／白話
     md = re.sub(r'<details class="art-src">\s*<summary>([^<]*)</summary>',
                 lambda m: f'\n**〔{m.group(1)}〕**\n', md)
@@ -90,7 +95,7 @@ def build(src_md, out_pdf, title, extra_meta=None):
 \titlespacing*{\subsubsection}{0pt}{4pt}{2pt}
 ''')
     cmd = [
-        'pandoc', tmp_md, '-o', out_pdf,
+        _pandoc_exe(), tmp_md, '-o', out_pdf,
         '--pdf-engine=xelatex',
         '-V', 'documentclass=ctexart',
         '-V', 'CJKmainfont=FangSong',

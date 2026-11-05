@@ -1468,3 +1468,14 @@ D 1458／S 657／G/T 9／矩陣 2124 未動；錨點失效 0。
 
 **驗證**：`rebuild_all.py --no-pdf` 全綠；`verify_integrity.py` 五項全通過；
 D 1458／S 657／G/T 9／矩陣 2124 未動。
+
+**補記（2026-11-05 17:00）：PDF 重建與兩個 bug**
+- Chrome 版八冊與 LaTeX 版重建（內容含附錄七、僧祇補比、差異一覽摘要）。
+- 修 `build_pdf.prep_md`：原只換 `</details>` 為 `</div>`，未換 `<details ...>` 開頭；
+  自加入「本節差異一覽」（`<details class="art-toc art-diff">`）後標籤失衡，
+  分卷 PDF 只剩 3 頁。今將所有 `<details…>` 一律轉 `div`，`<summary>` 轉小標題。
+- 修 `build_tex`：原只移除 `class="art-toc"`，漏了 `art-toc art-diff`，
+  LaTeX 轉換留下失衡標籤；改以 `art-(toc|diff)` 整塊移除。
+- 修 `build_pdf` 之 pandoc 呼叫：改用 `build_html._pandoc_exe()`，
+  免 PATH 指向舊版 pandoc 時 `FileNotFoundError`。
+- 封面「829 節」改 848。

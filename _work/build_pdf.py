@@ -15,6 +15,8 @@
   python build_pdf.py --test     # 只做卷三十一至三十七，驗版式
 """
 import os, re, subprocess, sys, shutil
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_html import _pandoc_exe
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -150,6 +152,11 @@ def prep_md(md):
         r'<details>\s*<summary>([^<]*)</summary>',
         lambda m: f'<div class="bh"><div class="bh-l">〔{m.group(1)}〕</div>\n',
         md)
+    # 其餘 details（篇目錄、本節差異一覽）亦轉為 div，summary 作小標題；
+    # 只換 </details> 而留 <details ...> 會造成標籤失衡，整份內容被吞。
+    md = re.sub(r'<details[^>]*>', '<div class="bh">', md)
+    md = re.sub(r'<summary>([^<]*)</summary>',
+                lambda m: f'<div class="bh-l">〔{m.group(1)}〕</div>', md)
     md = md.replace('</details>', '</div>')
     # 移除空錨點（PDF 無需跳轉）
     md = re.sub(r'<a id="[^"]*"></a>\s*', '', md)
@@ -203,7 +210,7 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None):
     md = md_text if md_text is not None else open(md_path, encoding='utf-8').read()
     md = prep_md(md)
 
-    p = subprocess.run(['pandoc', '-f', 'gfm', '-t', 'html5', '--no-highlight'],
+    p = subprocess.run([_pandoc_exe(), '-f', 'gfm', '-t', 'html5', '--no-highlight'],
                        input=md.encode('utf-8'), capture_output=True)
     if p.returncode != 0:
         print('  pandoc 失敗：', p.stderr.decode('utf-8')[:300])
@@ -212,7 +219,7 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None):
 
     _sub = title.replace('五部律差異對照本', '').strip() or '全一冊'
     cover = make_cover('五部律差異對照本', '以《四分律》為軸　五部對校',
-                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　829 節　·　九組歸併',
+                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　848 節　·　九組歸併',
                         'A4 · 內文 12pt · 緊湊排版'])
     toc = make_toc(md)
     page = f"""<!DOCTYPE html>
