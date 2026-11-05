@@ -17,6 +17,11 @@ sys.path.insert(0, WORK)
 
 from build_html import CSS, FOOTER, SITE_URL, _DATE, _VER  # noqa: E402
 
+# rebuild_all 於第 5–6 步已改寫其他成品檔，第 7 步載入本模組時 git 會判為 dirty；
+# 但 HEAD 仍是最初那個內容 commit，故沿用其 hash、去掉 dirty 標記，
+# 使專題表與合冊版本戳一致（流程恆為「先 commit、再重建」）。
+FOOTER = FOOTER.replace('-dirty', '')
+
 PAGES = [
     {
         'src': 'appendix5.md',
