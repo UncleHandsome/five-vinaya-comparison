@@ -26,8 +26,13 @@ def _stamp():
     try:
         h = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT,
                            capture_output=True, text=True, timeout=10).stdout.strip()
-        if h and subprocess.run(['git', 'status', '--porcelain'], cwd=ROOT,
-                                capture_output=True, text=True, timeout=20).stdout.strip():
+        # 只監看來源目錄，避免 rebuild 中前面步驟改寫成品而被判 dirty
+        # （與 build_html._build_stamp 同一判準，確保全站版本戳一致）。
+        st = subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no',
+                             '--', '_work', 'tools', '01_原文', '02_去重稿', '白話四分律'],
+                            cwd=ROOT, capture_output=True, text=True,
+                            timeout=20).stdout.strip()
+        if h and st:
             h += '-dirty'
     except Exception:
         h = ''

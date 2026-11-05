@@ -125,8 +125,12 @@ def _build_stamp():
     try:
         h = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT,
                            capture_output=True, text=True, timeout=10).stdout.strip()
-        st = subprocess.run(['git', 'status', '--porcelain'], cwd=ROOT,
-                            capture_output=True, text=True, timeout=20).stdout.strip()
+        # 只監看來源目錄：rebuild 流程會先改寫成品 MD/HTML/CSV，
+        # 若把它們算進 dirty，同一版本會在不同頁面出現不同戳記。
+        st = subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no',
+                             '--', '_work', 'tools', '01_原文', '02_去重稿', '白話四分律'],
+                            cwd=ROOT, capture_output=True, text=True,
+                            timeout=20).stdout.strip()
         if h and st:
             h += '-dirty'
     except Exception:
