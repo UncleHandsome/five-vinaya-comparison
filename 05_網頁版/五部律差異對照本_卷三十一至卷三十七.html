@@ -374,7 +374,9 @@ body.par main:after{content:""; display:block; clear:both}
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
 <label for="find" class="sr-only">全文檢索</label>
-<input type="search" id="find" placeholder="全文檢索（Enter 逐處）" aria-label="全文檢索，含折疊內容"
+<input type="search" id="find"
+  placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;（Enter 逐處）"
+  aria-label="多關鍵字模糊檢索，含折疊內容。空白分隔多詞，減號排除，引號片語"
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 <div id="findinfo" role="status" aria-live="polite"
@@ -6485,9 +6487,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 479fe0a（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 4f1fd1f-dirty（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 479fe0a」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 4f1fd1f-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -6495,7 +6497,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 479fe0a（2026-11-05）}<br>
+　note = {版本 4f1fd1f-dirty（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -6602,19 +6604,132 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
   if (fbox){
     var hits = [], cur = -1, timer = null, LIMIT = 3000;
 
+    // ── 多關鍵字＋模糊檢索 ────────────────────────────────────────
+    // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
+    // 匹配：先比正規化後的精確子串；不成，再退回「子序列」模糊，
+    //       可容漏字、跳字（如「摩埵」可中「摩那埵」）。
+    var FOLD = {'麁':'麤', '鉢':'缽', '著':'着', '牀':'床', '汙':'污',
+                '脚':'腳', '㥲':'瞋', '柰':'奈', '㝹':'兔', '説':'說',
+                '摺':'襵', '麤':'麤'};
+    var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
+
+    var norm = function(s){
+      s = String(s).replace(PUNC, '').toLowerCase();
+      var o = '';
+      for (var i = 0; i < s.length; i++){
+        var c = s.charAt(i);
+        o += (FOLD[c] || c);
+      }
+      return o;
+    };
+
+    var fuzzy = function(hay, needle){
+      if (needle.length < 2) return false;      // 單字只作精確，免處處命中
+      var i = 0, j = 0, first = -1, last = -1;
+      while (i < hay.length && j < needle.length){
+        if (hay.charAt(i) === needle.charAt(j)){
+          if (first < 0) first = i;
+          last = i; j++;
+        }
+        i++;
+      }
+      if (j < needle.length) return false;
+      // 首末跨度不得過散：2 字 ≤6、3 字 ≤8、4 字 ≤10……
+      return (last - first + 1) <= needle.length * 2;
+    };
+
+    var parseQuery = function(q){
+      var inc = [], exc = [], phr = [], m;
+      var re = /"([^"]+)"|(\S+)/g;
+      while ((m = re.exec(q))){
+        if (m[1]){
+          var p = norm(m[1]);
+          if (p) phr.push(p);
+        } else {
+          var t = m[2];
+          if (t.charAt(0) === '-' && t.length > 1){
+            var e = norm(t.slice(1));
+            if (e) exc.push(e);
+          } else {
+            var v = norm(t);
+            if (v) inc.push(v);
+          }
+        }
+      }
+      return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
+    };
+
+    var matchOne = function(hay, term){
+      if (hay.indexOf(term) >= 0) return 1;   // 精確
+      if (fuzzy(hay, term)) return 2;         // 模糊
+      return 0;
+    };
+
     var collect = function(q){
+      var pq = parseQuery(q);
+      if (!pq.n) return [];
       var root = document.getElementById('main') || document.body;
       var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-      var out = [], n, lq = q.toLowerCase();
+      var nodes = [], masks = [], exf = [], rank = [], n;
       while ((n = w.nextNode())){
         var pe = n.parentElement;
         if (!pe) continue;
-        var t = pe.tagName;
-        if (t === 'SCRIPT' || t === 'STYLE' || t === 'NOSCRIPT') continue;
-        if (n.data && n.data.toLowerCase().indexOf(lq) >= 0){
-          out.push(n);
-          if (out.length >= LIMIT) break;
+        var tag = pe.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') continue;
+        // 正規化結果快取於文字節點，第二次查詢起不必重算（合冊數十萬節點）
+        var hay = n._n;
+        if (hay === undefined){ hay = n._n = norm(n.data || ''); }
+        nodes.push(n);
+        if (!hay){ masks.push(0); exf.push(0); rank.push(0); continue; }
+        var ex = 0;
+        for (var i = 0; i < pq.exc.length; i++){
+          if (hay.indexOf(pq.exc[i]) >= 0){ ex = 1; break; }
         }
+        var m = 0, r = 0;
+        if (!ex){
+          for (var j = 0; j < pq.inc.length; j++){
+            var rr = matchOne(hay, pq.inc[j]);
+            if (rr){ m |= (1 << j); if (rr > r) r = rr; }
+          }
+          for (var k = 0; k < pq.phr.length; k++){
+            if (hay.indexOf(pq.phr[k]) >= 0){
+              m |= (1 << (pq.inc.length + k)); if (r < 1) r = 1;
+            }
+          }
+        }
+        masks.push(m); exf.push(ex); rank.push(r);
+      }
+      var full = (1 << pq.n) - 1;
+      var hitIdx = [];
+      for (var x = 0; x < nodes.length; x++){ if (masks[x]) hitIdx.push(x); }
+
+      // 單詞：逐處列出，精確者在前
+      if (pq.n === 1){
+        var e1 = [], f1 = [];
+        for (var y = 0; y < hitIdx.length; y++){
+          var iy = hitIdx[y];
+          if (exf[iy]) continue;
+          (rank[iy] === 1 ? e1 : f1).push(nodes[iy]);
+          if (e1.length + f1.length >= LIMIT) break;
+        }
+        return e1.concat(f1);
+      }
+
+      // 多詞：以「鄰近段落群」為一處（同一卡片／同一節內全部命中），
+      // 而非要求同一文字節點含全部詞——否則多詞幾乎恆為 0 處。
+      var out = [], W = 40;
+      for (var h = 0; h < hitIdx.length; h++){
+        var i0 = hitIdx[h], acc = 0, exs = 0, last = i0;
+        var end = Math.min(nodes.length, i0 + W);
+        for (var t = i0; t < end; t++){
+          acc |= masks[t]; exs += exf[t];
+          if ((acc & full) === full){ last = t; break; }
+        }
+        if ((acc & full) === full && exs === 0){
+          out.push(nodes[i0]);
+          while (h + 1 < hitIdx.length && hitIdx[h + 1] <= last) h++;
+        }
+        if (out.length >= LIMIT) break;
       }
       return out;
     };
@@ -6633,6 +6748,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       var node = hits[cur];
       reveal(node);
       var pe = node.parentElement;
+      // 前一次的高亮須先清除，否則逐處巡覽會累積多個 .hitflash
+      Array.prototype.forEach.call(document.querySelectorAll('.hitflash'),
+        function(x){ x.classList.remove('hitflash'); });
       pe.classList.add('hitflash');
       // 展開 details 會使上方版面變高，瀏覽器的 scroll anchoring 隨之補償，
       // 把剛跳到的位置又推走；此處暫停 anchoring，並於兩帧後再校正一次。
@@ -6640,18 +6758,40 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       // 於此時會落在舊座標。改以絕對座標直接捲動，並在版面穩定前後各校正一次。
       var de = document.documentElement;
       var oldAnchor = de.style.overflowAnchor;
+      var oldBehav = de.style.scrollBehavior;
       de.style.overflowAnchor = 'none';
+      // 全站 CSS 有 scroll-behavior:smooth，多次校正會被平滑動畫互相打斷，
+      // 反而越滾越遠；跳轉期間須強制即時定位。
+      de.style.scrollBehavior = 'auto';
+      var targetTop = Math.max(80, (window.innerHeight - pe.offsetHeight) / 2);
       var jump = function(){
-        var y = pe.getBoundingClientRect().top + window.pageYOffset
-                - Math.max(80, (window.innerHeight - pe.offsetHeight) / 2);
-        window.scrollTo(0, Math.max(0, y));
+        var y = pe.getBoundingClientRect().top + window.pageYOffset - targetTop;
+        window.scrollTo({top: Math.max(0, y), behavior: 'instant'});
       };
       jump();
-      [120, 350, 700, 1200, 2000].forEach(function(t){ setTimeout(jump, t); });
+      // 字體（思源宋體等）載入後會整頁重排，固定時刻的校正會失效；
+      // 改以 rAF 監測目標位置，偏離即修正，連續 4 幀穩定或 6 秒為止。
+      var stable = 0, t0 = Date.now(), lastTry = 0;
+      var tick = function(){
+        var now = Date.now();
+        var d = Math.abs(pe.getBoundingClientRect().top - targetTop);
+        if (d <= 8){
+          stable++;
+        } else {
+          stable = 0;
+          if (now - lastTry > 120){ lastTry = now; jump(); }
+        }
+        if (stable < 4 && now - t0 < 6000){ requestAnimationFrame(tick); }
+      };
+      requestAnimationFrame(tick);
+      if (document.fonts && document.fonts.ready){
+        document.fonts.ready.then(function(){ setTimeout(jump, 60); });
+      }
+      setTimeout(function(){ pe.classList.remove('hitflash'); }, 3000);
       setTimeout(function(){
-        pe.classList.remove('hitflash');
         de.style.overflowAnchor = oldAnchor;
-      }, 2600);
+        de.style.scrollBehavior = oldBehav;
+      }, 6400);
       finfo.textContent = '第 ' + (cur + 1) + ' / ' + hits.length + ' 處' +
         (hits.length >= LIMIT ? '（已達上限，請加長關鍵詞）' : '');
     };
@@ -6662,7 +6802,13 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
       if (q !== run.last){
         hits = collect(q); cur = -1; run.last = q;
       }
-      if (!hits.length){ finfo.textContent = '「' + q + '」：0 處'; return; }
+      if (!hits.length){
+        var tip = (q.indexOf('-') >= 0 || q.indexOf('"') >= 0)
+          ? '（請檢查 -排除 與 "片語" 之語法）'
+          : (q.split(/\s+/).length > 1 ? '（多詞須全部命中，可減少詞數）' : '');
+        finfo.textContent = '「' + q + '」：0 處' + tip;
+        return;
+      }
       go(jump ? cur + 1 : 0);
     };
 

@@ -125,16 +125,67 @@ JS = r"""
   var f = {st:'', seg:'', lv:'', q:''};
   var cntEl = document.getElementById('cnt');
 
+  // 多關鍵字＋模糊（與對照本、專題表同一套規則）
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+              '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵','麤':'麤'};
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
+  function norm(s){
+    s = String(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){ var c = s.charAt(i); o += (FOLD[c] || c); }
+    return o;
+  }
+  function fuzzy(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  }
+  function parseQuery(q){
+    var inc = [], exc = [], phr = [], m, re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){ var p = norm(m[1]); if (p) phr.push(p); }
+      else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){ var e = norm(t.slice(1)); if (e) exc.push(e); }
+        else { var v = norm(t); if (v) inc.push(v); }
+      }
+    }
+    return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
+  }
+  function hit(hay, t){
+    if (hay.indexOf(t) >= 0) return 1;
+    return fuzzy(hay, t) ? 2 : 0;
+  }
+
   function apply(){
     var n = 0;
+    var pq = f.pq || {inc: [], exc: [], phr: [], n: 0};
     rows.forEach(function(tr){
       var ok = true;
       if (f.st && tr.dataset.st !== f.st) ok = false;
       if (f.seg && tr.dataset.seg !== f.seg) ok = false;
       if (f.lv && tr.dataset.lv !== f.lv) ok = false;
-      if (ok && f.q){
-        var s = (tr.dataset.txt || '').toLowerCase();
-        if (s.indexOf(f.q) < 0) ok = false;
+      if (ok && (pq.n || pq.exc.length)){
+        if (tr._n === undefined) tr._n = norm(tr.dataset.txt || '');
+        var s = tr._n, qok = true;
+        for (var a = 0; a < pq.exc.length; a++){
+          if (s.indexOf(pq.exc[a]) >= 0){ qok = false; break; }
+        }
+        if (qok) for (var b = 0; b < pq.phr.length; b++){
+          if (s.indexOf(pq.phr[b]) < 0){ qok = false; break; }
+        }
+        if (qok) for (var c = 0; c < pq.inc.length; c++){
+          if (!hit(s, pq.inc[c])){ qok = false; break; }
+        }
+        if (!qok) ok = false;
       }
       tr.style.display = ok ? '' : 'none';
       if (ok) n++;
@@ -173,7 +224,11 @@ JS = r"""
   });
 
   var q = document.getElementById('q');
-  q.addEventListener('input', function(){ f.q = q.value.trim().toLowerCase(); apply(); });
+  q.addEventListener('input', function(){
+    f.q = q.value.trim();
+    f.pq = parseQuery(f.q);
+    apply();
+  });
 
   // 目錄高亮
   var links = Array.prototype.slice.call(document.querySelectorAll('nav a[href^="#"]'));
@@ -289,7 +344,9 @@ def main():
   <span class="lbl">狀態</span>{st_chips}
   <span class="lbl">主稿</span>{seg_chips}
   <span class="lbl">層級</span>{lv_chips}
-  <input type="search" id="q" placeholder="搜索主題或差異…" aria-label="搜索主題或差異">
+  <input type="search" id="q"
+    placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;"
+    aria-label="多關鍵字模糊搜索主題或差異：空白分隔多詞，減號排除，引號片語">
   <span class="count" id="cnt">{total:,} 項</span>
 </div>
 {''.join(body)}

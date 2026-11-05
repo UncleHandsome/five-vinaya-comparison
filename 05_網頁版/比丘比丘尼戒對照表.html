@@ -283,7 +283,7 @@ td.bad{color:#a33; font-weight:600}
 <h2>附錄五　比丘／比丘尼共戒對位表</h2>
 <p class="note"><strong>範圍</strong>：只列二部共有之戒（共戒）；比丘獨有、比丘尼獨有者不列。波羅夷、僧殘、捨墮、<strong>單提（波逸提）</strong>、<strong>眾學法</strong>各類皆納入對位。<br><strong>判準</strong>：以戒名字元相似度 ≥ 0.30 自動候選；異名而確為共戒者由編者判定補入。「罪名異同」一欄為本表重點——同題之戒，二部所結之罪未必相同。相似度僅為檢索之便，<strong>非判定</strong>；表列「待覆核」者請回二部戒文自校，本書不強配（凡例六）。</p>
 <div class="tools">
-<label>搜尋</label><input type="search" placeholder="輸入關鍵詞即時過濾" aria-label="搜尋表格">
+<label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
 <label>罪名異同</label><select data-col="6" aria-label="篩選罪名異同"><option value="">全部</option><option value="**異**">**異**</option><option value="同">同</option></select>
 <label>罪屬</label><select data-col="2" aria-label="篩選罪屬"><option value="">全部</option><option value="僧殘">僧殘</option><option value="單提（波逸提）">單提（波逸提）</option><option value="捨墮（尼薩耆波逸提）">捨墮（尼薩耆波逸提）</option><option value="波羅夷">波羅夷</option></select>
 <button type="button" class="reset">清除</button>
@@ -693,7 +693,7 @@ td.bad{color:#a33; font-weight:600}
 <h2>附錄五之一　眾學法（二部共遵，無對位可列）</h2>
 <p class="note">查尼律諸篇（026–037）<strong>全無「眾學／式叉迦羅尼／應當學」之獨立條目</strong>；眾學法為二部共遵之威儀法，比丘尼不另立戒條。故本表無「比丘眾學 ↔ 尼眾學」之對位——非遺漏，乃體例如是。為便讀者掌握，下列比丘眾學全部 58 目（篇 022–024），尼眾亦同遵此批威儀。</p>
 <div class="tools">
-<label>搜尋</label><input type="search" placeholder="輸入關鍵詞即時過濾" aria-label="搜尋表格">
+<label>搜尋</label><input type="search" placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">
 <label>篇</label><select data-col="0" aria-label="篩選篇"><option value="">全部</option><option value="022">022</option><option value="023">023</option><option value="024">024</option></select>
 <button type="button" class="reset">清除</button>
 <span class="count"></span></div>
@@ -1019,9 +1019,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 479fe0a（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 4f1fd1f（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 479fe0a」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 4f1fd1f」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -1029,7 +1029,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 479fe0a（2026-11-05）}<br>
+　note = {版本 4f1fd1f（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -1041,6 +1041,47 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 </main></div>
 <script>
 (function(){
+  // 多關鍵字＋模糊（與對照本檢索同一套規則）
+  // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+              '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵','麤':'麤'};
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
+  function norm(s){
+    s = String(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){ var c = s.charAt(i); o += (FOLD[c] || c); }
+    return o;
+  }
+  function fuzzy(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  }
+  function parseQuery(q){
+    var inc = [], exc = [], phr = [], m, re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){ var p = norm(m[1]); if (p) phr.push(p); }
+      else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){ var e = norm(t.slice(1)); if (e) exc.push(e); }
+        else { var v = norm(t); if (v) inc.push(v); }
+      }
+    }
+    return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
+  }
+  function hit(hay, t){
+    if (hay.indexOf(t) >= 0) return 1;
+    return fuzzy(hay, t) ? 2 : 0;
+  }
+
   document.querySelectorAll('.tbl-wrap').forEach(function(wrap){
     var tid = wrap.getAttribute('data-tbl');
     var table = wrap.querySelector('table');
@@ -1052,10 +1093,23 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
     var sortCol = -1, sortDesc = false;
 
     function refresh(){
-      var q = (box.value || '').trim().toLowerCase();
+      var pq = parseQuery(box.value || '');
       var n = 0;
       rows.forEach(function(tr){
-        var ok = !q || tr.textContent.toLowerCase().indexOf(q) >= 0;
+        var ok = true;
+        if (pq.n || pq.exc.length){
+          if (tr._norm === undefined) tr._norm = norm(tr.textContent);
+          var hay = tr._norm;
+          for (var a = 0; a < pq.exc.length; a++){
+            if (hay.indexOf(pq.exc[a]) >= 0){ ok = false; break; }
+          }
+          if (ok) for (var b = 0; b < pq.phr.length; b++){
+            if (hay.indexOf(pq.phr[b]) < 0){ ok = false; break; }
+          }
+          if (ok) for (var c = 0; c < pq.inc.length; c++){
+            if (!hit(hay, pq.inc[c])){ ok = false; break; }
+          }
+        }
         if (ok) {
           sels.forEach(function(sel){
             if (!sel.value) return;
@@ -1067,7 +1121,8 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
         tr.hidden = !ok;
         if (ok) n++;
       });
-      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列';
+      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' +
+        (n === 0 && pq.n > 1 ? '（多詞須同一列全部命中，可減少詞數）' : '');
     }
     box.addEventListener('input', refresh);
     sels.forEach(function(s){ s.addEventListener('change', refresh); });

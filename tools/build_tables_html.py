@@ -87,6 +87,47 @@ td.bad{color:#a33; font-weight:600}
 
 JS = r"""
 (function(){
+  // 多關鍵字＋模糊（與對照本檢索同一套規則）
+  // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+              '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵','麤':'麤'};
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
+  function norm(s){
+    s = String(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){ var c = s.charAt(i); o += (FOLD[c] || c); }
+    return o;
+  }
+  function fuzzy(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  }
+  function parseQuery(q){
+    var inc = [], exc = [], phr = [], m, re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){ var p = norm(m[1]); if (p) phr.push(p); }
+      else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){ var e = norm(t.slice(1)); if (e) exc.push(e); }
+        else { var v = norm(t); if (v) inc.push(v); }
+      }
+    }
+    return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
+  }
+  function hit(hay, t){
+    if (hay.indexOf(t) >= 0) return 1;
+    return fuzzy(hay, t) ? 2 : 0;
+  }
+
   document.querySelectorAll('.tbl-wrap').forEach(function(wrap){
     var tid = wrap.getAttribute('data-tbl');
     var table = wrap.querySelector('table');
@@ -98,10 +139,23 @@ JS = r"""
     var sortCol = -1, sortDesc = false;
 
     function refresh(){
-      var q = (box.value || '').trim().toLowerCase();
+      var pq = parseQuery(box.value || '');
       var n = 0;
       rows.forEach(function(tr){
-        var ok = !q || tr.textContent.toLowerCase().indexOf(q) >= 0;
+        var ok = true;
+        if (pq.n || pq.exc.length){
+          if (tr._norm === undefined) tr._norm = norm(tr.textContent);
+          var hay = tr._norm;
+          for (var a = 0; a < pq.exc.length; a++){
+            if (hay.indexOf(pq.exc[a]) >= 0){ ok = false; break; }
+          }
+          if (ok) for (var b = 0; b < pq.phr.length; b++){
+            if (hay.indexOf(pq.phr[b]) < 0){ ok = false; break; }
+          }
+          if (ok) for (var c = 0; c < pq.inc.length; c++){
+            if (!hit(hay, pq.inc[c])){ ok = false; break; }
+          }
+        }
         if (ok) {
           sels.forEach(function(sel){
             if (!sel.value) return;
@@ -113,7 +167,8 @@ JS = r"""
         tr.hidden = !ok;
         if (ok) n++;
       });
-      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列';
+      cnt.textContent = '顯示 ' + n + ' / ' + rows.length + ' 列' +
+        (n === 0 && pq.n > 1 ? '（多詞須同一列全部命中，可減少詞數）' : '');
     }
     box.addEventListener('input', refresh);
     sels.forEach(function(s){ s.addEventListener('change', refresh); });
@@ -217,7 +272,9 @@ def build_page(cfg):
                        '<br>'.join(esc(x) for x in notes.split('\n') if x.strip()) +
                        '</p>')
         out.append('<div class="tools">')
-        out.append('<label>搜尋</label><input type="search" placeholder="輸入關鍵詞即時過濾" aria-label="搜尋表格">')
+        out.append('<label>搜尋</label><input type="search" '
+                   'placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;" '
+                   'aria-label="多關鍵字模糊搜尋：空白分隔多詞，減號排除，引號片語">')
         # 離散值欄下拉
         for label, colname in cfg['filters'].items():
             if colname not in head:
