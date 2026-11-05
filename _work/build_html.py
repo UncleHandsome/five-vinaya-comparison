@@ -1029,8 +1029,8 @@ __SEARCH_CORE__
       }
       var site = document.createElement('a');
       site.className = 'fl-more fl-site';
-      site.href = 'index.html?q=' + encodeURIComponent(fbox.value.trim());
-      site.textContent = '在全站索引中檢索此詞 →';
+      site.href = '五部律差異對照本.html?q=' + encodeURIComponent(fbox.value.trim());
+      site.textContent = '在全書中全文檢索此詞 →';
       flist.appendChild(site);
       place();
       flist.hidden = false;
@@ -1527,19 +1527,17 @@ def build_index():
 <p>讀四分律至某篇某戒，翻至本書同篇，即見其餘四部於此處有何增、減、開、異。</p></blockquote>
 
 <h2>全書檢索</h2>
-<form class="homefind" action="index.html" method="get" role="search" id="homeform">
+<form class="homefind" action="五部律差異對照本.html" method="get" role="search">
   <input type="search" name="q" id="homeq" required autocomplete="off"
     placeholder="例：摩那埵 波逸提　或　迦絺那 -四分"
     aria-label="全書檢索：空白分隔多詞，減號排除，引號片語">
   <button type="submit">搜尋</button>
 </form>
-<div id="homeres" class="homeres" aria-live="polite"></div>
 <p class="hint">支援<strong>多關鍵字</strong>（空白分隔，須全部命中）、
 <strong>排除</strong>（<code>-四分</code>）、<strong>片語</strong>（<code>"非親里"</code>），
 並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）與<strong>名相別名</strong>
 （查<code>波逸提</code>亦得「單提」、查<code>捨墮</code>亦得「尼薩耆」）。
-索引收 2,124 項標題與差異摘要，<strong>即時列出、點擊直達</strong>，不載合冊；
-欲查原文與白話全文，再用合冊側欄。</p>
+送出後於合冊全文檢索並跳至首處；合冊較大，首次載入需數秒。</p>
 
 <h2>五部律</h2>
 <table>
@@ -1638,8 +1636,6 @@ def build_index():
 {FOOTER}
 </main>
 </div>
-<script>__CORE__</script>
-<script>__HOMEJS__</script>
 </body></html>"""
     page = page.replace('__CORE__', SEARCH_CORE).replace('__HOMEJS__', HOME_SEARCH)
     open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='\n').write(page)
@@ -1649,7 +1645,10 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     single = '--single' in sys.argv
 
-    build_search_index()
+    # 首頁索引暫停（2026-11-05）：首頁改回合冊全文檢索。
+    # 要開回：加 --with-index，並將 build_index 的表單 action 改回 index.html。
+    if '--with-index' in sys.argv:
+        build_search_index()
     if not single:
         build_index()
         print('索引頁：index.html')

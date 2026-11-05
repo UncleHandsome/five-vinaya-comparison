@@ -1428,3 +1428,12 @@ D1458／S657／矩陣2124 未動，錨點失效 0。第二部導言已加「改�
 
 **驗證**：`rebuild_all.py --no-pdf` 全綠；`verify_integrity.py` 五項全通過；
 D 1458／S 657／G/T 9／矩陣 2124 未動；錨點失效 0。
+
+**補記（2026-11-05 16:35）：首頁索引停用**
+- 使用者指示「索引先不要」：首頁表單改回 `action="五部律差異對照本.html"`，
+  移除 `#homeres` 與首頁索引腳本，`search_index.js` 不再產生（已刪）。
+- `build_search_index()` 與 `HOME_SEARCH` 保留，`build_html.py --with-index` 可重生；
+  要開回首頁即時結果，另需把 `build_index()` 的表單 action 改回 `index.html`
+  並補回 `#homeres` 與兩段 script。停用理由：索引只收標題與差異摘要，
+  查原文／白話會落空，不如合冊全文檢索完整。
+- 分卷檢索面板底部連結改指合冊（「在全書中全文檢索此詞」）。
