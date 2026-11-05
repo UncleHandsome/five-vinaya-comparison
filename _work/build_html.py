@@ -277,6 +277,13 @@ details.art-toc li{margin:.12rem 0; font-size:13px; line-height:1.65; break-insi
 details.art-toc a{color:var(--fg2); text-decoration:none}
 details.art-toc a:hover{color:var(--accent); text-decoration:underline}
 @media(max-width:700px){details.art-toc ul{columns:1}}
+/* ── 節級差異一覽（單欄、較輕） ── */
+details.art-diff{margin:.3rem 0 .85rem; padding:.18rem .7rem;
+  background:#f5f6f2; border-color:var(--line)}
+details.art-diff summary{font-size:12.5px; padding:.15rem 0}
+details.art-diff ul{columns:1; margin:.25rem 0 .2rem}
+details.art-diff li{font-size:12.5px; line-height:1.55}
+details.art-diff code{font-size:11.5px}
 /* ── 分隔線 ── */
 hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 錨點高亮 ── */
@@ -331,6 +338,8 @@ body.par main:after{content:""; display:block; clear:both}
   h5{background:#26241f}
   details.art-src{background:#1c1b19; border-left-color:#8a7443}
   details.art-plain{background:#191c19; border-left-color:#5c7059}
+  details.art-toc,details.art-diff{background:#1d1c1a; border-color:var(--line)}
+  details.art-toc summary,details.art-diff summary{color:var(--accent)}
   details.art-src>summary{color:#c9a76a}
   details.art-plain>summary{color:#8fae8a}
   details.art-src p,details.art-plain p{color:#cfc8bc}

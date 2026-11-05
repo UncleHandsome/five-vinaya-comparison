@@ -139,6 +139,13 @@ details.art-toc li{margin:.12rem 0; font-size:13px; line-height:1.65; break-insi
 details.art-toc a{color:var(--fg2); text-decoration:none}
 details.art-toc a:hover{color:var(--accent); text-decoration:underline}
 @media(max-width:700px){details.art-toc ul{columns:1}}
+/* ── 節級差異一覽（單欄、較輕） ── */
+details.art-diff{margin:.3rem 0 .85rem; padding:.18rem .7rem;
+  background:#f5f6f2; border-color:var(--line)}
+details.art-diff summary{font-size:12.5px; padding:.15rem 0}
+details.art-diff ul{columns:1; margin:.25rem 0 .2rem}
+details.art-diff li{font-size:12.5px; line-height:1.55}
+details.art-diff code{font-size:11.5px}
 /* ── 分隔線 ── */
 hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 錨點高亮 ── */
@@ -193,6 +200,8 @@ body.par main:after{content:""; display:block; clear:both}
   h5{background:#26241f}
   details.art-src{background:#1c1b19; border-left-color:#8a7443}
   details.art-plain{background:#191c19; border-left-color:#5c7059}
+  details.art-toc,details.art-diff{background:#1d1c1a; border-color:var(--line)}
+  details.art-toc summary,details.art-diff summary{color:var(--accent)}
   details.art-src>summary{color:#c9a76a}
   details.art-plain>summary{color:#8fae8a}
   details.art-src p,details.art-plain p{color:#cfc8bc}
@@ -315,9 +324,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 199e798（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 d89ffbc-dirty（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 199e798」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 d89ffbc-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -325,7 +334,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 199e798（2026-11-05）}<br>
+　note = {版本 d89ffbc-dirty（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。

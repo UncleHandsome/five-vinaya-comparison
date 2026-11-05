@@ -177,11 +177,19 @@ def C2(rows, pools):
 
 
 def C3(rows, pools):
-    """差異敘述提及某部，而矩陣該部記「未比」——讀者易誤為「無」。"""
+    """差異敘述提及某部，而矩陣該部記「未比」——讀者易誤為「無」。
+
+    須讀套用 errata 後之 diff_full：已補「欄記未比」別白者即為已處理，不重報。
+    """
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(ROOT, '_work'))
+    import errata as _errata
     pairs = (('五分', 'v5'), ('十誦', 'v10'), ('僧祇', 'vMK'), ('根有', 'vGU'))
     res = []
     for r in rows:
-        t = r.get('diff_full') or ''
+        t = _errata.apply(r).get('diff_full') or ''
+        if '欄記「未比」' in t:
+            continue
         for name, field in pairs:
             if name in t and r.get(field) == '未比':
                 res.append((r['id'], field, r['canon'], name,

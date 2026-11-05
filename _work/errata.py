@@ -7,6 +7,8 @@
 以存可追溯。對照本與矩陣皆引用本模組，避免二書不一致。
 """
 
+import os, json
+
 # 覆蓋欄位：title / diff_full / ref4 / st / lv
 ERRATA = {
     'M-1913': {
@@ -1150,3 +1152,33 @@ _BATCH1 = {
 for _rid, _specs in _BATCH1.items():
     ERRATA.setdefault(_rid, {})
     ERRATA[_rid]['_append'] = list(ERRATA[_rid].get('_append', [])) + _specs
+
+
+# ── 歸併組改判（2026-11-05，使用者指示「從根源修正」）────────────────
+# 逐筆回 85 項 ref4 之四分原典上下文判讀：凡四分「同一條戒／同一制度」本文具在、
+# 而本項所述僅為他部增出之細目／判例／開緣者，依凡例二應為 A 或 B，非 C。
+# 改 st 與 v4，補歸位篇段按語；**不改 _locate.json，故 S/D 項號全數不動**。
+_MERGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'merge_place.json')
+if os.path.exists(_MERGE_PATH):
+    _MERGE = json.load(open(_MERGE_PATH, encoding='utf-8'))
+    for _rid, _v in _MERGE.items():
+        ERRATA.setdefault(_rid, {})
+        _e = ERRATA[_rid]
+        _e['st'] = _v['st']
+        _e.setdefault('cells', {})['v4'] = _v['v4']
+        _e['_append'] = list(_e.get('_append', [])) + [
+            ('diff_full', '（改判：本項四分實有此制，見 %s；%s。'
+                          '原判「四分所無」過寬，今依凡例二改判為「%s」。'
+                          '項號與編次不改，仍列第二部，讀者可循上引篇段回第一部對讀。）'
+             % (_v['place'], _v['why'],
+                '同條增異' if _v['st'] == 'A' else '同條開緣')),
+            ('ref4', '（按：本項已改判為同條異制；此處「遍查未見」僅謂未見'
+                     '此細目／判例／開緣，非謂四分無此戒此制。凡例四之「驗其制，'
+                     '不驗其詞」於此尤宜措意。）'),
+        ]
+
+# 全書複驗補遺：M-0836 差異說明提及僧祇，而該欄記未比。
+ERRATA.setdefault('M-0836', {})
+ERRATA['M-0836']['_append'] = list(ERRATA['M-0836'].get('_append', [])) + [
+    ('diff_full', '（按：本項僧祇欄記「未比」，謂未經比勘，非謂僧祇無此制。）'),
+]

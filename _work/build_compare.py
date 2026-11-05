@@ -30,6 +30,12 @@ OUT = os.path.join(ROOT, '03_成品')   # 成品統一輸出於此
 si = {x['n']: x for x in json.load(open(os.path.join(BASE, 'sifen_index.json'), encoding='utf-8'))}
 rows = json.load(open(os.path.join(BASE, 'matrix_built.json'), encoding='utf-8'))
 loc = json.load(open(os.path.join(BASE, '_locate.json'), encoding='utf-8'))
+# 第二部戒類標註（tools/build_sclass.py 產出）。缺檔時靜默退化，不影響既有輸出。
+_SCLASS_PATH = os.path.join(BASE, 's_class.json')
+SCLASS = json.load(open(_SCLASS_PATH, encoding='utf-8')) if os.path.exists(_SCLASS_PATH) else {}
+# 歸併組改判與歸位篇段（tools/build_merge_place.py 產出）
+_MERGE_PATH = os.path.join(BASE, 'merge_place.json')
+MERGE_PLACE = json.load(open(_MERGE_PATH, encoding='utf-8')) if os.path.exists(_MERGE_PATH) else {}
 ORIG = json.load(open(os.path.join(BASE, 'originals_index.json'), encoding='utf-8'))
 
 ID2ROW = {r['id']: r for r in rows}
@@ -397,7 +403,7 @@ def title_md(t, rid=None):
     return f'**{main}**　{sub}'
 
 
-def render_item(r, no_prefix, compact=False):
+def render_item(r, no_prefix, compact=False, cls_label=None):
     """渲染一項"""
     r = apply_errata(r)
     g = ID2GT.get(r['id'])
@@ -411,7 +417,8 @@ def render_item(r, no_prefix, compact=False):
     lines.append('')
     p_ = PLACED.get(r['id'])
     loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+    _cls = f'　類：{cls_label}' if cls_label and cls_label != '未分類' else ''
+    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}{_cls}　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
     lines.append('')
     # 差異
     diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
@@ -1099,6 +1106,46 @@ def build_part1(seg_filter=None):
                     _sub += f'　本節差異 {len(_grp)} 項'
                 L.append(f'<sub>{_sub}</sub>')
                 L.append('')
+                # 節級差異一覽：_grp 早已算出，此前只顯示項數。此處列出可點擊項號，
+                # 沿用既有 #d-xxxx 錨點，不新增錨點、不改項號。
+                if _grp:
+                    _open = ' open' if len(_grp) <= 8 else ''
+                    L.append(f'<details class="art-toc art-diff"{_open}>'
+                             f'<summary>本節差異一覽（{len(_grp)}）</summary>')
+                    L.append('')
+                    for _s3, _r3 in _grp:
+                        _no3 = D_NO.get(_r3['id']) or _r3['id']
+                        _e3 = apply_errata(_r3)
+                        _t3 = clean_title(fix_terms(_e3['title'], _r3['canon']), _r3['id'])
+                        L.append(f'- [`{_no3}`](#{str(_no3).lower()})　'
+                                 f'{esc(split_title(_t3, _r3["id"])[0])}'
+                                 f'　〔{esc(_r3["canon"])} {_e3.get("st", "")}〕')
+                    L.append('')
+                    L.append('</details>')
+                    L.append('')
+                # 歸位互見：改判為「四分有此制」而原列第二部者，於對應節列出入口，
+                # 使讀者在戒條處即可見之（等於歸位，但不搬移 S 項、不改項號）。
+                _xref = []
+                for _mid, _v in MERGE_PLACE.items():
+                    _mseg = re.search(r'(\d{3})\s*段(\d+)', _v['place'])
+                    if not _mseg or int(_mseg.group(1)) != n:
+                        continue
+                    if not (_u['a'] <= int(_mseg.group(2)) <= _u['b']):
+                        continue
+                    _sno = S_NO.get(_mid)
+                    if _sno:
+                        _xref.append((_sno, _mid, _v))
+                if _xref:
+                    L.append(f'<details class="art-toc art-diff" open>'
+                             f'<summary>本節互見：四分有此制，細目見他部（{len(_xref)} 項）</summary>')
+                    L.append('')
+                    for _sno, _mid, _v in _xref:
+                        _xt = (ID2ROW.get(_mid) or {}).get('title', '')
+                        L.append(f'- [`{_sno}`](五部律差異對照本_四分所無與歸併組.html#{_sno.lower()})　'
+                                 f'{esc(_xt[:44])}　宜歸 {esc(_v["place"])}')
+                    L.append('')
+                    L.append('</details>')
+                    L.append('')
                 L.extend(render_src(n, _u))
                 _pb = [] if plain_doubt(n, _u) else render_plain(n, _u)
                 if _pb:
@@ -1153,6 +1200,40 @@ def build_part2():
     L.append(f'> 表列共 {sum(len(v) for v in by_canon_absent.values())} 項，另有 {n_merged} 項已併入第三部之 `G#`／`T#` 組'
              f'（同組他稿重出者，不於此重列），合 {len(ABSENT)} 項，即四分律所無之全數。')
     L.append('')
+    if MERGE_PLACE:
+        L.append(f'> **改判說明**：本輪逐筆回原典複核，其中 **{len(MERGE_PLACE)} 項**之 `ref4` '
+                 '實已指著四分同一條戒或同一制度之本文，所異者只是細目、判例或開緣，'
+                 '依凡例二應為「同條增異 A」或「同條開緣 B」，原判「四分所無 C」過寬。'
+                 '今已就地改判狀態與四分欄，並於各項補「宜歸」之篇段；'
+                 '**惟為存 S 項號與原編次，仍列於此部，不搬移、不重編**。'
+                 '讀者宜循各項所標篇段回第一部對讀；第一部相關節亦列互見。'
+                 '故本部之名「四分所無」，當理解為「原編次所收」，非謂其中每一項四分皆無其制。')
+        L.append('')
+    # 依戒類瀏覽索引：只增可點擊連結，不搬移 S 項、不重編項號。
+    if SCLASS:
+        _bycls = defaultdict(list)
+        for _mid, _v in SCLASS.items():
+            if _mid in S_NO:
+                _bycls[_v['類']].append((S_NO[_mid], _v['title']))
+        L.append(f'<details class="art-toc"><summary>依戒類瀏覽'
+                 f'（{len(_bycls)} 類，標註 {sum(len(v) for v in _bycls.values())} 項）</summary>')
+        L.append('')
+        L.append('> 依標題關鍵詞與 `ref4` 篇段自動標註；「未分類」者非無類，乃證據不足以判定，'
+                 '寧缺勿強配（凡例六）。本索引只增連結，**不搬移、不重編 S 項**；'
+                 '各項卡片之 `<sub>` 亦標其所屬類。')
+        L.append('')
+        for _cls in sorted(_bycls, key=lambda k: (k == '未分類', k)):
+            L.append(f'**{_cls}（{len(_bycls[_cls])} 項）**')
+            L.append('')
+            for _sno, _tt in _bycls[_cls]:
+                L.append(f'- [`{_sno}`](#{_sno.lower()})　{esc(_tt[:52])}')
+            L.append('')
+        L.append('</details>')
+        L.append('')
+        L.append('> **歸併複審**：本輪逐筆回原典核 `ref4` 附具體四分篇段引用者 85 項，'
+                 '皆為「有其文而無此制」，原判「四分所無」無誤；'
+                 '明細見 `_work/審閱/歸併複審.csv`。')
+        L.append('')
     for c in ['五分', '十誦', '僧祇', '根有']:
         sub = by_canon_absent.get(c, [])
         if not sub:
@@ -1189,7 +1270,14 @@ def build_part2():
                          + '；勘誤改判其層級，而分組仍依原編次，故列於此，編號不更。</sub>')
                 L.append('')
             for r in bylv[lv]:
-                L.append(render_item(r, S_NO[r['id']], compact=True))
+                _cl = (SCLASS.get(r['id']) or {}).get('類')
+                L.append(render_item(r, S_NO[r['id']], compact=True, cls_label=_cl))
+                if r['id'] in MERGE_PLACE:
+                    _mp = MERGE_PLACE[r['id']]
+                    L.append(f'<sub>宜歸：{esc(_mp["place"])}　（{esc(_mp["why"])}；'
+                             f'已改判為{"同條增異" if _mp["st"] == "A" else "同條開緣"}，'
+                             f'項號不改）</sub>')
+                    L.append('')
         L.append('')
     return '\n'.join(L)
 
@@ -1382,6 +1470,12 @@ def build_appendix():
              '第某戒來查，宜先審其戒文之事由，於矩陣 `主題` 欄索之，'
              '較按號碼推尋為確。')
     L.append('')
+    # 附錄五／六由 tools/build_appendices.py 產出，缺檔時靜默略過
+    for _fn in ('appendix5.md', 'appendix6.md'):
+        _ap = os.path.join(BASE, _fn)
+        if os.path.exists(_ap):
+            L.append(open(_ap, encoding='utf-8').read())
+            L.append('')
     L.append('---')
     L.append('')
     L.append('*本書據《五部律綜合異同矩陣》2,124 項、四分律七十五篇索引及歸位表機械生成，'
