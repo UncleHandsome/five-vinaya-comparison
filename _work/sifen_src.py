@@ -818,6 +818,26 @@ def _title_glyph(s):
     return re.sub(r'[，、；：]$', '', s)
 
 
+_NI_JIE = None
+
+
+def _ni_jie_map():
+    """尼單提節 → 戒名（內容對位，見 tools/build_ni_jie.py）。
+
+    戒本 178 名與廣律 170 節次序不同，不能按節序套；此表逐節按戒文對位。
+    """
+    global _NI_JIE
+    if _NI_JIE is None:
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         'ni_jie_map.json')
+        try:
+            with open(p, encoding='utf-8') as f:
+                _NI_JIE = json.load(f)
+        except Exception:
+            _NI_JIE = {}
+    return _NI_JIE
+
+
 def unit_label(u, no=None):
     """節的顯示名（不含段範圍）。
 
@@ -825,6 +845,11 @@ def unit_label(u, no=None):
     （如篇 010 第十九戒 →「十九、貿錢寶戒」）。未登錄者仍用原節題。
     """
     if no is not None:
+        # 尼單提：節序與戒本次序不同，須按內容對位表取名（不限 fam，
+        # 少數節 jie_family 未判而仍屬尼單提）
+        _v = _ni_jie_map().get(f'{no}|{u["a"]}')
+        if _v:
+            return '／'.join(_v)
         fam = jie_family(no, u)
         if fam:
             # 尼單提用續編號 num（戒序 1–178）；比丘用 cn 轉數字
