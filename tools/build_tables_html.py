@@ -15,7 +15,7 @@ WORK = os.path.join(ROOT, '_work')
 OUT = os.path.join(ROOT, '05_網頁版')
 sys.path.insert(0, WORK)
 
-from build_html import CSS, FOOTER, SITE_URL, _DATE, _VER  # noqa: E402
+from build_html import CSS, FOOTER, SITE_URL, _DATE, _VER, SEARCH_CORE  # noqa: E402
 
 # rebuild_all 於第 5–6 步已改寫其他成品檔，第 7 步載入本模組時 git 會判為 dirty；
 # 但 HEAD 仍是最初那個內容 commit，故沿用其 hash、去掉 dirty 標記，
@@ -87,46 +87,8 @@ td.bad{color:#a33; font-weight:600}
 
 JS = r"""
 (function(){
-  // 多關鍵字＋模糊（與對照本檢索同一套規則）
-  // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
-  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
-              '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵','麤':'麤'};
-  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
-  function norm(s){
-    s = String(s).replace(PUNC, '').toLowerCase();
-    var o = '';
-    for (var i = 0; i < s.length; i++){ var c = s.charAt(i); o += (FOLD[c] || c); }
-    return o;
-  }
-  function fuzzy(hay, needle){
-    if (needle.length < 2) return false;
-    var i = 0, j = 0, first = -1, last = -1;
-    while (i < hay.length && j < needle.length){
-      if (hay.charAt(i) === needle.charAt(j)){
-        if (first < 0) first = i;
-        last = i; j++;
-      }
-      i++;
-    }
-    if (j < needle.length) return false;
-    return (last - first + 1) <= needle.length * 2;
-  }
-  function parseQuery(q){
-    var inc = [], exc = [], phr = [], m, re = /"([^"]+)"|(\S+)/g;
-    while ((m = re.exec(q))){
-      if (m[1]){ var p = norm(m[1]); if (p) phr.push(p); }
-      else {
-        var t = m[2];
-        if (t.charAt(0) === '-' && t.length > 1){ var e = norm(t.slice(1)); if (e) exc.push(e); }
-        else { var v = norm(t); if (v) inc.push(v); }
-      }
-    }
-    return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
-  }
-  function hit(hay, t){
-    if (hay.indexOf(t) >= 0) return 1;
-    return fuzzy(hay, t) ? 2 : 0;
-  }
+  // 檢索核心與對照本共用（正規化、同義詞、模糊）
+  var norm = function(x){ return VS.norm(x); };
 
   document.querySelectorAll('.tbl-wrap').forEach(function(wrap){
     var tid = wrap.getAttribute('data-tbl');
@@ -139,7 +101,7 @@ JS = r"""
     var sortCol = -1, sortDesc = false;
 
     function refresh(){
-      var pq = parseQuery(box.value || '');
+      var pq = VS.parseQuery(box.value || '');
       var n = 0;
       rows.forEach(function(tr){
         var ok = true;
@@ -153,7 +115,7 @@ JS = r"""
             if (hay.indexOf(pq.phr[b]) < 0){ ok = false; break; }
           }
           if (ok) for (var c = 0; c < pq.inc.length; c++){
-            if (!hit(hay, pq.inc[c])){ ok = false; break; }
+            if (!VS.matchGroup(hay, pq.inc[c])){ ok = false; break; }
           }
         }
         if (ok) {
@@ -305,7 +267,7 @@ def build_page(cfg):
 
     out.append(FOOTER)
     out.append('</main></div>')
-    out.append(f'<script>{JS}</script>')
+    out.append(f'<script>{SEARCH_CORE}</script>\n<script>{JS}</script>')
     out.append('</body></html>')
     p = os.path.join(OUT, cfg['out'])
     open(p, 'w', encoding='utf-8', newline='\n').write('\n'.join(out))

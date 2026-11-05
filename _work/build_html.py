@@ -168,7 +168,8 @@ body{
   font-size:18px; line-height:1.85;
   -webkit-font-smoothing:antialiased;
   /* 長段引文（十誦、根有多長句）在窄屏不得撐破版面 */
-  overflow-x:hidden; overflow-wrap:break-word; word-break:break-word;
+  /* clip 不建立捲動容器，否則 body 會搶走 sticky 的捲動祖先，側欄即不吸附 */
+  overflow-x:clip; overflow-wrap:break-word; word-break:break-word;
 }
 /* ── 版面 ── */
 .wrap{display:flex; min-height:100vh}
@@ -310,6 +311,23 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 檢索命中 ── */
 .hitflash{background:#fff2b8 !important; box-shadow:0 0 0 3px #ffe680;
   transition:background .5s, box-shadow .5s; border-radius:2px}
+/* ── 檢索結果清單 ── */
+.findwrap{position:sticky; top:0; z-index:6; background:var(--panel);
+  border-bottom:1px solid var(--line); padding-bottom:.35rem}
+.findlist{position:fixed; z-index:200; width:440px; max-width:calc(100vw - 16px);
+  max-height:min(58vh,480px); overflow:auto; background:var(--bg); border:1px solid var(--line);
+  border-radius:4px; box-shadow:0 10px 28px rgba(0,0,0,.16); padding:.2rem}
+.fl-item{display:block; width:100%; text-align:left; background:none; border:0;
+  border-bottom:1px solid var(--line); padding:.42rem .5rem; cursor:pointer;
+  font:inherit; font-size:12.5px; line-height:1.6; color:var(--fg)}
+.fl-item:last-of-type{border-bottom:0}
+.fl-item:hover,.fl-item.sel{background:var(--panel)}
+.fl-item .fl-t{display:block}
+.fl-item .fl-c{display:block; color:#8a8278; font-size:11px; margin-top:.12em}
+.fl-item mark{background:#ffe9a8; color:inherit; padding:0 .08em; border-radius:2px}
+.fl-more{padding:.4rem .5rem; font-size:11.5px; color:#8a8278; display:block}
+.fl-site{color:var(--accent); text-decoration:none; border-top:1px solid var(--line)}
+.fl-site:hover{text-decoration:underline}
 /* ── 對讀：原文與白話左右並列 ── */
 body.par details.art-src,
 body.par details.art-plain{float:left; width:calc(50% - .5rem); box-sizing:border-box;
@@ -334,6 +352,10 @@ body.par main:after{content:""; display:block; clear:both}
   nav input[type=text],nav input[type=search]{background:#232120; color:var(--fg);
     border-color:var(--line)}
   #findinfo{color:#8b857b}
+  .findlist{background:#1e1d1b; box-shadow:0 10px 28px rgba(0,0,0,.55)}
+  .fl-item .fl-c,.fl-more{color:#8b857b}
+  .fl-item mark{background:#6b5a22; color:#f3eee4}
+  .fl-item:hover,.fl-item.sel{background:#2a2825}
   #colophon{color:var(--fg2)}
   details{background:#1e1d1b}
   details p{color:#c9c3b8}
@@ -363,8 +385,22 @@ body.par main:after{content:""; display:block; clear:both}
 .homefind button:hover{background:var(--accent2); border-color:var(--accent2)}
 .hint{font-size:13px; color:var(--fg2); margin:.1rem 0 1.2rem; line-height:1.75}
 .hint code{background:var(--code); padding:.05rem .3rem; border-radius:2px}
+.homeres{margin:.2rem 0 1.4rem; max-height:62vh; overflow:auto}
+.homeres .fl-item{font-size:14px; padding:.55rem .65rem; border:1px solid var(--line);
+  border-radius:4px; margin-bottom:.35rem; background:var(--panel)}
+.homeres .fl-item:hover{background:var(--bg); border-color:var(--accent2)}
+.homeres .fl-k{display:inline-block; min-width:1.5em; margin-right:.4em; font-size:11px;
+  color:var(--accent); border:1px solid var(--line); border-radius:2px; text-align:center;
+  padding:0 .2em; vertical-align:.08em}
+.homeres .fl-t{display:inline}
+.homeres .fl-c{display:block; color:#8a8278; font-size:12px; margin-top:.18em}
+.homeres .fl-more{color:#8a8278; font-size:12.5px; padding:.3rem .2rem}
 @media (prefers-color-scheme: dark){
   .homefind input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
+  .homeres .fl-item{background:#1e1d1b}
+  .homeres .fl-item:hover{background:#232120}
+  .homeres .fl-item mark{background:#6b5a22; color:#f3eee4}
+  .homeres .fl-c,.homeres .fl-more{color:#8b857b}
 }
 /* ── 窄屏 ── */
 @media(max-width:1100px){
@@ -389,7 +425,287 @@ body.par main:after{content:""; display:block; clear:both}
 }
 """
 
+# ── 檢索核心（合冊／分卷／首頁共用）──────────────────────────────
+# 正規化：全半角與標點去除、繁簡異體折疊、梵巴轉寫去變音符。
+# 同義詞：律學名相別名（單提↔波逸提、捨墮↔尼薩耆波逸提……），
+#         查「波逸提」亦得「單提」，惟排序在精確命中之後。
+SEARCH_CORE = r"""
+window.VS = (function(){
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…／\/]/g;
+  // 異體字折疊（鍵為罕見體，值為通行體）
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+    '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵',
+    '衆':'眾','敎':'教','卽':'即','爲':'為','凈':'淨','倂':'併','峯':'峰','羣':'群',
+    '眞':'真','覩':'睹','穉':'稚','疎':'疏','隣':'鄰','牕':'窗','窻':'窗','牎':'窗',
+    '鷄':'雞','兎':'兔','豬':'猪','貓':'猫','蟁':'蚊','螘':'蟻','鼈':'鱉',
+    '麪':'麵','麫':'麵','煑':'煮','甞':'嘗','嚐':'嘗','塚':'冢','冡':'冢','冐':'冒',
+    '凖':'準','况':'況','凄':'淒','敍':'敘','牠':'他','麽':'麼',
+    '尠':'鮮','尟':'鮮','尢':'尤','尲':'尷','尶':'尷','屛':'屏','峩':'峨','巗':'巖',
+    '幷':'並','幇':'幫','廼':'乃','迺':'乃','衹':'只','喫':'吃','箒':'帚','篛':'箬',
+    '粧':'妝','糉':'粽','糰':'團','絃':'弦','綫':'線','罇':'樽','羗':'羌','翫':'玩',
+    '耑':'專','肻':'肯','脣':'唇','腅':'臉','舘':'館','菓':'果','萞':'蓖','蔴':'麻',
+    '薫':'薰','藴':'蘊','蘂':'蕊','虵':'蛇','蝨':'蝨','衂':'衄','袵':'衽','裠':'裙',
+    '襍':'雜','覈':'核','謌':'歌','貍':'狸','賸':'剩','跥':'跺','蹟':'跡','躭':'耽',
+    '軃':'嚲','輭':'軟','迻':'移','遶':'繞','邨':'村','醎':'鹹','鈎':'鉤','鉋':'刨',
+    '銲':'焊','鍊':'煉','鎗':'槍','鑪':'爐','閒':'閑','閙':'鬧','陞':'升','隖':'塢',
+    '靑':'青','鞵':'鞋','韈':'襪','頫':'俯','顚':'顛','餧':'餵','饑':'飢','驘':'騾',
+    '髩':'鬢','鬭':'鬥','魲':'鱸','鮎':'鯰','鵶':'鴉','鷰':'燕','麕':'麇','黴':'霉',
+    '齩':'咬','龞':'鱉'};
+  // 律學名相別名（鍵值皆為已正規化之形）
+  var SYN = {
+    '波逸提':['單提'], '單提':['波逸提'],
+    '尼薩耆波逸提':['捨墮','尼薩耆'], '捨墮':['尼薩耆波逸提','尼薩耆'], '尼薩耆':['捨墮'],
+    '僧殘':['僧伽婆尸沙'], '僧伽婆尸沙':['僧殘'],
+    '眾學':['式叉迦羅尼','學法'], '式叉迦羅尼':['眾學'],
+    '突吉羅':['惡作'], '惡作':['突吉羅'],
+    '偷蘭遮':['偷羅遮','土羅遮'], '偷羅遮':['偷蘭遮'],
+    '提舍尼':['波羅提提舍尼'], '波羅提提舍尼':['提舍尼'],
+    '僧祇':['摩訶僧祇'], '摩訶僧祇':['僧祇'],
+    '根有':['根本說一切有部'], '根本說一切有部':['根有'],
+    '五分':['彌沙塞'], '彌沙塞':['五分'],
+    '四分':['法藏部','曇無德'], '法藏部':['四分'],
+    '十誦':['薩婆多'], '薩婆多':['十誦'],
+    '揵度':['犍度'], '犍度':['揵度'],
+    '毘尼':['毗尼'], '毗尼':['毘尼'],
+    '婬':['淫'], '淫':['婬'],
+    '滅諍':['滅諍法','七滅諍']
+  };
+  var strip = function(s){
+    s = String(s);
+    if (s.normalize){
+      try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch(e){}
+    }
+    return s;
+  };
+  var norm = function(s){
+    s = strip(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){
+      var c = s.charAt(i);
+      o += (FOLD[c] || c);
+    }
+    return o;
+  };
+  // 子序列模糊：可容漏字、跳字，但首末跨度不得過散
+  var fuzzy = function(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  };
+  var parseQuery = function(q){
+    var inc = [], exc = [], phr = [], raw = [], m;
+    var re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){
+        var p = norm(m[1]);
+        if (p){ phr.push(p); raw.push(m[1]); }
+      } else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){
+          var e = norm(t.slice(1));
+          if (e) exc.push(e);
+        } else {
+          var v = norm(t);
+          if (v){ inc.push(v); raw.push(t); }
+        }
+      }
+    }
+    var groups = [];
+    for (var i = 0; i < inc.length; i++){
+      var t2 = inc[i], g = [t2], alt = SYN[t2];
+      if (alt){
+        for (var j = 0; j < alt.length; j++){
+          if (alt[j] !== t2) g.push(alt[j]);
+        }
+      }
+      groups.push(g);
+    }
+    return {inc: groups, exc: exc, phr: phr, raw: raw, n: groups.length + phr.length};
+  };
+  // 回傳 0 未中、1 精確、2 同義詞、3 模糊
+  var matchGroup = function(hay, g){
+    if (hay.indexOf(g[0]) >= 0) return 1;
+    for (var i = 1; i < g.length; i++){
+      if (hay.indexOf(g[i]) >= 0) return 2;
+    }
+    if (fuzzy(hay, g[0])) return 3;
+    return 0;
+  };
+  return {norm: norm, strip: strip, fuzzy: fuzzy, parseQuery: parseQuery, matchGroup: matchGroup};
+})();
+"""
+
+# ── 首頁全站索引檢索（延遲載入 search_index.js，不載合冊）──────────
+HOME_SEARCH = r"""
+(function(){
+  var form = document.getElementById('homeform');
+  var q = document.getElementById('homeq');
+  var box = document.getElementById('homeres');
+  if (!form || !q || !box || !window.VS) return;
+  var loading = false, wait = null, recs = null, timer = null, lastQ = '';
+
+  var load = function(fn){
+    if (window.SIDX){ recs = window.SIDX; return fn(); }
+    wait = fn;
+    if (loading) return;
+    loading = true;
+    var s = document.createElement('script');
+    s.src = 'search_index.js';
+    s.onload = function(){
+      recs = window.SIDX || []; loading = false;
+      var f = wait; wait = null; if (f) f();
+    };
+    s.onerror = function(){
+      loading = false;
+      box.innerHTML = '<p class="fl-more">索引載入失敗，請改用' +
+        '<a href="五部律差異對照本.html">合冊</a>側欄檢索。</p>';
+    };
+    document.head.appendChild(s);
+  };
+
+  var esc = function(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+    });
+  };
+  var tokens = function(qq){
+    var out = [], m, re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(qq))){
+      var t = m[1] || m[2];
+      if (!t || t.charAt(0) === '-') continue;
+      out.push(t);
+    }
+    return out;
+  };
+  var hl = function(text, qq){
+    var ts = tokens(qq), low = String(text).toLowerCase();
+    for (var i = 0; i < ts.length; i++){
+      var k = low.indexOf(ts[i].toLowerCase());
+      if (k >= 0){
+        return esc(text.slice(0, k)) + '<mark>' + esc(text.slice(k, k + ts[i].length)) +
+               '</mark>' + esc(text.slice(k + ts[i].length));
+      }
+    }
+    return esc(text);
+  };
+
+  var KIND = {p: '篇', u: '節', d: '項', s: '項', g: '組', x: '頁'};
+
+  var search = function(qq){
+    var pq = VS.parseQuery(qq);
+    if (!pq.n || !recs) return [];
+    var out = [];
+    for (var i = 0; i < recs.length; i++){
+      var r = recs[i];
+      var nt = String(r[2] || '').toLowerCase();
+      var nb = String(r[3] || '').toLowerCase();
+      var nc = String(r[5] || '').toLowerCase();
+      var ex = false;
+      for (var e = 0; e < pq.exc.length; e++){
+        if (nt.indexOf(pq.exc[e]) >= 0 || nb.indexOf(pq.exc[e]) >= 0){ ex = true; break; }
+      }
+      if (ex) continue;
+      var score = 0, miss = false;
+      for (var j = 0; j < pq.inc.length; j++){
+        var g = pq.inc[j];
+        var s1 = VS.matchGroup(nt, g);
+        var s2 = s1 ? 0 : VS.matchGroup(nb, g);
+        var s3 = (s1 || s2) ? 0 : VS.matchGroup(nc, g);
+        if (!s1 && !s2 && !s3){ miss = true; break; }
+        score += s1 ? 0 : (s2 ? 1 : 2);
+      }
+      if (miss) continue;
+      var pok = true;
+      for (var k = 0; k < pq.phr.length; k++){
+        if (nt.indexOf(pq.phr[k]) < 0 && nb.indexOf(pq.phr[k]) < 0){ pok = false; break; }
+      }
+      if (!pok) continue;
+      out.push({r: r, s: score, i: i});
+    }
+    out.sort(function(a, b){ return a.s - b.s || a.i - b.i; });
+    return out;
+  };
+
+  var render = function(qq){
+    var res = search(qq);
+    box.innerHTML = '';
+    var full = '五部律差異對照本.html?q=' + encodeURIComponent(qq);
+    if (!res.length){
+      box.innerHTML = '<p class="fl-more">索引中無「' + esc(qq) + '」。</p>' +
+        '<a class="fl-more" href="' + full + '">在合冊中全文檢索（含原文與白話）→</a>';
+      return;
+    }
+    var n = Math.min(res.length, 60);
+    for (var i = 0; i < n; i++){
+      var r = res[i].r;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fl-item';
+      b.innerHTML = '<span class="fl-k">' + (KIND[r[0]] || '') + '</span>' +
+        '<span class="fl-t">' + hl(r[2], qq) + '</span>' +
+        '<span class="fl-c">' + esc(r[5] || '') +
+        (r[3] ? '　·　' + hl(r[3], qq) : '') + '</span>';
+      b.addEventListener('click', (function(h){
+        return function(){ location.href = h; };
+      })(r[4]));
+      box.appendChild(b);
+    }
+    var foot = document.createElement('div');
+    foot.className = 'fl-more';
+    foot.innerHTML = '共 ' + res.length + ' 項' +
+      (res.length > n ? '，僅列前 ' + n + ' 項' : '') +
+      '　·　<a href="' + full + '">在合冊中全文檢索 →</a>';
+    box.appendChild(foot);
+  };
+
+  var go = function(){
+    var qq = q.value.trim();
+    if (!qq){ box.innerHTML = ''; lastQ = ''; return; }
+    if (qq === lastQ) return;
+    lastQ = qq;
+    load(function(){ render(qq); });
+  };
+  q.addEventListener('input', function(){
+    clearTimeout(timer);
+    timer = setTimeout(go, 180);
+  });
+  form.addEventListener('submit', function(e){ e.preventDefault(); lastQ = ''; go(); });
+
+  (function(){
+    var m = (location.search || '').match(/[?&]q=([^&]*)/);
+    if (!m) return;
+    var q0 = '';
+    try { q0 = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err){ return; }
+    if (!q0) return;
+    q.value = q0;
+    setTimeout(go, 120);
+  })();
+})();
+"""
+
+SEARCH_BOX = r"""
+<div class="grp findwrap" style="padding:.2rem 1rem .55rem">
+<label for="find" class="sr-only">全文檢索</label>
+<input type="search" id="find"
+  placeholder="檢索：多詞空白分隔；-詞排除；&quot;片語&quot;（/ 或 Ctrl+K）"
+  aria-label="多關鍵字模糊檢索，含折疊內容。空白分隔多詞，減號排除，引號片語"
+  autocomplete="off"
+  style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
+  font-size:12.5px;font-family:inherit;background:#fff">
+<div id="findinfo" role="status" aria-live="polite"
+  style="font-size:11.5px;color:#8a8278;padding:.25rem .1rem 0;min-height:1.2em"></div>
+<div id="findlist" class="findlist" role="listbox" aria-label="檢索結果" hidden></div>
+"""
+
 JS = r"""
+__SEARCH_CORE__
 (function(){
   // 目錄高亮：滾動時標記當前章節
   var links = Array.prototype.slice.call(document.querySelectorAll('nav a[href^="#"]'));
@@ -478,89 +794,56 @@ JS = r"""
       syncP();
     });
   }
-  // 全文檢索：含折疊（未展開）內容，命中則自動展開並跳至該處
+  // ── 全文檢索：合冊／分卷 ──────────────────────────────────────
+  // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
+  // 排序：標題命中 → 精確 → 同義詞 → 模糊；同分依文序。
+  // 呈現：側欄結果清單可點擊；Enter 逐處跳，↑↓ 選擇。
   var fbox = document.getElementById('find');
   var finfo = document.getElementById('findinfo');
-  if (fbox){
-    var hits = [], cur = -1, timer = null, LIMIT = 3000;
+  var flist = document.getElementById('findlist');
+  if (fbox && window.VS){
+    var hits = [], cur = -1, sel = -1, timer = null, LIMIT = 3000, SHOW = 200;
+    var pqCache = null;
 
-    // ── 多關鍵字＋模糊檢索 ────────────────────────────────────────
-    // 語法：空白分隔多詞（須全部命中）；-詞 排除；"片語" 要求連續。
-    // 匹配：先比正規化後的精確子串；不成，再退回「子序列」模糊，
-    //       可容漏字、跳字（如「摩埵」可中「摩那埵」）。
-    var FOLD = {'麁':'麤', '鉢':'缽', '著':'着', '牀':'床', '汙':'污',
-                '脚':'腳', '㥲':'瞋', '柰':'奈', '㝹':'兔', '説':'說',
-                '摺':'襵', '麤':'麤'};
-    var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
-
-    var norm = function(s){
-      s = String(s).replace(PUNC, '').toLowerCase();
-      var o = '';
-      for (var i = 0; i < s.length; i++){
-        var c = s.charAt(i);
-        o += (FOLD[c] || c);
+    // 目錄、頁腳等重複區不入檢索，免同一標題命中兩次
+    var skipZone = function(el){
+      var up = el, d = 0;
+      while (up && d < 5){
+        if (up.tagName === 'DETAILS' &&
+            String(up.className || '').indexOf('art-toc') >= 0) return true;
+        if (up.tagName === 'FOOTER' || up.tagName === 'NAV') return true;
+        up = up.parentElement; d++;
       }
-      return o;
+      return false;
     };
 
-    var fuzzy = function(hay, needle){
-      if (needle.length < 2) return false;      // 單字只作精確，免處處命中
-      var i = 0, j = 0, first = -1, last = -1;
-      while (i < hay.length && j < needle.length){
-        if (hay.charAt(i) === needle.charAt(j)){
-          if (first < 0) first = i;
-          last = i; j++;
-        }
-        i++;
-      }
-      if (j < needle.length) return false;
-      // 首末跨度不得過散：2 字 ≤6、3 字 ≤8、4 字 ≤10……
-      return (last - first + 1) <= needle.length * 2;
-    };
-
-    var parseQuery = function(q){
-      var inc = [], exc = [], phr = [], m;
-      var re = /"([^"]+)"|(\S+)/g;
-      while ((m = re.exec(q))){
-        if (m[1]){
-          var p = norm(m[1]);
-          if (p) phr.push(p);
-        } else {
-          var t = m[2];
-          if (t.charAt(0) === '-' && t.length > 1){
-            var e = norm(t.slice(1));
-            if (e) exc.push(e);
-          } else {
-            var v = norm(t);
-            if (v) inc.push(v);
-          }
-        }
-      }
-      return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
-    };
-
-    var matchOne = function(hay, term){
-      if (hay.indexOf(term) >= 0) return 1;   // 精確
-      if (fuzzy(hay, term)) return 2;         // 模糊
-      return 0;
+    // 項目標題（<p><strong>D-0002</strong>　…）權重同標題
+    var isTitle = function(pe){
+      var f = pe.firstElementChild;
+      return !!(f && f.tagName === 'STRONG' &&
+                /^[DST]-\d{4}$/.test(f.textContent.trim()));
     };
 
     var collect = function(q){
-      var pq = parseQuery(q);
+      var pq = VS.parseQuery(q);
+      pqCache = pq;
       if (!pq.n) return [];
       var root = document.getElementById('main') || document.body;
       var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-      var nodes = [], masks = [], exf = [], rank = [], n;
+      var nodes = [], masks = [], exf = [], rank = [], head = [], n;
       while ((n = w.nextNode())){
         var pe = n.parentElement;
         if (!pe) continue;
         var tag = pe.tagName;
         if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') continue;
-        // 正規化結果快取於文字節點，第二次查詢起不必重算（合冊數十萬節點）
+        if (skipZone(pe)){
+          nodes.push(n); masks.push(0); exf.push(1); rank.push(0); head.push(0); continue;
+        }
+        // 正規化結果快取於文字節點，第二次查詢起不必重算
         var hay = n._n;
-        if (hay === undefined){ hay = n._n = norm(n.data || ''); }
+        if (hay === undefined){ hay = n._n = VS.norm(n.data || ''); }
         nodes.push(n);
-        if (!hay){ masks.push(0); exf.push(0); rank.push(0); continue; }
+        if (!hay){ masks.push(0); exf.push(0); rank.push(0); head.push(0); continue; }
         var ex = 0;
         for (var i = 0; i < pq.exc.length; i++){
           if (hay.indexOf(pq.exc[i]) >= 0){ ex = 1; break; }
@@ -568,7 +851,7 @@ JS = r"""
         var m = 0, r = 0;
         if (!ex){
           for (var j = 0; j < pq.inc.length; j++){
-            var rr = matchOne(hay, pq.inc[j]);
+            var rr = VS.matchGroup(hay, pq.inc[j]);
             if (rr){ m |= (1 << j); if (rr > r) r = rr; }
           }
           for (var k = 0; k < pq.phr.length; k++){
@@ -578,40 +861,36 @@ JS = r"""
           }
         }
         masks.push(m); exf.push(ex); rank.push(r);
+        head.push((/^H[2-5]$/.test(tag) || isTitle(pe)) ? 1 : 0);
       }
       var full = (1 << pq.n) - 1;
-      var hitIdx = [];
-      for (var x = 0; x < nodes.length; x++){ if (masks[x]) hitIdx.push(x); }
-
-      // 單詞：逐處列出，精確者在前
+      var out = [];
       if (pq.n === 1){
-        var e1 = [], f1 = [];
-        for (var y = 0; y < hitIdx.length; y++){
-          var iy = hitIdx[y];
-          if (exf[iy]) continue;
-          (rank[iy] === 1 ? e1 : f1).push(nodes[iy]);
-          if (e1.length + f1.length >= LIMIT) break;
+        for (var y = 0; y < nodes.length; y++){
+          if (!masks[y] || exf[y]) continue;
+          out.push({n: nodes[y], s: head[y] ? 0 : rank[y], i: y});
         }
-        return e1.concat(f1);
+      } else {
+        // 多詞：以「鄰近段落群」為一處（同一卡片／同一節內全部命中）
+        var W = 40;
+        for (var h = 0; h < nodes.length; h++){
+          if (!masks[h] || exf[h]) continue;
+          var acc = 0, last = h, ok = false, best = 0;
+          var end = Math.min(nodes.length, h + W);
+          for (var t = h; t < end; t++){
+            acc |= masks[t];
+            if (rank[t] > best) best = rank[t];
+            if ((acc & full) === full){ last = t; ok = true; break; }
+          }
+          if (ok){
+            out.push({n: nodes[h], s: head[h] ? 0 : best, i: h});
+            h = last;
+          }
+          if (out.length >= LIMIT) break;
+        }
       }
-
-      // 多詞：以「鄰近段落群」為一處（同一卡片／同一節內全部命中），
-      // 而非要求同一文字節點含全部詞——否則多詞幾乎恆為 0 處。
-      var out = [], W = 40;
-      for (var h = 0; h < hitIdx.length; h++){
-        var i0 = hitIdx[h], acc = 0, exs = 0, last = i0;
-        var end = Math.min(nodes.length, i0 + W);
-        for (var t = i0; t < end; t++){
-          acc |= masks[t]; exs += exf[t];
-          if ((acc & full) === full){ last = t; break; }
-        }
-        if ((acc & full) === full && exs === 0){
-          out.push(nodes[i0]);
-          while (h + 1 < hitIdx.length && hitIdx[h + 1] <= last) h++;
-        }
-        if (out.length >= LIMIT) break;
-      }
-      return out;
+      out.sort(function(a, b){ return a.s - b.s || a.i - b.i; });
+      return out.slice(0, LIMIT);
     };
 
     var reveal = function(node){
@@ -622,10 +901,24 @@ JS = r"""
       }
     };
 
+    // 往上找最近的前置標題，作為結果的脈絡（篇／節）
+    var nearest = function(node, s){
+      var el = node.parentElement;
+      while (el && el.id !== 'main'){
+        var p = el.previousElementSibling;
+        while (p){
+          if (p.matches && p.matches(s)) return p;
+          p = p.previousElementSibling;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    };
+
     var go = function(i){
       if (!hits.length) return;
       cur = ((i % hits.length) + hits.length) % hits.length;
-      var node = hits[cur];
+      var node = hits[cur].n;
       reveal(node);
       var pe = node.parentElement;
       // 前一次的高亮須先清除，否則逐處巡覽會累積多個 .hitflash
@@ -634,14 +927,11 @@ JS = r"""
       pe.classList.add('hitflash');
       // 展開 details 會使上方版面變高，瀏覽器的 scroll anchoring 隨之補償，
       // 把剛跳到的位置又推走；此處暫停 anchoring，並於兩帧後再校正一次。
-      // 展開 details 之後，上方內容的高度往往要到數百毫秒後才定；scrollIntoView
-      // 於此時會落在舊座標。改以絕對座標直接捲動，並在版面穩定前後各校正一次。
       var de = document.documentElement;
       var oldAnchor = de.style.overflowAnchor;
       var oldBehav = de.style.scrollBehavior;
       de.style.overflowAnchor = 'none';
-      // 全站 CSS 有 scroll-behavior:smooth，多次校正會被平滑動畫互相打斷，
-      // 反而越滾越遠；跳轉期間須強制即時定位。
+      // 全站 CSS 有 scroll-behavior:smooth，多次校正會被平滑動畫互相打斷
       de.style.scrollBehavior = 'auto';
       var targetTop = Math.max(80, (window.innerHeight - pe.offsetHeight) / 2);
       var jump = function(){
@@ -649,8 +939,6 @@ JS = r"""
         window.scrollTo({top: Math.max(0, y), behavior: 'instant'});
       };
       jump();
-      // 字體（思源宋體等）載入後會整頁重排，固定時刻的校正會失效；
-      // 改以 rAF 監測目標位置，偏離即修正，連續 4 幀穩定或 6 秒為止。
       var stable = 0, t0 = Date.now(), lastTry = 0;
       var tick = function(){
         var now = Date.now();
@@ -672,36 +960,175 @@ JS = r"""
         de.style.overflowAnchor = oldAnchor;
         de.style.scrollBehavior = oldBehav;
       }, 6400);
+      sel = -1;
+      markSel();
+      place();
       finfo.textContent = '第 ' + (cur + 1) + ' / ' + hits.length + ' 處' +
         (hits.length >= LIMIT ? '（已達上限，請加長關鍵詞）' : '');
     };
 
+    var esc = function(s){
+      return String(s).replace(/[&<>"]/g, function(c){
+        return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+      });
+    };
+
+    var snipOf = function(node){
+      var t = String(node.data || '').replace(/\s+/g, ' ').trim();
+      if (!t) return '';
+      var low = t.toLowerCase(), pos = -1, len = 0;
+      var raws = (pqCache && pqCache.raw) || [];
+      for (var i = 0; i < raws.length && pos < 0; i++){
+        var k = low.indexOf(String(raws[i]).toLowerCase());
+        if (k >= 0){ pos = k; len = String(raws[i]).length; }
+      }
+      if (pos < 0){ pos = 0; len = 0; }
+      var a = Math.max(0, pos - 26), b = Math.min(t.length, pos + len + 54);
+      return (a > 0 ? '…' : '') + t.slice(a, b) + (b < t.length ? '…' : '');
+    };
+
+    var hl = function(text){
+      var raws = (pqCache && pqCache.raw) || [];
+      var low = String(text).toLowerCase();
+      for (var i = 0; i < raws.length; i++){
+        var r = String(raws[i]), k = low.indexOf(r.toLowerCase());
+        if (k >= 0){
+          return esc(text.slice(0, k)) + '<mark>' + esc(text.slice(k, k + r.length)) +
+                 '</mark>' + esc(text.slice(k + r.length));
+        }
+      }
+      return esc(text);
+    };
+
+    var render = function(){
+      if (!flist) return;
+      flist.innerHTML = '';
+      if (!hits.length){ flist.hidden = true; return; }
+      var n = Math.min(hits.length, SHOW);
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < n; i++){
+        var node = hits[i].n;
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'fl-item'; b.setAttribute('data-i', i);
+        var h5 = nearest(node, 'h5'), h4 = nearest(node, 'h4');
+        var ctx = (h4 ? h4.textContent.trim() : '') +
+                  (h5 ? '　›　' + h5.textContent.trim() : '');
+        b.innerHTML = '<span class="fl-t">' + hl(snipOf(node) || node.data || '') + '</span>' +
+                      (ctx ? '<span class="fl-c">' + esc(ctx) + '</span>' : '');
+        b.addEventListener('click', (function(idx){
+          return function(){ go(idx); };
+        })(i));
+        frag.appendChild(b);
+      }
+      flist.appendChild(frag);
+      if (hits.length > SHOW){
+        var more = document.createElement('div');
+        more.className = 'fl-more';
+        more.textContent = '僅列前 ' + SHOW + ' 處，共 ' + hits.length + ' 處';
+        flist.appendChild(more);
+      }
+      var site = document.createElement('a');
+      site.className = 'fl-more fl-site';
+      site.href = 'index.html?q=' + encodeURIComponent(fbox.value.trim());
+      site.textContent = '在全站索引中檢索此詞 →';
+      flist.appendChild(site);
+      place();
+      flist.hidden = false;
+    };
+
+    // 面板浮動於側欄之上，避免被 nav 的 overflow 裁切
+    var place = function(n){
+      n = n || 0;
+      var r = fbox.getBoundingClientRect();
+      // 版面未定（字體或長頁重排）時 rect 可能為 0，稍候再試
+      if (r.bottom < 10 && n < 40){
+        requestAnimationFrame(function(){ place(n + 1); });
+        return;
+      }
+      flist.style.left = Math.max(8, r.left) + 'px';
+      flist.style.top = (r.bottom + 4) + 'px';
+      flist.style.width = Math.min(440, window.innerWidth - 16) + 'px';
+      var below = window.innerHeight - r.bottom - 12;
+      flist.style.maxHeight = Math.max(160, Math.min(480, below)) + 'px';
+    };
+
+    var markSel = function(){
+      if (!flist || flist.hidden) return;
+      var items = flist.querySelectorAll('.fl-item');
+      for (var i = 0; i < items.length; i++){
+        if (i === sel){
+          items[i].classList.add('sel');
+          items[i].scrollIntoView({block: 'nearest'});
+        } else {
+          items[i].classList.remove('sel');
+        }
+      }
+    };
+
     var run = function(jump){
       var q = fbox.value.trim();
-      if (q.length < 1){ hits = []; cur = -1; finfo.textContent = ''; return; }
-      if (q !== run.last){
-        hits = collect(q); cur = -1; run.last = q;
+      sel = -1;
+      if (q.length < 1){
+        hits = []; cur = -1; finfo.textContent = '';
+        if (flist) flist.hidden = true;
+        return;
       }
+      if (q !== run.last){ hits = collect(q); cur = -1; run.last = q; }
       if (!hits.length){
+        if (flist) flist.hidden = true;
         var tip = (q.indexOf('-') >= 0 || q.indexOf('"') >= 0)
           ? '（請檢查 -排除 與 "片語" 之語法）'
           : (q.split(/\s+/).length > 1 ? '（多詞須全部命中，可減少詞數）' : '');
         finfo.textContent = '「' + q + '」：0 處' + tip;
         return;
       }
-      go(jump ? cur + 1 : 0);
+      render();
+      if (jump){ go(cur + 1); }
+      else { finfo.textContent = '「' + q + '」：' + hits.length + ' 處（Enter 跳至首處）'; }
     };
 
     fbox.addEventListener('input', function(){
       clearTimeout(timer);
-      timer = setTimeout(function(){ run(false); }, 320);
+      timer = setTimeout(function(){ run(false); }, 300);
     });
     fbox.addEventListener('keydown', function(e){
-      if (e.key === 'Enter'){ e.preventDefault(); run(true); }
-      if (e.key === 'Escape'){ fbox.value = ''; hits = []; finfo.textContent = ''; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+        if (!hits.length) return;
+        e.preventDefault();
+        var n = Math.min(hits.length, SHOW);
+        sel = e.key === 'ArrowDown' ? (sel + 1) % n : (sel <= 0 ? n - 1 : sel - 1);
+        markSel();
+        return;
+      }
+      if (e.key === 'Enter'){ e.preventDefault(); if (sel >= 0) go(sel); else run(true); }
+      if (e.key === 'Escape'){
+        fbox.value = ''; hits = []; cur = -1; sel = -1; finfo.textContent = '';
+        if (flist) flist.hidden = true;
+      }
+    });
+    fbox.addEventListener('focus', function(){
+      if (hits.length && flist){ place(); flist.hidden = false; }
+    });
+    window.addEventListener('resize', function(){ if (flist && !flist.hidden) place(); });
+    window.addEventListener('scroll', function(){ if (flist && !flist.hidden) place(); }, true);
+    document.addEventListener('click', function(e){
+      if (flist && !flist.hidden && !flist.contains(e.target) && e.target !== fbox){
+        flist.hidden = true;
+      }
+    });
+    // 全站快捷鍵：/ 或 Ctrl+K 聚焦檢索
+    document.addEventListener('keydown', function(e){
+      var ae = document.activeElement || {};
+      var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
+      if (!typing && e.key === '/'){
+        e.preventDefault(); fbox.focus(); fbox.select();
+      }
+      if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
+        e.preventDefault(); fbox.focus(); fbox.select();
+      }
     });
 
-    // 由首頁表單 ?q= 帶入，自動執行一次（不必再按 Enter）
+    // 由首頁或外部連結 ?q= 帶入，自動執行一次
     (function(){
       var m = (location.search || '').match(/[?&]q=([^&]*)/);
       if (!m) return;
@@ -709,7 +1136,7 @@ JS = r"""
       try { q0 = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err){ return; }
       if (!q0) return;
       fbox.value = q0;
-      setTimeout(function(){ run(false); }, 260);
+      setTimeout(function(){ run(true); }, 260);
     })();
   }
   // 列印前自動展開全部折疊（CSS 對 closed details 的內容未必生效），列印後復原
@@ -733,6 +1160,8 @@ JS = r"""
   })();
 })();
 """
+
+JS = JS.replace('__SEARCH_CORE__', SEARCH_CORE)
 
 
 _CN_D = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
@@ -874,6 +1303,8 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
             if any(_c == _j for _j, _f in JUAN):
                 _cur = _c
     nav = build_nav(md_text, is_full, _cur)
+    # 檢索框置於站名之後、目錄之前，並隨側欄吸附
+    nav = nav.replace('</h1>', '</h1>\n' + SEARCH_BOX, 1)
 
     # 分卷頁不含卷首凡例，故於正文前附一則小凡例，免〔十誦 A〕一類標記無所解
     _banner = '' if is_full else """
@@ -936,15 +1367,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 </div>
-<div class="grp" style="padding:.4rem 1rem 0">
-<label for="find" class="sr-only">全文檢索</label>
-<input type="search" id="find"
-  placeholder="多關鍵字：空白分隔；-詞排除；&quot;片語&quot;（Enter 逐處）"
-  aria-label="多關鍵字模糊檢索，含折疊內容。空白分隔多詞，減號排除，引號片語"
-  style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
-  font-size:12.5px;font-family:inherit;background:#fff">
-<div id="findinfo" role="status" aria-live="polite"
-  style="font-size:11.5px;color:#8a8278;padding:.25rem .1rem 0;min-height:1.2em"></div>
+
 </div>
 </nav>
 <main id="main">
@@ -959,6 +1382,117 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 </html>"""
     open(out_path, 'w', encoding='utf-8', newline='\n').write(page)
     return True
+
+
+def _plain(s):
+    """去 Markdown 標記，留純文字（供索引摘要）。"""
+    s = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', s)
+    s = re.sub(r'<[^>]+>', '', s)
+    s = s.replace('**', '').replace('`', '').replace('\\', '')
+    return re.sub(r'\s+', ' ', s).strip()
+
+
+def build_search_index():
+    """全站索引：篇／節／項三級，供首頁即時檢索（不載合冊）。
+
+    每筆 [類, 編號, 標題, 摘要, 連結, 脈絡]。
+    類：p 篇、u 節、d/s 項、g 歸併組、x 專題頁。
+    """
+    recs = []
+    for jname, fn in JUAN:
+        p = os.path.join(SRC, fn)
+        if not os.path.exists(p):
+            continue
+        page = fn.replace('.md', '.html')
+        lines = open(p, encoding='utf-8').read().split('\n')
+        pian_no = pian = ''
+        jie = ''
+        pend = ''
+        pian_idx = None
+        for i, ln in enumerate(lines):
+            m = re.match(r'^<a id="(u\d{3}-\d+)"></a>$', ln)
+            if m:
+                pend = m.group(1)
+                continue
+            m = re.match(r'^#### (\d{3})\u3000(.+)$', ln)
+            if m:
+                pian_no, pian = m.group(1), _plain(m.group(2))
+                snip = ''
+                for k in range(i + 1, min(i + 10, len(lines))):
+                    if lines[k].startswith('> **篇旨**'):
+                        snip = _plain(lines[k].split('：', 1)[-1])[:78]
+                        break
+                recs.append(['p', pian_no, f'{pian_no}　{pian}', snip, page + '#', ''])
+                pian_idx = len(recs) - 1
+                jie = ''
+                continue
+            m = re.match(r'^#### `([GT]\d+)`\u3000(.+)$', ln)
+            if m:
+                gid, gtitle = m.group(1), _plain(m.group(2))
+                recs.append(['g', gid, gtitle, '', f'{page}#gt-{gid}', '第三部　歸併組'])
+                continue
+            m = re.match(r'^##### (.+)$', ln)
+            if m:
+                jie = _plain(m.group(1))
+                anchor = pend or ''
+                if pian_idx is not None and recs[pian_idx][4].endswith('#'):
+                    recs[pian_idx][4] += anchor
+                recs.append(['u', anchor or f'u{pian_no}', jie, '',
+                             page + ('#' + anchor if anchor else ''),
+                             f'{pian_no}　{pian}'])
+                pend = ''
+                continue
+            m = re.match(r'^\*\*([DST]-\d{4})\*\*\u3000(.+)$', ln)
+            if m:
+                rid, title = m.group(1), _plain(m.group(2))
+                snip = ''
+                for k in range(i + 1, min(i + 26, len(lines))):
+                    nxt = lines[k]
+                    if nxt.startswith('- '):
+                        snip = _plain(nxt[2:])[:86]
+                        break
+                    if (re.match(r'^\*\*[DST]-\d{4}\*\*', nxt) or
+                            nxt.startswith('#### ') or nxt.startswith('##### ')):
+                        break
+                recs.append([rid[0].lower(), rid, title, snip,
+                             f'{page}#{rid.lower()}',
+                             f'{pian_no}　{pian}' + (f'／{jie}' if jie else '')])
+                continue
+
+    # 節摘要：取該節各項標題，供整節層級檢索（單項摘要未含之詞亦可由節命中）
+    for i, r in enumerate(recs):
+        if r[0] != 'u':
+            continue
+        ts = []
+        for j in range(i + 1, len(recs)):
+            if recs[j][0] in ('u', 'p', 'g'):
+                break
+            if recs[j][0] in ('d', 's'):
+                ts.append(recs[j][2])
+            if len(ts) >= 10:
+                break
+        if ts:
+            r[3] = '；'.join(ts)[:150]
+
+    recs += [
+        ['x', '矩陣', '五部律綜合異同矩陣', '2,124 列，五欄記各律有無，可篩選排序',
+         '五部律綜合異同矩陣.html', '專題'],
+        ['x', '對照', '比丘／比丘尼戒對照表', '共戒對位 39 組，附眾學法 58 目',
+         '比丘比丘尼戒對照表.html', '專題表'],
+        ['x', '開遮', '五部律開遮持犯表', '657 列，差異導向，五欄記各律有無',
+         '五部律開遮持犯表.html', '專題表'],
+    ]
+
+    out = os.path.join(OUT, 'search_index.js')
+    js = 'window.SIDX=' + json.dumps(recs, ensure_ascii=False,
+                                    separators=(',', ':')) + ';\n'
+    open(out, 'w', encoding='utf-8', newline='\n').write(js)
+    kinds = {}
+    for r in recs:
+        kinds[r[0]] = kinds.get(r[0], 0) + 1
+    print('  索引：%d 筆（%s）%.0f KB' % (
+        len(recs), '／'.join(f'{k} {v}' for k, v in sorted(kinds.items())),
+        os.path.getsize(out) / 1024))
 
 
 def build_index():
@@ -982,16 +1516,19 @@ def build_index():
 <p>讀四分律至某篇某戒，翻至本書同篇，即見其餘四部於此處有何增、減、開、異。</p></blockquote>
 
 <h2>全書檢索</h2>
-<form class="homefind" action="五部律差異對照本.html" method="get" role="search">
-  <input type="search" name="q" id="homeq" required
+<form class="homefind" action="index.html" method="get" role="search" id="homeform">
+  <input type="search" name="q" id="homeq" required autocomplete="off"
     placeholder="例：摩那埵 波逸提　或　迦絺那 -四分"
     aria-label="全書檢索：空白分隔多詞，減號排除，引號片語">
   <button type="submit">搜尋</button>
 </form>
+<div id="homeres" class="homeres" aria-live="polite"></div>
 <p class="hint">支援<strong>多關鍵字</strong>（空白分隔，須全部命中）、
 <strong>排除</strong>（<code>-四分</code>）、<strong>片語</strong>（<code>"非親里"</code>），
-並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）。
-送出後於合冊檢索並跳至首處；合冊較大，首次載入需數秒。</p>
+並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）與<strong>名相別名</strong>
+（查<code>波逸提</code>亦得「單提」、查<code>捨墮</code>亦得「尼薩耆」）。
+索引收 2,124 項標題與差異摘要，<strong>即時列出、點擊直達</strong>，不載合冊；
+欲查原文與白話全文，再用合冊側欄。</p>
 
 <h2>五部律</h2>
 <table>
@@ -1089,7 +1626,11 @@ def build_index():
 <main>{body}
 {FOOTER}
 </main>
-</div></body></html>"""
+</div>
+<script>__CORE__</script>
+<script>__HOMEJS__</script>
+</body></html>"""
+    page = page.replace('__CORE__', SEARCH_CORE).replace('__HOMEJS__', HOME_SEARCH)
     open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='\n').write(page)
 
 
@@ -1097,6 +1638,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     single = '--single' in sys.argv
 
+    build_search_index()
     if not single:
         build_index()
         print('索引頁：index.html')

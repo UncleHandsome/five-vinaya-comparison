@@ -11,7 +11,9 @@
 
 輸出：05_網頁版/五部律綜合異同矩陣.html
 """
-import os, re, subprocess, datetime, html as H
+import os, re, sys, subprocess, datetime, html as H
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_html import SEARCH_CORE
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -125,45 +127,8 @@ JS = r"""
   var f = {st:'', seg:'', lv:'', q:''};
   var cntEl = document.getElementById('cnt');
 
-  // 多關鍵字＋模糊（與對照本、專題表同一套規則）
-  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
-              '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵','麤':'麤'};
-  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…]/g;
-  function norm(s){
-    s = String(s).replace(PUNC, '').toLowerCase();
-    var o = '';
-    for (var i = 0; i < s.length; i++){ var c = s.charAt(i); o += (FOLD[c] || c); }
-    return o;
-  }
-  function fuzzy(hay, needle){
-    if (needle.length < 2) return false;
-    var i = 0, j = 0, first = -1, last = -1;
-    while (i < hay.length && j < needle.length){
-      if (hay.charAt(i) === needle.charAt(j)){
-        if (first < 0) first = i;
-        last = i; j++;
-      }
-      i++;
-    }
-    if (j < needle.length) return false;
-    return (last - first + 1) <= needle.length * 2;
-  }
-  function parseQuery(q){
-    var inc = [], exc = [], phr = [], m, re = /"([^"]+)"|(\S+)/g;
-    while ((m = re.exec(q))){
-      if (m[1]){ var p = norm(m[1]); if (p) phr.push(p); }
-      else {
-        var t = m[2];
-        if (t.charAt(0) === '-' && t.length > 1){ var e = norm(t.slice(1)); if (e) exc.push(e); }
-        else { var v = norm(t); if (v) inc.push(v); }
-      }
-    }
-    return {inc: inc, exc: exc, phr: phr, n: inc.length + phr.length};
-  }
-  function hit(hay, t){
-    if (hay.indexOf(t) >= 0) return 1;
-    return fuzzy(hay, t) ? 2 : 0;
-  }
+  // 檢索核心與對照本共用（正規化、同義詞、模糊）
+  var norm = function(x){ return VS.norm(x); };
 
   function apply(){
     var n = 0;
@@ -183,7 +148,7 @@ JS = r"""
           if (s.indexOf(pq.phr[b]) < 0){ qok = false; break; }
         }
         if (qok) for (var c = 0; c < pq.inc.length; c++){
-          if (!hit(s, pq.inc[c])){ qok = false; break; }
+          if (!VS.matchGroup(s, pq.inc[c])){ qok = false; break; }
         }
         if (!qok) ok = false;
       }
@@ -226,7 +191,7 @@ JS = r"""
   var q = document.getElementById('q');
   q.addEventListener('input', function(){
     f.q = q.value.trim();
-    f.pq = parseQuery(f.q);
+    f.pq = VS.parseQuery(f.q);
     apply();
   });
 
@@ -363,6 +328,7 @@ CBETA 電子佛典依 Creative Commons「姓名標示—非商業性—相同方
 </footer>
 </main>
 </div>
+<script>{SEARCH_CORE}</script>
 <script>{JS}</script>
 </body></html>"""
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
