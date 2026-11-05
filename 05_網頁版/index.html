@@ -26,7 +26,8 @@ body{
   font-size:18px; line-height:1.85;
   -webkit-font-smoothing:antialiased;
   /* 長段引文（十誦、根有多長句）在窄屏不得撐破版面 */
-  overflow-x:hidden; overflow-wrap:break-word; word-break:break-word;
+  /* clip 不建立捲動容器，否則 body 會搶走 sticky 的捲動祖先，側欄即不吸附 */
+  overflow-x:clip; overflow-wrap:break-word; word-break:break-word;
 }
 /* ── 版面 ── */
 .wrap{display:flex; min-height:100vh}
@@ -168,6 +169,23 @@ hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
 /* ── 檢索命中 ── */
 .hitflash{background:#fff2b8 !important; box-shadow:0 0 0 3px #ffe680;
   transition:background .5s, box-shadow .5s; border-radius:2px}
+/* ── 檢索結果清單 ── */
+.findwrap{position:sticky; top:0; z-index:6; background:var(--panel);
+  border-bottom:1px solid var(--line); padding-bottom:.35rem}
+.findlist{position:fixed; z-index:200; width:440px; max-width:calc(100vw - 16px);
+  max-height:min(58vh,480px); overflow:auto; background:var(--bg); border:1px solid var(--line);
+  border-radius:4px; box-shadow:0 10px 28px rgba(0,0,0,.16); padding:.2rem}
+.fl-item{display:block; width:100%; text-align:left; background:none; border:0;
+  border-bottom:1px solid var(--line); padding:.42rem .5rem; cursor:pointer;
+  font:inherit; font-size:12.5px; line-height:1.6; color:var(--fg)}
+.fl-item:last-of-type{border-bottom:0}
+.fl-item:hover,.fl-item.sel{background:var(--panel)}
+.fl-item .fl-t{display:block}
+.fl-item .fl-c{display:block; color:#8a8278; font-size:11px; margin-top:.12em}
+.fl-item mark{background:#ffe9a8; color:inherit; padding:0 .08em; border-radius:2px}
+.fl-more{padding:.4rem .5rem; font-size:11.5px; color:#8a8278; display:block}
+.fl-site{color:var(--accent); text-decoration:none; border-top:1px solid var(--line)}
+.fl-site:hover{text-decoration:underline}
 /* ── 對讀：原文與白話左右並列 ── */
 body.par details.art-src,
 body.par details.art-plain{float:left; width:calc(50% - .5rem); box-sizing:border-box;
@@ -192,6 +210,10 @@ body.par main:after{content:""; display:block; clear:both}
   nav input[type=text],nav input[type=search]{background:#232120; color:var(--fg);
     border-color:var(--line)}
   #findinfo{color:#8b857b}
+  .findlist{background:#1e1d1b; box-shadow:0 10px 28px rgba(0,0,0,.55)}
+  .fl-item .fl-c,.fl-more{color:#8b857b}
+  .fl-item mark{background:#6b5a22; color:#f3eee4}
+  .fl-item:hover,.fl-item.sel{background:#2a2825}
   #colophon{color:var(--fg2)}
   details{background:#1e1d1b}
   details p{color:#c9c3b8}
@@ -221,8 +243,22 @@ body.par main:after{content:""; display:block; clear:both}
 .homefind button:hover{background:var(--accent2); border-color:var(--accent2)}
 .hint{font-size:13px; color:var(--fg2); margin:.1rem 0 1.2rem; line-height:1.75}
 .hint code{background:var(--code); padding:.05rem .3rem; border-radius:2px}
+.homeres{margin:.2rem 0 1.4rem; max-height:62vh; overflow:auto}
+.homeres .fl-item{font-size:14px; padding:.55rem .65rem; border:1px solid var(--line);
+  border-radius:4px; margin-bottom:.35rem; background:var(--panel)}
+.homeres .fl-item:hover{background:var(--bg); border-color:var(--accent2)}
+.homeres .fl-k{display:inline-block; min-width:1.5em; margin-right:.4em; font-size:11px;
+  color:var(--accent); border:1px solid var(--line); border-radius:2px; text-align:center;
+  padding:0 .2em; vertical-align:.08em}
+.homeres .fl-t{display:inline}
+.homeres .fl-c{display:block; color:#8a8278; font-size:12px; margin-top:.18em}
+.homeres .fl-more{color:#8a8278; font-size:12.5px; padding:.3rem .2rem}
 @media (prefers-color-scheme: dark){
   .homefind input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
+  .homeres .fl-item{background:#1e1d1b}
+  .homeres .fl-item:hover{background:#232120}
+  .homeres .fl-item mark{background:#6b5a22; color:#f3eee4}
+  .homeres .fl-c,.homeres .fl-more{color:#8b857b}
 }
 /* ── 窄屏 ── */
 @media(max-width:1100px){
@@ -254,16 +290,19 @@ body.par main:after{content:""; display:block; clear:both}
 <p>讀四分律至某篇某戒，翻至本書同篇，即見其餘四部於此處有何增、減、開、異。</p></blockquote>
 
 <h2>全書檢索</h2>
-<form class="homefind" action="五部律差異對照本.html" method="get" role="search">
-  <input type="search" name="q" id="homeq" required
+<form class="homefind" action="index.html" method="get" role="search" id="homeform">
+  <input type="search" name="q" id="homeq" required autocomplete="off"
     placeholder="例：摩那埵 波逸提　或　迦絺那 -四分"
     aria-label="全書檢索：空白分隔多詞，減號排除，引號片語">
   <button type="submit">搜尋</button>
 </form>
+<div id="homeres" class="homeres" aria-live="polite"></div>
 <p class="hint">支援<strong>多關鍵字</strong>（空白分隔，須全部命中）、
 <strong>排除</strong>（<code>-四分</code>）、<strong>片語</strong>（<code>"非親里"</code>），
-並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）。
-送出後於合冊檢索並跳至首處；合冊較大，首次載入需數秒。</p>
+並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）與<strong>名相別名</strong>
+（查<code>波逸提</code>亦得「單提」、查<code>捨墮</code>亦得「尼薩耆」）。
+索引收 2,124 項標題與差異摘要，<strong>即時列出、點擊直達</strong>，不載合冊；
+欲查原文與白話全文，再用合冊側欄。</p>
 
 <h2>五部律</h2>
 <table>
@@ -361,9 +400,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 22467c1（2026-11-05）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 e105f99（2026-11-05）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 22467c1」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 e105f99」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -371,7 +410,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 22467c1（2026-11-05）}<br>
+　note = {版本 e105f99（2026-11-05）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -381,4 +420,263 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 </footer>
 
 </main>
-</div></body></html>
+</div>
+<script>
+window.VS = (function(){
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…／\/]/g;
+  // 異體字折疊（鍵為罕見體，值為通行體）
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+    '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵',
+    '衆':'眾','敎':'教','卽':'即','爲':'為','凈':'淨','倂':'併','峯':'峰','羣':'群',
+    '眞':'真','覩':'睹','穉':'稚','疎':'疏','隣':'鄰','牕':'窗','窻':'窗','牎':'窗',
+    '鷄':'雞','兎':'兔','豬':'猪','貓':'猫','蟁':'蚊','螘':'蟻','鼈':'鱉',
+    '麪':'麵','麫':'麵','煑':'煮','甞':'嘗','嚐':'嘗','塚':'冢','冡':'冢','冐':'冒',
+    '凖':'準','况':'況','凄':'淒','敍':'敘','牠':'他','麽':'麼',
+    '尠':'鮮','尟':'鮮','尢':'尤','尲':'尷','尶':'尷','屛':'屏','峩':'峨','巗':'巖',
+    '幷':'並','幇':'幫','廼':'乃','迺':'乃','衹':'只','喫':'吃','箒':'帚','篛':'箬',
+    '粧':'妝','糉':'粽','糰':'團','絃':'弦','綫':'線','罇':'樽','羗':'羌','翫':'玩',
+    '耑':'專','肻':'肯','脣':'唇','腅':'臉','舘':'館','菓':'果','萞':'蓖','蔴':'麻',
+    '薫':'薰','藴':'蘊','蘂':'蕊','虵':'蛇','蝨':'蝨','衂':'衄','袵':'衽','裠':'裙',
+    '襍':'雜','覈':'核','謌':'歌','貍':'狸','賸':'剩','跥':'跺','蹟':'跡','躭':'耽',
+    '軃':'嚲','輭':'軟','迻':'移','遶':'繞','邨':'村','醎':'鹹','鈎':'鉤','鉋':'刨',
+    '銲':'焊','鍊':'煉','鎗':'槍','鑪':'爐','閒':'閑','閙':'鬧','陞':'升','隖':'塢',
+    '靑':'青','鞵':'鞋','韈':'襪','頫':'俯','顚':'顛','餧':'餵','饑':'飢','驘':'騾',
+    '髩':'鬢','鬭':'鬥','魲':'鱸','鮎':'鯰','鵶':'鴉','鷰':'燕','麕':'麇','黴':'霉',
+    '齩':'咬','龞':'鱉'};
+  // 律學名相別名（鍵值皆為已正規化之形）
+  var SYN = {
+    '波逸提':['單提'], '單提':['波逸提'],
+    '尼薩耆波逸提':['捨墮','尼薩耆'], '捨墮':['尼薩耆波逸提','尼薩耆'], '尼薩耆':['捨墮'],
+    '僧殘':['僧伽婆尸沙'], '僧伽婆尸沙':['僧殘'],
+    '眾學':['式叉迦羅尼','學法'], '式叉迦羅尼':['眾學'],
+    '突吉羅':['惡作'], '惡作':['突吉羅'],
+    '偷蘭遮':['偷羅遮','土羅遮'], '偷羅遮':['偷蘭遮'],
+    '提舍尼':['波羅提提舍尼'], '波羅提提舍尼':['提舍尼'],
+    '僧祇':['摩訶僧祇'], '摩訶僧祇':['僧祇'],
+    '根有':['根本說一切有部'], '根本說一切有部':['根有'],
+    '五分':['彌沙塞'], '彌沙塞':['五分'],
+    '四分':['法藏部','曇無德'], '法藏部':['四分'],
+    '十誦':['薩婆多'], '薩婆多':['十誦'],
+    '揵度':['犍度'], '犍度':['揵度'],
+    '毘尼':['毗尼'], '毗尼':['毘尼'],
+    '婬':['淫'], '淫':['婬'],
+    '滅諍':['滅諍法','七滅諍']
+  };
+  var strip = function(s){
+    s = String(s);
+    if (s.normalize){
+      try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch(e){}
+    }
+    return s;
+  };
+  var norm = function(s){
+    s = strip(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){
+      var c = s.charAt(i);
+      o += (FOLD[c] || c);
+    }
+    return o;
+  };
+  // 子序列模糊：可容漏字、跳字，但首末跨度不得過散
+  var fuzzy = function(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  };
+  var parseQuery = function(q){
+    var inc = [], exc = [], phr = [], raw = [], m;
+    var re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){
+        var p = norm(m[1]);
+        if (p){ phr.push(p); raw.push(m[1]); }
+      } else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){
+          var e = norm(t.slice(1));
+          if (e) exc.push(e);
+        } else {
+          var v = norm(t);
+          if (v){ inc.push(v); raw.push(t); }
+        }
+      }
+    }
+    var groups = [];
+    for (var i = 0; i < inc.length; i++){
+      var t2 = inc[i], g = [t2], alt = SYN[t2];
+      if (alt){
+        for (var j = 0; j < alt.length; j++){
+          if (alt[j] !== t2) g.push(alt[j]);
+        }
+      }
+      groups.push(g);
+    }
+    return {inc: groups, exc: exc, phr: phr, raw: raw, n: groups.length + phr.length};
+  };
+  // 回傳 0 未中、1 精確、2 同義詞、3 模糊
+  var matchGroup = function(hay, g){
+    if (hay.indexOf(g[0]) >= 0) return 1;
+    for (var i = 1; i < g.length; i++){
+      if (hay.indexOf(g[i]) >= 0) return 2;
+    }
+    if (fuzzy(hay, g[0])) return 3;
+    return 0;
+  };
+  return {norm: norm, strip: strip, fuzzy: fuzzy, parseQuery: parseQuery, matchGroup: matchGroup};
+})();
+</script>
+<script>
+(function(){
+  var form = document.getElementById('homeform');
+  var q = document.getElementById('homeq');
+  var box = document.getElementById('homeres');
+  if (!form || !q || !box || !window.VS) return;
+  var loading = false, wait = null, recs = null, timer = null, lastQ = '';
+
+  var load = function(fn){
+    if (window.SIDX){ recs = window.SIDX; return fn(); }
+    wait = fn;
+    if (loading) return;
+    loading = true;
+    var s = document.createElement('script');
+    s.src = 'search_index.js';
+    s.onload = function(){
+      recs = window.SIDX || []; loading = false;
+      var f = wait; wait = null; if (f) f();
+    };
+    s.onerror = function(){
+      loading = false;
+      box.innerHTML = '<p class="fl-more">索引載入失敗，請改用' +
+        '<a href="五部律差異對照本.html">合冊</a>側欄檢索。</p>';
+    };
+    document.head.appendChild(s);
+  };
+
+  var esc = function(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+    });
+  };
+  var tokens = function(qq){
+    var out = [], m, re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(qq))){
+      var t = m[1] || m[2];
+      if (!t || t.charAt(0) === '-') continue;
+      out.push(t);
+    }
+    return out;
+  };
+  var hl = function(text, qq){
+    var ts = tokens(qq), low = String(text).toLowerCase();
+    for (var i = 0; i < ts.length; i++){
+      var k = low.indexOf(ts[i].toLowerCase());
+      if (k >= 0){
+        return esc(text.slice(0, k)) + '<mark>' + esc(text.slice(k, k + ts[i].length)) +
+               '</mark>' + esc(text.slice(k + ts[i].length));
+      }
+    }
+    return esc(text);
+  };
+
+  var KIND = {p: '篇', u: '節', d: '項', s: '項', g: '組', x: '頁'};
+
+  var search = function(qq){
+    var pq = VS.parseQuery(qq);
+    if (!pq.n || !recs) return [];
+    var out = [];
+    for (var i = 0; i < recs.length; i++){
+      var r = recs[i];
+      var nt = String(r[2] || '').toLowerCase();
+      var nb = String(r[3] || '').toLowerCase();
+      var nc = String(r[5] || '').toLowerCase();
+      var ex = false;
+      for (var e = 0; e < pq.exc.length; e++){
+        if (nt.indexOf(pq.exc[e]) >= 0 || nb.indexOf(pq.exc[e]) >= 0){ ex = true; break; }
+      }
+      if (ex) continue;
+      var score = 0, miss = false;
+      for (var j = 0; j < pq.inc.length; j++){
+        var g = pq.inc[j];
+        var s1 = VS.matchGroup(nt, g);
+        var s2 = s1 ? 0 : VS.matchGroup(nb, g);
+        var s3 = (s1 || s2) ? 0 : VS.matchGroup(nc, g);
+        if (!s1 && !s2 && !s3){ miss = true; break; }
+        score += s1 ? 0 : (s2 ? 1 : 2);
+      }
+      if (miss) continue;
+      var pok = true;
+      for (var k = 0; k < pq.phr.length; k++){
+        if (nt.indexOf(pq.phr[k]) < 0 && nb.indexOf(pq.phr[k]) < 0){ pok = false; break; }
+      }
+      if (!pok) continue;
+      out.push({r: r, s: score, i: i});
+    }
+    out.sort(function(a, b){ return a.s - b.s || a.i - b.i; });
+    return out;
+  };
+
+  var render = function(qq){
+    var res = search(qq);
+    box.innerHTML = '';
+    var full = '五部律差異對照本.html?q=' + encodeURIComponent(qq);
+    if (!res.length){
+      box.innerHTML = '<p class="fl-more">索引中無「' + esc(qq) + '」。</p>' +
+        '<a class="fl-more" href="' + full + '">在合冊中全文檢索（含原文與白話）→</a>';
+      return;
+    }
+    var n = Math.min(res.length, 60);
+    for (var i = 0; i < n; i++){
+      var r = res[i].r;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fl-item';
+      b.innerHTML = '<span class="fl-k">' + (KIND[r[0]] || '') + '</span>' +
+        '<span class="fl-t">' + hl(r[2], qq) + '</span>' +
+        '<span class="fl-c">' + esc(r[5] || '') +
+        (r[3] ? '　·　' + hl(r[3], qq) : '') + '</span>';
+      b.addEventListener('click', (function(h){
+        return function(){ location.href = h; };
+      })(r[4]));
+      box.appendChild(b);
+    }
+    var foot = document.createElement('div');
+    foot.className = 'fl-more';
+    foot.innerHTML = '共 ' + res.length + ' 項' +
+      (res.length > n ? '，僅列前 ' + n + ' 項' : '') +
+      '　·　<a href="' + full + '">在合冊中全文檢索 →</a>';
+    box.appendChild(foot);
+  };
+
+  var go = function(){
+    var qq = q.value.trim();
+    if (!qq){ box.innerHTML = ''; lastQ = ''; return; }
+    if (qq === lastQ) return;
+    lastQ = qq;
+    load(function(){ render(qq); });
+  };
+  q.addEventListener('input', function(){
+    clearTimeout(timer);
+    timer = setTimeout(go, 180);
+  });
+  form.addEventListener('submit', function(e){ e.preventDefault(); lastQ = ''; go(); });
+
+  (function(){
+    var m = (location.search || '').match(/[?&]q=([^&]*)/);
+    if (!m) return;
+    var q0 = '';
+    try { q0 = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err){ return; }
+    if (!q0) return;
+    q.value = q0;
+    setTimeout(go, 120);
+  })();
+})();
+</script>
+</body></html>
