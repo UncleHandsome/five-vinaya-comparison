@@ -61,3 +61,20 @@ _work/_jie_diff.txt
 _work/_jie_suspect.txt
 _work/_probe_jie.py
 _work/_probe_jie2.py
+
+# 一次性除錯腳本與中間稿（2026-11-06 清理：_work 359→263 檔、78M→46M）
+_work/_*.py
+_work/_*.txt
+_work/_*.json
+_work/_14*.xml
+_work/_gaiji.json
+_work/_tex_test2.pdf
+# 例外：建置必需（build_compare 讀 _locate.json）與資料來源憑證
+!_work/_locate.json
+!_work/_inv.json
+!_work/_split.json
+!_work/_q3637.json
+!_work/_q3637b.json
+!_work/_todo_title.json
+!_work/_jie_diff.txt
+!_work/_jie_suspect.txt
