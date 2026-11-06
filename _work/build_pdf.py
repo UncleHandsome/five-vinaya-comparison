@@ -74,7 +74,7 @@ strong{font-weight:700}
 sub{font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:8.5pt;
   color:#555; font-style:normal; display:block; margin:1.5pt 0 3pt;
   line-height:1.4; letter-spacing:.2pt}
-code{font-family:"Consolas",monospace; font-size:9.5pt; color:#7a4a1a}
+code{font-family:"Consolas","FangSong",monospace; font-size:9.5pt; color:#7a4a1a}
 a{color:#111; text-decoration:none}
 /* ── 引用塊 ── */
 blockquote{
@@ -135,6 +135,10 @@ hr{border:0; border-top:.5pt solid #bbb; margin:8pt 0}
 .toc .lv2 .n{color:#777; font-family:"Microsoft YaHei",sans-serif; font-size:9.5pt}
 /* ── 項目標題不與正文分離 ── */
 p:has(> strong:first-child){page-break-after:avoid}
+/* 標題、元數據、原文提示不孤懸頁底 */
+h4 + sub, h5 + sub, h4 + p, h5 + p{page-break-before:avoid}
+p:has(> strong:first-child) + blockquote{page-break-before:avoid}
+sub{page-break-inside:avoid}
 """
 
 

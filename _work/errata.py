@@ -1030,13 +1030,28 @@ TITLE_MAIN = {
 
 
 def split_title(t, rid=None, limit=16):
-    """拆為（主標題, 副標題）。有 TITLE_MAIN 者從之，否則取頂層冒號前段。"""
+    """拆為（主標題, 副標題）。有 TITLE_MAIN 者從之，否則取頂層冒號前段。
+
+    副標題若以主標題開頭重複（如「初制戒本即具三句」＋「初制戒本即具…」），
+    削去重複前綴，免標題口吃。
+    """
+    def _dedup(main, sub):
+        if not main or not sub:
+            return main, sub
+        k = 0
+        while k < len(sub) and k < len(main) and sub[k] == main[k]:
+            k += 1
+        if k < 4:
+            return main, sub
+        rest = sub[k:].lstrip('：:，,、　 」「『』（）()')
+        return (main, rest) if len(rest) >= 4 else (main, '')
+
     t = (t or '').strip()
     m = TITLE_MAIN.get(rid or '')
     if m:
         if t.startswith(m):
-            return m, t[len(m):].lstrip('：:，,、　 ')
-        return m, t
+            return _dedup(m, t[len(m):].lstrip('：:，,、　 '))
+        return _dedup(m, t)
     # 自動：頂層冒號，前段 3–limit 字者
     d, marks = 0, []
     for i, ch in enumerate(t):
@@ -1048,19 +1063,21 @@ def split_title(t, rid=None, limit=16):
             marks.append((i, ch))
     for i, ch in marks:
         if ch in '：:' and 3 <= i <= limit:
-            return t[:i], t[i + 1:]
+            return _dedup(t[:i], t[i + 1:])
     # 次：無冒號而逾 23 字者，取最後一個頂層逗號／分號為斷（前段 6–limit 字）
     if len(t) >= 24:
         cand = [i for i, ch in marks if ch in '，；' and 6 <= i <= limit]
         if cand:
             i = max(cand)
-            return t[:i], t[i + 1:]
+            return _dedup(t[:i], t[i + 1:])
     return t, ''
 
 
 def clean_title(t, rid=None):
     """去除標題中的段號後綴與分類標籤，並統一戒號為四分律。"""
     t = (t or '').strip()
+    # 【主題】前綴為早期分類殘留，全書僅少數有，統一去除
+    t = _re.sub(r'^【[^】]{1,8}】\s*', '', t)
     if rid and rid in JIE_NO_FIX:
         old, new = JIE_NO_FIX[rid]
         if t.startswith(old):

@@ -377,7 +377,9 @@ def diff_lines(row, bold=True, expand=True, limit=110):
     else:
         out = ['**差異**'] + parts
     if tag:
-        out += ['', f'<sub>異在：{tag}</sub>']
+        # 「異在：」為早期分類語半成品，多數截斷且僅百餘條有；
+        # 其句已自差異條列中抽出，不再另行輸出，統一體例。
+        pass
     return out
 
 

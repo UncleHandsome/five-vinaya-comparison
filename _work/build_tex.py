@@ -46,11 +46,11 @@ FULL = '五部律差異對照本.md'
 
 def prep(md):
     """轉為 LaTeX 友善的 Markdown"""
-    # 本篇目錄在 PDF 無用，整段移除
-    # 目錄與「本節差異一覽」皆為導覽用，PDF 線性閱讀不需要，整塊移除；
-    # 只認 class="art-toc" 會漏掉 art-toc art-diff，留下失衡的 <details>。
-    md = re.sub(r'<details class="art-(?:toc|diff)[^"]*">.*?</details>\s*', '',
-                md, flags=re.S)
+    # 本篇目錄（class="art-toc"）在 PDF 無用，整段移除；
+    # 「本節差異一覽」（art-toc art-diff）保留，改為小標題，與 Chrome 版一致。
+    md = re.sub(r'<details class="art-toc">.*?</details>\s*', '', md, flags=re.S)
+    md = re.sub(r'<details class="art-toc art-diff"[^>]*>\s*<summary>([^<]*)</summary>',
+                lambda m: f'\n**〔{m.group(1)}〕**\n', md)
     # 四分律原文／白話
     md = re.sub(r'<details class="art-src">\s*<summary>([^<]*)</summary>',
                 lambda m: f'\n**〔{m.group(1)}〕**\n', md)
@@ -87,6 +87,11 @@ def build(src_md, out_pdf, title, extra_meta=None):
 \renewcommand{\headrulewidth}{0.3pt}
 \fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
 \usepackage{etoolbox}
+\usepackage{needspace}
+\renewcommand{\contentsname}{目錄}
+\pretocmd{\section}{\needspace{5\baselineskip}}{}{}
+\pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\needspace{4\baselineskip}}{}{}
 \pretocmd{\tableofcontents}{\clearpage}{}{}
 \apptocmd{\tableofcontents}{\clearpage}{}{}
 \usepackage{titlesec}
@@ -100,7 +105,7 @@ def build(src_md, out_pdf, title, extra_meta=None):
         '-V', 'documentclass=ctexart',
         '-V', 'CJKmainfont=FangSong',
         '-V', 'CJKsansfont=Microsoft YaHei',
-        '-V', 'CJKmonofont=Consolas',
+        '-V', 'CJKmonofont=FangSong',
         '-V', 'geometry:margin=1.5cm',
         '-V', 'fontsize=12pt',
         '-V', 'linestretch=1.25',
@@ -108,7 +113,7 @@ def build(src_md, out_pdf, title, extra_meta=None):
         '-V', 'colorlinks=false',
         '-V', 'bookmarks=true',
         '-V', 'bookmarksopen=true',
-        '--toc', '--toc-depth=3',
+        '--toc', '--toc-depth=5',
         '--include-in-header', hdr,
         '--metadata', f'title={title}',
     ]

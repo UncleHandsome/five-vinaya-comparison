@@ -167,8 +167,8 @@ def fix_ref4_loc(ref4, p_):
 
 
 def clean_ref(s, kind='四分'):
-    """把引用標記統一為讀者可用之形式（見 norm_ref.py）"""
-    return norm_ref(s, kind)
+    """把引用標記統一為讀者可用之形式（見 norm_ref.py），並清工程代號。"""
+    return clean_engine(norm_ref(s, kind))
 
 
 def esc(s):
@@ -201,6 +201,32 @@ def clip_orig(orig, r):
                 cut = cut[:p + len(sep)]
                 break
     return cut, True
+
+
+def fmt_unit(unit):
+    """資料庫子卷代號 → 正式卷次（vol36-37 → 卷 36–37）。"""
+    m = re.match(r'vol(\d+)-(\d+)([a-z]?)$', unit or '')
+    if m:
+        return '卷 %d–%d%s' % (int(m.group(1)), int(m.group(2)), m.group(3))
+    m = re.match(r'vol(\d+)([a-z]?)$', unit or '')
+    if m:
+        return '卷 %d%s' % (int(m.group(1)), m.group(2))
+    return unit or ''
+
+
+def clean_engine(t):
+    """清除底稿工程代號：Wxx 檔號、sifen/wufen 路徑、卷段黏連、shisong。"""
+    if not t:
+        return t
+    t = re.sub(r'五分\s*W\d+\s*(\d+)-(\d+)', r'五分卷 \1 段 \2', t)
+    t = re.sub(r'五分\s*W\d+\s*', '五分 ', t)
+    t = re.sub(r'wufen/vol(\d+)[`\s]*段\s*(\d+)', r'五分卷 \1 段 \2', t)
+    t = re.sub(r'sifen/(\d{3})[`\s]*段\s*(\d+)', r'四分 \1 段 \2', t)
+    t = re.sub(r'(\d{3})_[^\s，。；）]{1,10}?段\s*(\d+)', r'\1 段 \2', t)
+    t = re.sub(r'vol(\d+)-(\d+)#(\d+)', r'卷 \1–\2 第 \3 項', t)
+    t = re.sub(r'vol(\d+)([a-z]?)#(\d+)', r'卷 \1\2 第 \3 項', t)
+    t = t.replace('shisong', '十誦')
+    return t
 
 
 def fix_terms(diff, canon):
@@ -416,12 +442,17 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
     lines.append(f'**{no_prefix}**　{title_md(clean_title(fix_terms(r["title"], r["canon"]), r["id"]), r["id"])}{gt_tag}')
     lines.append('')
     p_ = PLACED.get(r['id'])
-    loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
+    if p_:
+        loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}'
+    elif r['st'] in ('A', 'B'):
+        loc_tag = '四分 對應見說明'
+    else:
+        loc_tag = '四分所無'
     _cls = f'　類：{cls_label}' if cls_label and cls_label != '未分類' else ''
-    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}{_cls}　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+    lines.append(f'<sub>{tag}　層級：{r.get("lv","")}{_cls}　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {fmt_unit(r["unit"])} 第 {r["no"]} 項</sub>')
     lines.append('')
     # 差異
-    diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
+    diff = rewrite_diff(r['id'], clean_engine(fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon'])))
     if diff:
         _mate = SAME_TOPIC.get(r['id'])
         _tail = ''
@@ -454,7 +485,7 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
                 lines.append(f'> {ln}')
             if clipped:
                 lines.append('>')
-                lines.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {r["unit"]}#{r["no"]}〕')
+                lines.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {fmt_unit(r["unit"])} 第 {r["no"]} 項〕')
             lines.append('')
         if plain:
             lines.append('<details><summary>白話</summary>')
@@ -550,8 +581,14 @@ def render_gt_block(g, ids):
         out.append(f'##### {r["canon"]}　{r["title"]}{_link}')
         out.append('')
         p_ = PLACED.get(r['id'])
-        loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}' if p_ else '四分所無'
-        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {r["unit"]}#{r["no"]}</sub>')
+        if p_:
+            loc_tag = f'四分 {p_["n"]:03d} 段{p_["seg"]}'
+        elif r['st'] in ('A', 'B'):
+            # 已改判同條增異／開緣而無四分定位，不再書「四分所無」自相矛盾
+            loc_tag = '四分 對應見說明'
+        else:
+            loc_tag = '四分所無'
+        out.append(f'<sub>〔{r["canon"]} {r["st"]}〕　{loc_tag}　本稿位置：{esc(expand_refs(fix_pos(r), r))}　出處：{r["canon"]} {fmt_unit(r["unit"])} 第 {r["no"]} 項</sub>')
         out.append('')
         diff = rewrite_diff(r['id'], fix_terms(one_line(r.get('diff_full') or r.get('diff') or ''), r['canon']))
         if diff:
