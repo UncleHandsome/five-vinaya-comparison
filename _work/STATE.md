@@ -1634,3 +1634,39 @@ D 1458／S 657／G/T 9／矩陣 2124 未動。
 
 **未處理**：`.git` 1.4 GB。歷史最大的 10 個 blob 皆為 `06_PDF/五部律差異對照本.pdf`
 （各 43–44 MB，重複十次以上）。要縮須改寫 148 個 commit ＋ force push，另議。
+
+## 二十六、.git 歷史改寫與歷史腳本歸檔（2026-11-06）
+
+**問題**：`.git` 1.4 GB（loose 930 MB ＋ pack 498 MB）；`git fsck --no-reflogs`
+只找到 15 個不可達 blob，即絕大部分舊 PDF 都是**可達**物件，`git gc` 救不了。
+最大 12 個 blob 全為 `06_PDF/五部律差異對照本.pdf`（34–44 MB）。
+
+**備份（三重，改寫前）**
+1. 本機 mirror `C:/Users/lionc/OneDrive/桌面/XW/律本_備份_20261106/repo.git`（149 commits／1.4 GB）
+2. 本機 PDF 副本 16 冊（100 MB ＋ 21 MB）
+3. 遠端分支 `backup-before-rewrite-20261106` → `ba7399a`（舊歷史與全部舊 PDF 仍在 GitHub）
+
+**執行**
+- `python -m git_filter_repo --force --invert-paths --path 06_PDF --path 07_PDF_LaTeX`
+- 149 → 135 commits（14 個只含 PDF 的空提交被清掉）；`.git` **1.4 GB → 39 MB**
+- filter-repo 會移除 origin 並把 remote-tracking ref 轉為本地分支：已重設 origin，
+  fetch refspec 收窄為 `+refs/heads/main:refs/remotes/origin/main`（**勿 fetch 備份分支**），
+  誤生的同名本地分支已刪。
+- 曾因 `git fetch origin main` 把舊 main 歷史拉回（.git 一度 758 MB），
+  刪 `refs/remotes/origin/main`、清 FETCH_HEAD、`reflog expire` ＋ `gc --prune=now` 後回到 42 MB。
+
+**PDF 體例變更**
+- 16 個現行 PDF 自備份還原至工作區，`.gitignore` 排除 `06_PDF/`、`07_PDF_LaTeX/`，
+  往後不再入版控；GitHub Pages 只部署 `05_網頁版/`，不受影響。
+- 公開取用：遠端備份分支的 `06_PDF/` 與 `07_PDF_LaTeX/`；或
+  `rebuild_all.py`／`build_tex.py --full` 重建。README、交接已同步。
+
+**歷史腳本歸檔（不實體搬遷）**
+- 以 `rebuild_all` 十步＋自訂 import 閉包＋交接明列者，判定 25 支活躍、130 支歷史。
+- 歷史腳本多以 `__file__` 定位 `_work`，搬進 `archive/` 會斷路徑且牽動百餘檔，
+  故**留在原位**，改以 `git rm --cached` 自版控移除、`.gitignore` 排除；
+  新 clone 只取活躍腳本。清單 `_work/ARCHIVE.md`、`_work/script_map.json`。
+- 追蹤檔 855 → 713。
+
+**文件**：README 補 PDF 不入版控說明、更新頁數表（合冊 2,611 頁／43.8 MB）
+與網頁 12 頁清單；交接補「歷史改寫」一節。

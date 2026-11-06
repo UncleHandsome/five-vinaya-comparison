@@ -78,3 +78,39 @@ _work/_tex_test2.pdf
 !_work/_todo_title.json
 !_work/_jie_diff.txt
 !_work/_jie_suspect.txt
+
+# PDF 為本機交付物，不入版控（2026-11-06 改寫歷史移除舊 blob）
+# 現行版本可由 rebuild_all.py / build_tex.py --full 重建，或自遠端
+# backup-before-rewrite-20261106 分支下載
+06_PDF/
+07_PDF_LaTeX/
+
+# 歷史批次腳本：留在磁碟供追溯，但自版控移除（2026-11-06）
+# 見 _work/ARCHIVE.md；例外為 rebuild_all 流程與其 import 閉包
+_work/*.py
+tools/*.py
+!tools/build_appendices.py
+!_work/build_compare.py
+!_work/build_html.py
+!tools/build_jie_names.py
+!_work/build_matrix_html.py
+!tools/build_mk_index.py
+!_work/build_pdf.py
+!tools/build_tables_html.py
+!_work/build_tex.py
+!_work/diff_fmt.py
+!_work/diff_rewrite.py
+!_work/errata.py
+!tools/fill_mk_gu.py
+!_work/fix_csv.py
+!_work/matrix_md.py
+!_work/norm_ref.py
+!_work/rebuild_all.py
+!tools/reclass_sclass.py
+!_work/section_intro.py
+!_work/sifen_src.py
+!tools/verify_integrity.py
+!_work/locate_sifen.py
+!_work/align_sifen2.py
+!tools/build_merge_place.py
+!tools/build_sclass.py
