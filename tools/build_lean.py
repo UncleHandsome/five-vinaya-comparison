@@ -65,7 +65,8 @@ def strip_lean(md):
     lines = md.split('\n')
     for i, line in enumerate(lines):
         if line.startswith('# '):
-            lines.insert(i + 1, '\n' + NOTE + '\n')
+            lines.insert(i + 1, '')
+            lines.insert(i + 2, NOTE)
             return '\n'.join(lines), n_src, n_plain
     return NOTE + '\n\n' + md, n_src, n_plain
 
