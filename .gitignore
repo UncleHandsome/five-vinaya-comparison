@@ -99,3 +99,7 @@ tools/*.py
 !_work/align_sifen2.py
 !tools/build_merge_place.py
 !tools/build_sclass.py
+
+# 精簡版 PDF（本機交付物，不入版控）
+08_PDF_精簡/
+!tools/build_lean.py

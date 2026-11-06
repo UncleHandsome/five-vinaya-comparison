@@ -19,6 +19,7 @@
 | `05_網頁版/` | HTML 網頁版，`index.html` 為入口 |
 | `06_PDF/` | A4 PDF（Chrome 版），12pt 緊湊排版。**本機產出，不入版控** |
 | `07_PDF_LaTeX/` | A4 PDF（LaTeX 版），有頁碼、書籤、頁眉。**本機產出，不入版控** |
+| `08_PDF_精簡/` | 精簡版 PDF：去白話、去四分律原文。**本機產出，不入版控** |
 | `_work/` | 工作區：中間產物、生成腳本、檢索索引 |
 | `_work/_backup/` | 舊版備份（去重稿前版、分卷舊檔），非必要可刪 |
 
@@ -98,11 +99,9 @@ A4、內文 12pt 仿宋、行距 1.45、邊距 14–15mm，一頁約 1,200–1,6
 
 > **PDF 不入版控（2026-11-06 起）**：歷次重建的 43–44 MB 合冊在 `.git` 內累積成
 > 1.4 GB，已改寫歷史移除（149 → 135 commits，`.git` 1.4 GB → 39 MB；
-> 加後續兩次提交，現為 137 commits／50 MB）。兩目錄仍在
-> 本機，`.gitignore` 排除之；要公開取用，可至
-> [改寫前備份分支](https://github.com/UncleHandsome/five-vinaya-comparison/tree/backup-before-rewrite-20261106)
-> 的 `06_PDF/` 與 `07_PDF_LaTeX/` 下載，或執行 `python _work/rebuild_all.py`、
-> `python _work/build_tex.py --full` 重建。
+> 含後續提交現約 50 MB）。兩目錄仍在本機，`.gitignore` 排除之；
+> 需要時執行 `python _work/rebuild_all.py`、`python _work/build_tex.py --full`、
+> `python tools/build_lean.py` 重建。改寫前的備份已於同日刪除。
 
 | 檔 | 頁數 | 大小 |
 |---|---:|---:|
@@ -133,20 +132,32 @@ A4、內文 12pt 仿宋、行距 1.45、邊距 14–15mm，一頁約 1,200–1,6
 
 | 檔 | 頁數 | 大小 |
 |---|---:|---:|
-| 合冊 | 2,817 | 8.4 MB |
+| 合冊 | 2,817 | 8.9 MB |
 | 卷一至卷十 | 440 | 1.8 MB |
-| 卷十一至卷二十一 | 513 | 2.0 MB |
-| 卷二十二至卷三十 | 302 | 1.2 MB |
+| 卷十一至卷二十一 | 513 | 2.1 MB |
+| 卷二十二至卷三十 | 302 | 1.3 MB |
 | 卷三十一至卷三十七 | 241 | 1.2 MB |
 | 卷三十八至卷四十九 | 497 | 2.0 MB |
 | 卷五十至卷六十 | 387 | 1.7 MB |
-| 四分所無與歸併組 | 444 | 1.6 MB |
+| 四分所無與歸併組 | 444 | 1.9 MB |
 
 > **兩套之取捨**：LaTeX 版有頁碼書籤，但排版較鬆（行距計算不同），頁數多約 35%；
 > 檔案反而小得多（合冊 8.4 MB 對 34.6 MB），因字體子集化更徹底。
 > 純閱讀用 LaTeX 版；要緊湊打印用 Chrome 版。
 >
 > 生成：`python _work/build_tex.py`（需 TeX Live，`xelatex` 須在 PATH）。
+
+### 精簡版（`08_PDF_精簡/`）
+
+抽去全書白話與每節所附的四分律原文，只留篇旨、節題、本節差異一覽、差異條列與本稿原文。
+原稿 11.1 MB／2,611 頁，精簡後 4.1 MB／1,081 頁（Chrome 版 30.2 MB），頁數減約六成。
+
+| 檔 | 說明 |
+|---|---|
+| `五部律差異對照本_精簡_Chrome.pdf` | Chrome 版，30.2 MB／1,081 頁 |
+| `五部律差異對照本_精簡_LaTeX.pdf` | LaTeX 版，4.0 MB，有頁碼、書籤 |
+
+生成：`python tools/build_lean.py`（`--md` 只產原稿、`--chrome`／`--tex` 只產單版）。
 
 ## 主要數據
 
@@ -223,6 +234,7 @@ python _work/build_html.py              # 對照本 HTML
 python _work/build_matrix_html.py       # 矩陣 HTML
 python _work/build_pdf.py               # PDF 分卷
 python _work/build_pdf.py --full        # 另出合冊
+python tools/build_lean.py              # 精簡版（去白話、去四分原文）兩版 PDF
 ```
 
 需 pandoc 3.x、Chrome（Chrome 版 PDF）、TeX Live（LaTeX 版 PDF）。

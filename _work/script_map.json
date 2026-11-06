@@ -18,6 +18,7 @@
   "_work/sifen_src.py",
   "tools/build_appendices.py",
   "tools/build_jie_names.py",
+  "tools/build_lean.py",
   "tools/build_merge_place.py",
   "tools/build_mk_index.py",
   "tools/build_sclass.py",

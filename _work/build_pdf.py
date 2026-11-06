@@ -206,7 +206,7 @@ def make_toc(md):
     return ''.join(out)
 
 
-def md_to_pdf(md_path, pdf_path, title, md_text=None):
+def md_to_pdf(md_path, pdf_path, title, md_text=None, subtitle=None, meta_lines=None):
     md = md_text if md_text is not None else open(md_path, encoding='utf-8').read()
     md = prep_md(md)
 
@@ -218,9 +218,9 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None):
     body = p.stdout.decode('utf-8')
 
     _sub = title.replace('五部律差異對照本', '').strip() or '全一冊'
-    cover = make_cover('五部律差異對照本', '以《四分律》為軸　五部對校',
-                       [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　848 節　·　九組歸併',
-                        'A4 · 內文 12pt · 緊湊排版'])
+    cover = make_cover('五部律差異對照本', subtitle or '以《四分律》為軸　五部對校',
+                       meta_lines or [f'— {_sub} —', '2,124 項差異　·　七十五篇　·　848 節　·　九組歸併',
+                                      'A4 · 內文 12pt · 緊湊排版'])
     toc = make_toc(md)
     page = f"""<!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
