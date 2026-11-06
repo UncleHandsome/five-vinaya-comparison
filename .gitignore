@@ -51,33 +51,18 @@ desktop.ini
 _work/_1428.xml
 _work/_gaiji.json
 
-# 校閱盤點的中間輸出（可由 _work/_inv*.py、_todo_title.py 等重跑）
-_work/_inv.json
-_work/_split.json
-_work/_dense_fix.json
-_work/_todo_title.json
-_work/_todo_title.txt
-_work/_jie_diff.txt
-_work/_jie_suspect.txt
-_work/_probe_jie.py
-_work/_probe_jie2.py
-
 # 一次性除錯腳本與中間稿（2026-11-06 清理：_work 359→263 檔、78M→46M）
 _work/_*.py
 _work/_*.txt
 _work/_*.json
-_work/_14*.xml
-_work/_gaiji.json
 _work/_tex_test2.pdf
-# 例外：建置必需（build_compare 讀 _locate.json）與資料來源憑證
+# 例外：建置必需（build_compare 讀 _locate.json）與既有對位資料
 !_work/_locate.json
-!_work/_inv.json
-!_work/_split.json
 !_work/_q3637.json
 !_work/_q3637b.json
-!_work/_todo_title.json
-!_work/_jie_diff.txt
-!_work/_jie_suspect.txt
+
+# CBETA 戒本 XML（T22n1426／1427／1431、T23n1436／1443）：
+# 附錄五、七對位之來源憑證，已入庫，勿刪勿忽略
 
 # PDF 為本機交付物，不入版控（2026-11-06 改寫歷史移除舊 blob）
 # 現行版本可由 rebuild_all.py / build_tex.py --full 重建，或自遠端

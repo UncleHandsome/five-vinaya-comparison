@@ -97,7 +97,8 @@ A4、內文 12pt 仿宋、行距 1.45、邊距 14–15mm，一頁約 1,200–1,6
 標題用微軟雅黑。每冊有封面與目錄頁。
 
 > **PDF 不入版控（2026-11-06 起）**：歷次重建的 43–44 MB 合冊在 `.git` 內累積成
-> 1.4 GB，已改寫歷史移除（149 → 135 commits，`.git` 1.4 GB → 39 MB）。兩目錄仍在
+> 1.4 GB，已改寫歷史移除（149 → 135 commits，`.git` 1.4 GB → 39 MB；
+> 加後續兩次提交，現為 137 commits／50 MB）。兩目錄仍在
 > 本機，`.gitignore` 排除之；要公開取用，可至
 > [改寫前備份分支](https://github.com/UncleHandsome/five-vinaya-comparison/tree/backup-before-rewrite-20261106)
 > 的 `06_PDF/` 與 `07_PDF_LaTeX/` 下載，或執行 `python _work/rebuild_all.py`、
