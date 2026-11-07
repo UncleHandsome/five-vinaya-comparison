@@ -449,6 +449,7 @@ nav h1 a{color:var(--fg)}
 .navfilterwrap{padding:.15rem 1rem .1rem}
 #navfilter{width:100%; margin:0; font-size:11.5px; padding:.26rem .45rem; border-radius:4px}
 #navfinfo{font-size:10px; padding:.15rem 0 0; color:#9a9288; min-height:1em}
+#navfinfo.none{color:#a8543a}
 
 /* 分組標題：標題＋細線 */
 nav .grp{margin:.15rem 0 .25rem}
@@ -495,12 +496,14 @@ nav a.jie.on{border-left-color:var(--accent); background:#efeade;
 .navdock{border-top:1px solid var(--line); box-shadow:0 -8px 18px rgba(0,0,0,.05)}
 .docklinks a{border-color:transparent; background:#efeade; color:#7a7268}
 .docklinks a:hover{background:#e7e1d3; border-color:var(--accent2); color:var(--accent)}
-.navdock .navtools button{border-color:transparent; background:transparent; color:#7a7268}
+.navdock .navtools button{border-color:transparent; background:transparent; color:#7a7268;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:.3rem .15rem}
 .navdock .navtools button:hover{background:#ece8dd; color:var(--accent)}
 .navdock .navtools button[aria-pressed="true"]{background:#efeade;
   border-color:var(--accent); color:var(--accent)}
 
 @media (prefers-color-scheme: dark){
+  #navfinfo.none{color:#d98b6a}
   nav::-webkit-scrollbar-thumb{background:#3a3733}
   .nsub{color:#7d766c}
   .navhead b,nav .grp>b{color:#8b857b}
@@ -669,10 +672,10 @@ nav a.jie.on{border-left-color:var(--accent); background:#efeade;
 <a href="#" id="refresh" title="強制重新抓取本頁（破快取）">↻ 更新</a>
 </div>
 <div class="navtools">
-<button type="button" id="toggle" aria-controls="main" title="展開或收起全部摺疊塊">全部展開／收起</button>
-<button type="button" id="width" title="放寬正文欄寬">切換寬屏</button>
-<button type="button" id="par" aria-pressed="false" title="四分原文與白話左右並列">對讀：原文並白話</button>
-<button type="button" id="navhide" title="收起側邊欄（Alt+N）">收起側欄</button>
+<button type="button" id="toggle" aria-controls="main" title="展開或收起正文全部摺疊塊">展開／收起</button>
+<button type="button" id="width" title="切換寬屏／舒適寬度">寬屏</button>
+<button type="button" id="par" aria-pressed="false" title="四分原文與白話左右並列">對讀</button>
+<button type="button" id="navhide" title="收起側邊欄（Alt+N）">收起</button>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
 <label for="jump" class="sr-only">跳至指定編號</label>
@@ -6859,9 +6862,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 5cc855b（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 00100fe-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 5cc855b」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 00100fe-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -6869,7 +6872,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 5cc855b（2026-11-07）}<br>
+　note = {版本 00100fe-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -7054,7 +7057,7 @@ window.VS = (function(){
   if (wbtn){
     if (localStorage.getItem('wb_wide') === '1') document.body.classList.add('wide');
     var syncW = function(){
-      wbtn.textContent = document.body.classList.contains('wide') ? '切換舒適寬度' : '切換寬屏';
+      wbtn.textContent = document.body.classList.contains('wide') ? '舒適寬' : '寬屏';
     };
     syncW();
     wbtn.addEventListener('click', function(e){
@@ -7071,7 +7074,7 @@ window.VS = (function(){
       var ds = document.querySelectorAll('details');
       var anyClosed = Array.prototype.some.call(ds, function(d){ return !d.open; });
       Array.prototype.forEach.call(ds, function(d){ d.open = anyClosed; });
-      bar.textContent = anyClosed ? '全部收起' : '全部展開';
+      bar.textContent = anyClosed ? '收起' : '展開';
     });
   }
   // 對讀：原文與白話左右並列
@@ -7080,7 +7083,7 @@ window.VS = (function(){
     if (localStorage.getItem('wb_par') === '1') document.body.classList.add('par');
     var syncP = function(){
       var on = document.body.classList.contains('par');
-      pbtn.textContent = on ? '對讀：開' : '對讀：原文並白話';
+      pbtn.textContent = on ? '對讀：開' : '對讀';
       pbtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     };
     syncP();
@@ -7600,13 +7603,38 @@ window.VS = (function(){
           if (!d.classList.contains('filtered')) d.open = true;
         });
       }
-      if (info) info.textContent = nq ? ('符合 ' + shown + ' 項（Esc 清除）') : '';
+      if (info){
+        info.textContent = !nq ? '' :
+          (shown ? ('符合 ' + shown + ' 項（Esc 清除）') : '無符合項（Esc 清除）');
+        info.classList.toggle('none', !!nq && !shown);
+      }
     };
-    f.addEventListener('input', apply);
+    // 中文輸入法：拼音階段會連發 input，等 compositionend 再篩，免目錄逐鍵閃動
+    var composing = false, ftimer = null;
+    f.addEventListener('compositionstart', function(){ composing = true; });
+    f.addEventListener('compositionend', function(){ composing = false; apply(); });
+    f.addEventListener('input', function(){
+      if (composing) return;
+      clearTimeout(ftimer);
+      ftimer = setTimeout(apply, 120);
+    });
     f.addEventListener('keydown', function(e){
       if (e.key === 'Escape'){ f.value = ''; apply(); f.blur(); }
     });
   }
+
+  // 二之一、捲動位置記憶（按頁）
+  try {
+    var _st = parseInt(localStorage.getItem(KEY + '_scroll') || '0', 10);
+    if (_st > 0) nav.scrollTop = _st;
+  } catch(e){}
+  var _stTimer = null;
+  nav.addEventListener('scroll', function(){
+    clearTimeout(_stTimer);
+    _stTimer = setTimeout(function(){
+      try { localStorage.setItem(KEY + '_scroll', String(Math.round(nav.scrollTop))); } catch(e){}
+    }, 250);
+  }, {passive:true});
 
   // 二之二、目錄層級的「全部展開／收起」
   var na = document.getElementById('navall');
