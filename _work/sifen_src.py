@@ -75,6 +75,15 @@ for _f in sorted(glob.glob(os.path.join(SIFEN_DIR, '*.txt'))):
             _lst.append((int(_m.group(1)), _m.group(2)))
     SEG[_no] = _lst
 
+# 篇題覆定：底本卷首作「人揵度第十二之一」，而全書無「之二」，去其「之一」，
+# 免讀者疑有闕卷（校閱報告所指）。
+TITLE_FIX = {52: '人揵度第十二'}
+TITLE.update(TITLE_FIX)
+
+# 揵度本名別體：059 卷首標「尼揵度竟」，058 作「比丘尼揵度竟」，二者本是一揵度，
+# 須合編節次（058 訖於（七），059 當接（八）–（十一）），故併為一名。
+FAM_ALIAS = {'尼揵度': '比丘尼揵度'}
+
 PLAIN = {}
 if os.path.exists(PLAIN_JSON):
     PLAIN = json.load(open(PLAIN_JSON, encoding='utf-8'))
@@ -101,7 +110,10 @@ def _fix_dup034():
 _fix_dup034()
 
 RE_JING = re.compile(r'[（(]([一二三四五六七八九十百]+)竟[)）]?')
-RE_TAIL = re.compile(r'[（(]([一二三四五六七八九十百]+)[）)]\s*$')
+# 尼單提諸篇尾標或作「(三十)」，或作「(三十竟)」，或於括號後再著句號
+# 「(三十)。」；舊式只認第一種，凡作「竟」或帶句號者皆漏切，一節遂含二戒
+# （031 段11–12、21–22、31–32，032 段7–8，035 段41–54 皆是）。今並收三式。
+RE_TAIL = re.compile(r'[（(]([一二三四五六七八九十百]+)(?:竟)?[）)]\s*[。，、]?\s*$')
 RE_NIAN = re.compile(r'[（(]([^（()）]{1,10}(?:揵度|犍度)[^（()）]{0,4}竟)[)）]')
 
 # 事件起首（供長篇切點吸附）
@@ -469,6 +481,7 @@ def _units_qian(no):
     for a, b, nm in blocks:
         nm = re.sub(r'(?:具足)?竟$', '', nm)
         fam = nm or KHD_HEAD.get((no, a)) or fam0
+        fam = FAM_ALIAS.get(fam, fam)
         for x, y in _split_events(segs, a, b):
             head = [t for k, t in segs if x <= k <= y][:2]   # 首二段合觀，免以發端語為名
             out.append({'a': x, 'b': y, 'cn': '', 'name': '', 'fam': fam,
@@ -531,7 +544,10 @@ SEC_PREFIX = {(21, 66): '〔波羅提提舍尼〕', (21, 77): '〔波羅提提�
 # 結單提，而提舍尼首戒只作「(一)」，無「竟」字可據，切戒時遂將段141–147 併入
 # 第一百七十八戒——節名作「使外道女香塗摩身」，而所含已是乞酥戒文。
 # 今於段141 補切一刀，冠以法名，與篇021 同例；戒號逕定，不與單提之累加相混。
-SEC_SPLIT = {(37, 141): ('〔波羅提提舍尼〕', '乞酥食')}
+SEC_SPLIT = {(37, 141): ('〔波羅提提舍尼〕', '乞酥食'),
+             # 段149 為四分律尼眾學法之總註（「下眾學戒與大僧戒無異，故不出耳」），
+             # 與前節乞油蜜戒不同科。五分尼眾學法之問答（D-0852）附此，別立一節。
+             (37, 149): ('〔尼眾學法〕', '四分從略')}
 NUM_FIX = {(37, 135): 178, (37, 141): 1}
 
 # ── 四分戒名人工覆定（2026-11-04，第八輪校閱）──────────────────────
@@ -860,7 +876,12 @@ def unit_label(u, no=None):
                 if _a and _b:
                     return _a + '／' + _b
             if seq and (fam + '|' + str(seq)) in JIE_NAMES:
-                return JIE_NAMES[fam + '|' + str(seq)]
+                _nm = JIE_NAMES[fam + '|' + str(seq)]
+                # 提舍尼自成一聚，戒號復從「一」起；篇旨已言「節名冠以
+                # 〔波羅提提舍尼〕以別之」，此處補冠，免與單提末戒混序。
+                if fam == '比丘提舍尼':
+                    _nm = '〔波羅提提舍尼〕' + _nm
+                return _nm
     if u.get('num'):
         h = f'第{_cn_num(u["num"])}戒'
         if u.get('name'):

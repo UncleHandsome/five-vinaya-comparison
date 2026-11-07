@@ -103,6 +103,8 @@ tools/*.py
 # 精簡版 PDF（本機交付物，不入版控）
 08_PDF_精簡/
 !tools/build_lean.py
+# 全書機械掃描（校閱收尾工具，需入庫供日後重跑）
+!tools/audit_book.py
 
 # 精簡版分卷暫存
 _work/_lean_tmp/

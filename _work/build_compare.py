@@ -81,7 +81,7 @@ GT_INFO = {
     'G6': ('波羅夷與學行法', '十誦 vol56#32／僧祇 vol25-26#24',
            '條件一一對應；同室宿、布薩自恣之許否兩存'),
     'G7': ('食前食後至餘家', '十誦 vol54#26／根有 vol42-43#4',
-           '三稿各記一側面：十誦立不犯緣、根有立犯界'),
+           '兩稿各記一側面：十誦立不犯緣、根有立犯界；五分以入門一腳、兩腳分罪，見根有項下'),
     'T1': ('比丘為官所執時之布薩', '五分 vol18#11／僧祇 vol27-28#22',
            '五分取清淨欲、就彼布薩、出界三層；僧祇分時集與羯磨欲、非時集與清淨欲'),
     'T2': ('大目連被判妄語', '僧祇 vol29-30#19／根有 vol10-11#4',
@@ -105,7 +105,9 @@ SAME_TOPIC = {
 # 022–024 底本三名互異（式叉迦羅尼法／百種學法之二／百眾學法之三），
 # 「種」「眾」又相混；丹本注已云「百眾學法之一」，今統一之，底本舊題存於篇旨。
 TITLE_FIX = {0: '卷首譯款與通序偈', 22: '百眾學法之一', 23: '百眾學法之二',
-             38: '受戒・說戒・安居・自恣諸揵度（卷31–37）'}
+             38: '受戒・說戒・安居・自恣諸揵度（卷31–37）',
+             # 底本卷首作「人揵度第十二之一」，全書無「之二」，去其「之一」
+             52: '人揵度第十二'}
 
 
 def ptitle(n):
@@ -166,9 +168,25 @@ def fix_ref4_loc(ref4, p_):
     return ref4
 
 
+def norm_query(s):
+    """統一「查詢詞」標記為「（查詢詞：…）」。
+
+    舊稿四種寫法並行（查詞、查、查詢詞；有無冒號、有無括號），校閱報告列為
+    體例不一。此處只正前綴，不動詞目本身。
+    """
+    if not s or ('查' not in s):
+        return s
+    s = s.replace('（查詞：', '（查詢詞：').replace('（查：', '（查詢詞：')
+    s = s.replace('（查 ', '（查詢詞：').replace('（查詢詞', '（查詢詞：')
+    s = s.replace('（查詢詞：：', '（查詢詞：')
+    s = re.sub(r'(?<![（(])查詞：', '查詢詞：', s)
+    s = re.sub(r'(?<![（(])查：', '查詢詞：', s)
+    return s
+
+
 def clean_ref(s, kind='四分'):
     """把引用標記統一為讀者可用之形式（見 norm_ref.py），並清工程代號。"""
-    return clean_engine(norm_ref(s, kind))
+    return norm_query(clean_engine(norm_ref(s, kind)))
 
 
 def esc(s):
@@ -218,6 +236,16 @@ def clean_engine(t):
     """清除底稿工程代號：Wxx 檔號、sifen/wufen 路徑、卷段黏連、shisong。"""
     if not t:
         return t
+    # 底稿 W 檔號（八處，皆見於對照欄）：逐條轉為五分卷段
+    for _a, _b in [('W05 6-187、6-188', '五分卷6 段187、段188'),
+                   ('W05 6-193', '五分卷6 段193'),
+                   ('W05 7-31', '五分卷7 段31'),
+                   ('W05 9-159', '五分卷9 段159'),
+                   ('W05 唯 6-178', '五分卷6 段178'),
+                   ('W04 捨墮段', '五分捨墮段'),
+                   ('W06 未列', '五分未列'),
+                   ('W31 28-8～42', '五分卷28 段8～42')]:
+        t = t.replace(_a, _b)
     t = re.sub(r'五分\s*W\d+\s*(\d+)-(\d+)', r'五分卷 \1 段 \2', t)
     t = re.sub(r'五分\s*W\d+\s*', '五分 ', t)
     t = re.sub(r'wufen/vol(\d+)[`\s]*段\s*(\d+)', r'五分卷 \1 段 \2', t)
@@ -229,13 +257,30 @@ def clean_engine(t):
     return t
 
 
+# 形近訛字（校閱報告所列，逐字回原典或文例可定者）。底本異體如「呵／訶」
+# 「穬麥／䵃麥」兩存者不在其列，以存各律舊文。
+VARIANT_FIX = [('速蔓界', '連蔓界'), ('得無癈闕', '得無廢闕'), ('簪帳', '簾帳'),
+               ('象牙我', '象牙杙'), ('跍跪', '胡跪'), ('惶心', '惺心')]
+
+
+def fix_variant(t):
+    if not t:
+        return t
+    for a, b in VARIANT_FIX:
+        t = t.replace(a, b)
+    return t
+
+
 def fix_terms(diff, canon):
     """把「本律」「此律」換為具體律名，免讀者回頭查主稿"""
     if not diff:
         return diff
     name = FULLNAME.get(canon, canon)
     d = diff.replace('本律', name).replace('此律', name)
-    return d
+    # 卷檔代號黏連於律名者，補空格並轉正式卷次：「十誦vol16段120」→「十誦 卷16 段120」
+    d = re.sub(r'(五分|十誦|僧祇|根有)\s*vol(\d+)\s*段\s*(\d+)',
+               lambda m: '%s 卷%s 段%s' % (m.group(1), m.group(2), m.group(3)), d)
+    return norm_query(fix_variant(d))
 
 
 def fix_pos(r):
@@ -253,13 +298,47 @@ def fix_pos(r):
     return pos
 
 
+def balance_q(t):
+    """節引起「而訖無」者，補其右引號。
+
+    原稿引文多自「若比丘…」起，至節引所止處未著右引號；全書逾百五十處，
+    讀者不知引文終於何處。先逐行補（本行有未閉之「，而下一行不以」起首者），
+    再於全塊末補其僅差一者。跨行引文（下行以」起首）不在此例，以免重閉。
+    """
+    lines = t.split('\n')
+    for i, ln in enumerate(lines):
+        d = ln.count('「') - ln.count('」')
+        if d <= 0 or ln.rstrip().endswith('」'):
+            continue
+        nxt = lines[i + 1] if i + 1 < len(lines) else ''
+        if nxt.lstrip().startswith('」') or (nxt.count('」') - nxt.count('「')) > 0:
+            continue
+        lines[i] = ln.rstrip() + '」' * d
+    t = '\n'.join(lines)
+    if t.count('「') == t.count('」') + 1 and not t.rstrip().endswith('」'):
+        t = t.rstrip() + '」'
+    elif t.count('」') == t.count('「') + 1:
+        # 有後引號而無前引號：於首段標記後補「（首行已有「者不補，如偈頌分句）
+        lines = t.split('\n')
+        for i, ln in enumerate(lines):
+            if '「' in ln or '」' not in t:
+                continue
+            m = re.match(r'^(〔[^〕]*〕)?(.*)$', ln)
+            pre, rest = (m.group(1) or ''), m.group(2)
+            if rest:
+                lines[i] = pre + '「' + rest
+                t = '\n'.join(lines)
+            break
+    return t
+
+
 def clean_orig(t):
     """清理原文中的重複標點與工作殘留"""
     if not t:
         return ''
     t = t.replace('〕〕', '〕').replace('】】', '】').replace('〔〔', '〔')
     t = t.replace('。。', '。').replace('，，', '，')
-    return t.strip()
+    return fix_variant(t.strip())
 
 
 # ---------- 主體：按四分律篇次分組 ----------
@@ -479,6 +558,7 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
         plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
         if orig:
             body, clipped = clip_orig(orig, r)
+            body = balance_q(body)
             lines.append(f'**本稿原文**（{r["canon"]}）：')
             lines.append('')
             for ln in body.split('\n'):
@@ -502,7 +582,7 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
         # 補證（簡版亦須出，凡例八目之一）
         _xref = dedup_xref(one_line(r.get('xref', '')))
         if _xref:
-            lines.append(f'- **補證**：{_xref}')
+            lines.append(f'- **補證**：{norm_query(_xref)}')
             lines.append('')
         return '\n'.join(lines)
 
@@ -512,13 +592,14 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
     plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
     if orig:
         body, clipped = clip_orig(orig, r)
+        body = balance_q(body)
         lines.append(f'**本稿原文**（{r["canon"]}）：')
         lines.append('')
         for ln in body.split('\n'):
             lines.append(f'> {ln}')
         if clipped:
             lines.append(f'>')
-            lines.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {r["unit"]}#{r["no"]}〕')
+            lines.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {fmt_unit(r["unit"])} 第 {r["no"]} 項〕')
         lines.append('')
     if plain:
         lines.append('<details><summary>白話</summary>')
@@ -553,7 +634,7 @@ def render_item(r, no_prefix, compact=False, cls_label=None):
     # 補證
     xref = dedup_xref(one_line(r.get('xref', '')))
     if xref:
-        lines.append(f'- **補證**：{xref}')
+        lines.append(f'- **補證**：{norm_query(xref)}')
         lines.append('')
 
     return '\n'.join(lines)
@@ -602,13 +683,14 @@ def render_gt_block(g, ids):
         orig = errata_orig(r['id'], clean_orig((o.get('orig') or '').strip()))
         if orig:
             body, clipped = clip_orig(orig, r)
+            body = balance_q(body)
             out.append(f'**本稿原文**（{r["canon"]}）：')
             out.append('')
             for ln in body.split('\n'):
                 out.append(f'> {ln}')
             if clipped:
                 out.append('>')
-                out.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {r["unit"]}#{r["no"]}〕')
+                out.append(f'> 〔節引，原文共 {len(orig):,} 字；全文見 {r["canon"]} {fmt_unit(r["unit"])} 第 {r["no"]} 項〕')
             out.append('')
         plain = errata_plain(r['id'], fix_terms(clean_orig((o.get('plain') or '').strip()), r['canon']))
         if plain:
@@ -733,15 +815,17 @@ def build_front():
     L.append('| **A** | 同條增異 | 同一戒條或制度，本稿有他部所無之實質增異（判罪輕重、程序、法數、人物結局） |')
     L.append('| **B** | 同條開緣 | 同一戒條，本稿另立開緣（新增開許或新增限制） |')
     L.append('| **C** | 四分所無 | 四分律無此戒此制，而他部有之 |')
-    L.append('| **D** | 同條減略 | 同一戒條，本稿較他部為略 |')
+    L.append('| **D** | 同條減略 | 同一戒條，一方具此制此數而他方無；各稿或就本稿言（本稿較他部為略），或就他部言（他部較本稿為略），詳下註 |')
     L.append('')
     L.append('`G#` 為同條歸併組，`T#` 為同題異制組，詳第三部。')
     L.append('')
+    _n_d = sum(1 for _r in rows if apply_errata(_r)['st'] == 'D')
     L.append('> **須辨（A 與 D 之界）**：此四目沿用各稿原判，非本書所重定。原稿標註時，'
-             '**A** 多施於「同條而內容有實質差異」者（判罪輕重、程序先後、法數多寡、人物結局），'
-             '**D** 多施於「一方具此制此數而他方無」者，其意近於「他部較本稿為略」。'
-             '二者本非截然，各稿判例亦不盡一致——同一「他部無此目」之項，或標 A 或標 D，'
-             '所在多有（今書中 D 凡 206 項，抽核數十，泰半為本稿有而他部無者）。'
+             '**A** 多施於「同條而內容有實質差異」者（判罪輕重、程序先後、法數多寡、人物結局）；'
+             '**D** 則多施於「一方具此制此數而他方無」者，其視角或自本稿言（本稿有而他部無），'
+             '或自他部言（他部較本稿為略），各稿不一。故 D 非盡為「本稿減略」，'
+             '亦有「本稿增出而他部從略」者在——今書中 D 凡 ' + str(_n_d) + ' 項，抽核數十，泰半屬此。'
+             '二者本非截然，同一「他部無此目」之項，或標 A 或標 D，所在多有。'
              '本書既存各稿之舊，不強為齊一；讀者欲知其實，當以「差異說明」所敘為準，'
              '狀態代號但供篩選檢索，不足為嚴格之分類。')
     L.append('')
@@ -1342,6 +1426,11 @@ def build_part3():
     L.append('')
     L.append('兩稿各記一次同一戒或同一制度者。')
     L.append('')
+    L.append('> **G2 已撤銷**：原「大房覆苫過限」一組，由五分「大房覆蓋限度」（以重數計）'
+             '與十誦「大房覆材不犯」（以覆材開緣）二稿合成；後者經覆核四分實有同條開緣，'
+             '已改判歸入第一部（014 篇段81），無須與他稿併觀，該組遂撤。'
+             '組號仍舊，不重編，故今存 G1、G3–G7 六組與 T1–T3 三組，編號至 G7 而無 G2。')
+    L.append('')
     for g in _gs:
         L.append(render_gt_block(g, GT[g]))
         L.append('')
@@ -1370,7 +1459,7 @@ def build_appendix():
     L.append('')
     L.append('### 附錄一　歸位方法與覆核')
     L.append('')
-    L.append('本書第一部按四分律篇段編次，其歸位之法十有三，依可靠程度為序：')
+    L.append('本書第一部按四分律篇段編次，其歸位之法十有四，依可靠程度為序：')
     L.append('')
     L.append('| 法 | 依據 | 項數 | 說明 |')
     L.append('|---|---|---:|---|')
@@ -1389,7 +1478,9 @@ def build_appendix():
         'quote': '引文檢索（以「」內引文回四分原文定位）',
         'force': '語義判定（引文無段號可據者）',
     }
-    cnt_how = Counter(p['how'] for p in loc['placed'])
+    # 以生效後之 PLACED 計數：ERRATA_POS 改繫者已改記 how='errata'，
+    # 若仍數 loc['placed']，則同一項兩見，合計溢出（校閱報告所指 1,459/1,464 之由）。
+    cnt_how = Counter(p['how'] for p in PLACED.values())
     for how in ['file', 'name_seg', 'name_dash', 'bare', 'dash', 'dot', 'num_seg', 'sifen_prefix', 'loose',
                 'chunk', 'file_only', 'quote', 'force']:
         if cnt_how.get(how):
@@ -1397,7 +1488,7 @@ def build_appendix():
     _n_er = len(ERRATA_POS)
     if _n_er:
         L.append(f'| `errata` | 覆核改判，另行歸位（見 `_work/errata.py`） | {_n_er} | — |')
-    _tot = len(loc['placed']) + _n_er
+    _tot = sum(cnt_how.values())
     L.append(f'| | **合計** | **{_tot}** | |')
     L.append('')
     if UNPLACED:
@@ -1462,7 +1553,8 @@ def build_appendix():
     for i, (d, n, cnt, paras) in enumerate(dens[:15], 1):
         L.append(f'| {i} | {n:03d} | {ptitle(n)} | {cnt} | {paras} | {d:.1f} |')
     L.append('')
-    _tot_paras = sum(si[n]['paras'] for n in by_seg)
+    # 分母取全書七十五篇之段數，含無差異之篇（如 029），方與上表段數合計相符
+    _tot_paras = sum(si[n]['paras'] for n in si)
     L.append(f'<sub>全書平均：{len(PLACED) / _tot_paras * 100:.1f} 項／百段'
              f'（{len(PLACED):,} 項 ÷ {_tot_paras:,} 段）。</sub>')
     L.append('')

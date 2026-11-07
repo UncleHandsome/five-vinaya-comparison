@@ -247,7 +247,8 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None, subtitle=None, meta_lines=
         '--no-pdf-header-footer',
         'file:///' + tmp_html.replace('\\', '/'),
     ]
-    r = subprocess.run(cmd, capture_output=True, timeout=1800)
+    # 合冊二千六百餘頁，Chrome 排版常逾三十分；分卷不過數百頁，留此上限無礙。
+    r = subprocess.run(cmd, capture_output=True, timeout=4200)
     ok = os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 1000
     if not ok:
         print('  Chrome 失敗：', r.stderr.decode('utf-8', 'ignore')[:300])

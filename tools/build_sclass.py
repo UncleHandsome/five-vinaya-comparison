@@ -32,6 +32,26 @@ CLASSES = [
     ('二不定', r'二不定|不定法'),
     ('揵度', r'揵度|犍度|受戒法|布薩法|安居法|自恣法'),
 ]
+
+# 尼律卷次（各律）：此諸卷所收，皆比丘尼戒，不得歸入「比丘…」類。
+# 舊法只憑「波逸提」「僧殘」等罪名關鍵詞，尼戒文雖作「若比丘尼…波逸提」，
+# 因「比丘尼」與罪名相隔逾六字，遂誤入比丘類（校閱報告所指 67 條之實）。
+NUN_VOL = {'五分': range(11, 15), '十誦': range(42, 48), '僧祇': range(36, 40)}
+# 罪名 → 尼戒類（依四分尼律五篇）
+NUN_CRIME = [('波羅提提舍尼', '尼提舍尼'), ('波羅夷', '尼八波羅夷'),
+             ('僧伽婆尸沙', '尼十七僧殘'), ('僧殘', '尼十七僧殘'),
+             ('尼薩耆', '尼三十捨墮'), ('捨墮', '尼三十捨墮'),
+             ('波逸提', '尼單提'), ('波夜提', '尼單提')]
+
+
+def _is_nun(r, text):
+    """判是否尼戒：先看本稿卷次是否在尼律範圍，再看戒文主語。"""
+    m = re.match(r'vol(\d+)', r.get('unit') or '')
+    if m and int(m.group(1)) in NUN_VOL.get(r.get('canon'), ()):
+        return True
+    i = text.find('若比丘尼')
+    j = text.find('若比丘，')
+    return i >= 0 and (j < 0 or i < j)
 RE_SEG4 = re.compile(r'(\d{3})[ _]段|(\d{3})\.(\d+)')
 RE_QUOTE = re.compile(r'「([^」]{4,})」')
 
@@ -39,6 +59,12 @@ RE_QUOTE = re.compile(r'「([^」]{4,})」')
 def classify(r, orig=''):
     """回 (類, 依據)。只用可覆核的字串，不猜；依據欄明記出自何處。"""
     t = (r.get('title') or '') + '　' + (r.get('diff_full') or '')
+    # 尼戒先判，免為「波逸提」「僧殘」等通名誤入比丘類
+    if _is_nun(r, t + '　' + (orig or '')):
+        for kw, cls in NUN_CRIME:
+            if kw in t or kw in (orig or ''):
+                return cls, '尼律（%s）' % kw
+        return '尼眾・女眾', '尼律卷次'
     for name, pat in CLASSES:
         m = re.search(pat, t)
         if m:
@@ -78,18 +104,33 @@ def main():
     print('C 類', len(C))
 
     # ── 分類表 ────────────────────────────────────────────────────
-    sclass = {}
+    # 既有 s_class.json 曾人工增補類目（僧團程序、衣鉢、安居等），非本腳本所能復原，
+    # 故以「增補」而非「覆蓋」方式寫回：只補正尼戒誤入比丘類者，其餘一律保留。
+    p = os.path.join(WORK, 's_class.json')
+    prev = json.load(open(p, encoding='utf-8')) if os.path.exists(p) else {}
+    sclass = dict(prev)
+    fixed = 0
     for r in C:
         k = '%s|%s|%s' % (r['canon'], r['unit'], r['no'])
-        cls, why = classify(r, (orig.get(k) or {}).get('orig', ''))
-        sclass[r['id']] = {
-            '類': cls, '層': r['lv'], '依據': why,
-            '可歸篇段': (RE_SEG4.search(r.get('ref4') or '').group()
-                        if RE_SEG4.search(r.get('ref4') or '') else ''),
-            'canon': r['canon'], 'title': r['title'],
-        }
-    p = os.path.join(WORK, 's_class.json')
+        o = (orig.get(k) or {}).get('orig', '')
+        old = dict(prev.get(r['id']) or {})
+        if old.get('類', '').startswith('比丘') and _is_nun(r, r['title'] + r['diff_full'] + o):
+            cls, why = classify(r, o)
+            if not cls.startswith('比丘'):
+                old.update({'類': cls, '依據': why})
+                sclass[r['id']] = old
+                fixed += 1
+                continue
+        if r['id'] not in sclass:
+            cls, why = classify(r, o)
+            sclass[r['id']] = {
+                '類': cls, '層': r['lv'], '依據': why,
+                '可歸篇段': (RE_SEG4.search(r.get('ref4') or '').group()
+                            if RE_SEG4.search(r.get('ref4') or '') else ''),
+                'canon': r['canon'], 'title': r['title'],
+            }
     json.dump(sclass, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    print('尼戒改類', fixed, '項')
     cc = collections.Counter(v['類'] for v in sclass.values())
     print('分類分佈:', dict(cc.most_common()))
     print('有明確類者', sum(v for k, v in cc.items() if k != '未分類'), '/', len(C))

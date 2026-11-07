@@ -51,7 +51,20 @@ def body_text():
 def main():
     t = body_text()
     # 戒本分節位置（單提：4673–7686；波羅夷、僧殘另取）
-    dan = [p[:80] for p in t[4673:7686].split('若比丘')[1:]]
+    def _dan(p):
+        """取戒本起句：至下一戒起首「為止；若仍逾 80 字，延伸至最近句末。
+
+        舊法硬切 80 字，長戒每截於句中（校閱報告所指「起句截斷」）。
+        """
+        p = p.strip().lstrip('「『（(，。、；： ')
+        i = p.find('「')
+        if i > 0:
+            p = p[:i]
+        if len(p) > 80:
+            m = re.search(r'[。！？]', p[80:200])
+            p = p[:80 + m.end()] if m else p[:80]
+        return p
+    dan = [_dan(p) for p in t[4673:7686].split('若比丘')[1:]]
     print('單提戒本條數', len(dan))
 
     import sifen_src as S
@@ -122,10 +135,10 @@ def main():
           % sum(1 for r in rows if r['僧祇序']), '']
 
     # 捨墮 26 條
-    dan2 = [p[:80] for p in t[3066:4610].split('若比丘')[1:]]
+    dan2 = [_dan(p) for p in t[3066:4610].split('若比丘')[1:]]
     L += ['#### 附錄七之一　僧祇戒本對照表（比丘捨墮）', '',
           '> 僧祇戒本捨墮只得 26 條（自稱「三十尼薩耆波夜提」），'
-          '四分 9 勸二家、10 過限忽切、24 勸織師、29 蘭若離衣四條無可對位，'
+          '四分 9 勸二家、10 過限怱切、24 勸織師、29 蘭若離衣四條無可對位，'
           '不強配。', '',
           '| 四分 | 四分戒名 | 僧祇戒本 | 僧祇起句 |', '|---|---|---|---|']
     units2 = {}
@@ -143,7 +156,7 @@ def main():
         no, cn = units2.get(i, ('', ''))
         L.append('| %03d-%s | %s | 第 %d 條 | %s |' %
                  (no, cn, nm('比丘捨墮', i), j,
-                  re.sub(r'^[，。、；：]', '', dan2[j - 1]).replace('|', '／')))
+                  re.sub(r'^[，。、；：]', '', dan2[j - 1]).rstrip('「『（(，。、；： ').replace('|', '／')))
     L.append('')
 
     with open(os.path.join(WORK, 'appendix7.md'), 'w', encoding='utf-8',
