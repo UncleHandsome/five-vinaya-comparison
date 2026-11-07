@@ -283,6 +283,10 @@ body.par main:after{content:""; display:block; clear:both}
 }
 
 /* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+/* 寬表橫向捲動容器（窄屏防撐破） */
+.tscroll{max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  margin:.8rem 0; border-radius:3px}
+.tscroll>table{margin:0}
 /* 底部固定工具區：分卷前後、回目錄、展開收合、跳項號 */
 nav{padding-bottom:0}
 .navdock{position:sticky; bottom:0; z-index:5; margin-top:.5rem;
@@ -386,7 +390,11 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   main{padding-top:3.4rem}
 }
 @media(min-width:1101px){ #navburger,#navmask{display:none} }
-@media print{ #navtoggle,#navburger,#navmask,#navresizer{display:none !important} }
+@media print{
+  #navtoggle,#navburger,#navmask,#navresizer{display:none !important}
+  /* 列印時表格不裁切，改由瀏覽器分頁 */
+  .tscroll{overflow:visible !important; max-width:none}
+}
 </style></head>
 <body><div class="wrap">
 <nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp" style="margin-bottom:.2rem"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="過濾目錄：篇名／戒名／節名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div><div class="grp"><b>全書</b><a href="index.html">目錄與說明</a><a href="五部律差異對照本.html">對照本合冊</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div><div class="grp"><b>專題表</b><a href="比丘比丘尼戒對照表.html">比丘／比丘尼戒對照</a><a href="五部律開遮持犯表.html">開遮持犯表</a></div><div class="grp"><b>分卷</b><a href="五部律差異對照本_卷一至卷十.html">卷一至卷十</a><a href="五部律差異對照本_卷十一至卷二十一.html">卷十一至卷二十一</a><a href="五部律差異對照本_卷二十二至卷三十.html">卷二十二至卷三十</a><a href="五部律差異對照本_卷三十一至卷三十七.html">卷三十一至卷三十七</a><a href="五部律差異對照本_卷三十八至卷四十九.html">卷三十八至卷四十九</a><a href="五部律差異對照本_卷五十至卷六十.html">卷五十至卷六十</a><a href="五部律差異對照本_四分所無與歸併組.html">四分所無與歸併組</a></div></nav>
@@ -521,9 +529,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 912725d（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 00b3bf5-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 912725d」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 00b3bf5-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -531,7 +539,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 912725d（2026-11-07）}<br>
+　note = {版本 00b3bf5-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。

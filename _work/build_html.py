@@ -427,6 +427,10 @@ body.par main:after{content:""; display:block; clear:both}
 
 CSS += r"""
 /* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+/* 寬表橫向捲動容器（窄屏防撐破） */
+.tscroll{max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  margin:.8rem 0; border-radius:3px}
+.tscroll>table{margin:0}
 /* 底部固定工具區：分卷前後、回目錄、展開收合、跳項號 */
 nav{padding-bottom:0}
 .navdock{position:sticky; bottom:0; z-index:5; margin-top:.5rem;
@@ -530,7 +534,11 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   main{padding-top:3.4rem}
 }
 @media(min-width:1101px){ #navburger,#navmask{display:none} }
-@media print{ #navtoggle,#navburger,#navmask,#navresizer{display:none !important} }
+@media print{
+  #navtoggle,#navburger,#navmask,#navresizer{display:none !important}
+  /* 列印時表格不裁切，改由瀏覽器分頁 */
+  .tscroll{overflow:visible !important; max-width:none}
+}
 """
 
 # ── 檢索核心（合冊／分卷／首頁共用）──────────────────────────────
@@ -1775,6 +1783,10 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
     # pandoc 在 Windows 上輸出 CRLF；此處先歸 LF，寫檔時亦不再轉換，
     # 否則 text mode 會把 \n 再轉成 \r\n，成 \r\r\n（雙重回車）。
     body = p.stdout.decode('utf-8').replace('\r\n', '\n')
+    # 寬表（附錄統計等）在窄屏會撐破版面：外包一層可橫向捲動的容器
+    body = re.sub(r'<table>.*?</table>',
+                  lambda m: '<div class="tscroll">' + m.group(0) + '</div>',
+                  body, flags=re.S)
 
     _cur = None
     if not is_full:

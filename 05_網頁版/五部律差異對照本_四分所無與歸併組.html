@@ -298,6 +298,10 @@ body.par main:after{content:""; display:block; clear:both}
 }
 
 /* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+/* 寬表橫向捲動容器（窄屏防撐破） */
+.tscroll{max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  margin:.8rem 0; border-radius:3px}
+.tscroll>table{margin:0}
 /* 底部固定工具區：分卷前後、回目錄、展開收合、跳項號 */
 nav{padding-bottom:0}
 .navdock{position:sticky; bottom:0; z-index:5; margin-top:.5rem;
@@ -401,7 +405,11 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   main{padding-top:3.4rem}
 }
 @media(min-width:1101px){ #navburger,#navmask{display:none} }
-@media print{ #navtoggle,#navburger,#navmask,#navresizer{display:none !important} }
+@media print{
+  #navtoggle,#navburger,#navmask,#navresizer{display:none !important}
+  /* 列印時表格不裁切，改由瀏覽器分頁 */
+  .tscroll{overflow:visible !important; max-width:none}
+}
 </style>
 </head>
 <body>
@@ -485,7 +493,7 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <p>讀法：欲知某部於四分律之外別有何制，逕翻該部之節。各節內依層級分組，組內依原稿項次排列。</p>
 <p><strong>層級之限</strong>：戒條、制度、法數、事件四目，依原稿標題與差異說明判定，界限本有交叉——如同一緣起既繫於戒條，亦可歸於事件；同一法數既為制度之目，亦可獨立成類。此分組僅供瀏覽，非嚴格分類，尋項時宜兼顧相鄰諸組。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>所屬律</th>
@@ -515,7 +523,7 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <td>根有律獨有者。根有與十誦同屬有部，與十誦重合最多，故此類最少。</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>表列共 657 項，另有 9 項已併入第三部之
 <code>G#</code>／<code>T#</code> 組（同組他稿重出者，不於此重列），合
@@ -18146,7 +18154,7 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <p><a id="ap1"></a></p>
 <h3 id="附錄一-歸位方法與覆核">附錄一　歸位方法與覆核</h3>
 <p>本書第一部按四分律篇段編次，其歸位之法十有四，依可靠程度為序：</p>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>法</th>
@@ -18247,7 +18255,7 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>全部 1,458 項皆已歸位，無遺漏。其中 <code>file_only</code> 4
 項僅知篇而不知段，依篇次列於該篇之首；<code>quote</code> 12
@@ -18259,7 +18267,7 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <p><a id="ap2"></a></p>
 <h3 id="附錄二-分部統計">附錄二　分部統計</h3>
 <h4 id="按四分律篇次">按四分律篇次</h4>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>篇</th>
@@ -18720,13 +18728,13 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td style="text-align: right;">12</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>合計</strong>：75 篇，1458 項；有差異者 74 篇；其中 029
 諸部皆同，無差異項。</p>
 <p><a id="ap3"></a></p>
 <h4 id="差異密度每百段之項數">差異密度：每百段之項數</h4>
 <p><sub>密度高者，非必差異大，乃該篇段數少而差異集中。讀者可據此優先細讀。</sub></p>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th style="text-align: right;">序</th>
@@ -18859,10 +18867,10 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td style="text-align: right;">51.0</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><sub>全書平均：28.1 項／百段（1,458 項 ÷ 5,180 段）。</sub></p>
 <h4 id="四分所無所屬律--層級">四分所無：所屬律 × 層級</h4>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>所屬律</th>
@@ -18915,12 +18923,12 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td style="text-align: right;"><strong>657</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>讀法：戒條一欄多者，該部於四分律之外別有戒目；制度、法數多者，其異在羯磨程序與名相組織，非別立新戒。</p>
 </blockquote>
 <h3 id="附錄三-四分律篇目卷次對照">附錄三　四分律篇目卷次對照</h3>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>卷次</th>
@@ -18967,7 +18975,7 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td style="text-align: right;">14</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="附錄四-由他部反查本書">附錄四　由他部反查本書</h3>
 <p>本書以四分律篇次為骨，他部之項散入各篇，故自他部原典入手者，不能循目錄而得。欲反查，有二法：</p>
 <p>一、<strong>按項反查</strong>：《五部律綜合異同矩陣》之
@@ -18996,7 +19004,7 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <p><strong>比丘尼品（比丘單提
 21–30）</strong>：此十戒（教誡尼、與尼衣、與尼同行同船等）為比丘對尼眾之制，尼律無同條可對；其對待之制（如尼「半月往僧中求教授」）散見尼單提，非同一戒，故不入本表，亦不列為「共戒」。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>比丘</th>
@@ -20021,14 +20029,14 @@ id="僧祇-收供養具卒風雨一切僧共收不得以德自免-編號-m-1809"
 <td>戒名小異</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>共戒對位 <strong>101</strong> 組：罪屬相同 100 組、相異 1
 組。罪名相異者即二部立法輕重之別，讀者可循篇號回正文覆核。</p>
 </blockquote>
 <h4
 id="附錄五之二-各類對位與獨有之數">附錄五之二　各類對位與獨有之數</h4>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>罪類</th>
@@ -20096,7 +20104,7 @@ id="附錄五之二-各類對位與獨有之數">附錄五之二　各類對位�
 <td><strong>140</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p><strong>合計之義</strong>：上表只計波羅夷、僧殘、捨墮、單提、提舍尼五篇，故比丘
 137、比丘尼 241，<strong>非二部戒條總數</strong>。比丘更加不定 2、眾學
@@ -20105,7 +20113,7 @@ id="附錄五之二-各類對位與獨有之數">附錄五之二　各類對位�
 者，依戒本之數；本書正文分節得 179 目。第124戒之緣起在 034 篇末、戒文在
 035 篇首，跨篇分屬二節，故多一目。）</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>罪類</th>
@@ -20140,7 +20148,7 @@ id="附錄五之二-各類對位與獨有之數">附錄五之二　各類對位�
 <td>四分律二部戒條之數</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p><strong>跨罪之一例</strong>：女身相觸戒，比丘結僧殘、比丘尼結波羅夷，故波羅夷列比丘
 4、尼 5，僧殘列比丘 8、尼 7——相差之 1 即此戒，非統計錯誤。</p>
@@ -20160,7 +20168,7 @@ id="附錄五之三-眾學法二部共遵無對位可列">附錄五之三　眾�
 107–178）實含後 42
 條未分節之威儀（塔寺、說法諸戒），故段次跨度特大，非一條橫跨七十二段。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>序</th>
@@ -20519,7 +20527,7 @@ id="附錄五之三-眾學法二部共遵無對位可列">附錄五之三　眾�
 <td>107–178（含後 42 條未分節）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>補記：末目以下之 42
 條（不得塔中埋死屍、不得向塔燒死屍、不得為持劍人說法等），原文自段 107
@@ -20537,7 +20545,7 @@ D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之�
 <p><strong>「三律所無」之讀法</strong>：差異說明中云「三律所無」者，指該項<strong>細節</strong>（如某種判法、某項開緣）為他三部所無，非謂此戒不存在；故該部欄仍作「有」。此為本表最易誤讀處，特揭於此。</p>
 <p><strong>補比明細與本表之關係</strong>：附錄六之一、之二列全書補比諸項，本表只取其中有差異可說者，故項號不必盡見於上表。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>項號</th>
@@ -27830,7 +27838,7 @@ D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之�
 <td>M-2112　根有 vol48-49#1；僧祇戒本 第82</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>共 <strong>657</strong>
 列。表內「未比」不得讀作「無」；若欲逐戒全表（每戒 × 五部 ×
@@ -27843,7 +27851,7 @@ D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之�
 </blockquote>
 <h4 id="附錄六之一甲-僧祇補比明細290-格">附錄六之一甲　僧祇補比明細（290
 格）</h4>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>項號</th>
@@ -29594,10 +29602,10 @@ D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之�
 <td>戒本第82</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="附錄六之一乙-十誦補比明細55-格">附錄六之一乙　十誦補比明細（55
 格）</h4>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>項號</th>
@@ -29882,14 +29890,14 @@ D-0450），循項號回《五部律綜合異同矩陣》，再按附錄四之�
 <td>十誦戒本 第147</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4
 id="附錄六之二-根有補比卷次學處統計">附錄六之二　根有補比卷次／學處統計</h4>
 <blockquote>
 <p>根有 396
 格，依「學處第N」定位：比丘按卷次，比丘尼按學處序（根有尼律學處自成一系）。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>卷次／學處</th>
@@ -30062,7 +30070,7 @@ id="附錄六之二-根有補比卷次學處統計">附錄六之二　根有補�
 <td>1</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3
 id="附錄七-僧祇戒本對照表比丘單提">附錄七　僧祇戒本對照表（比丘單提）</h3>
 <blockquote>
@@ -30072,7 +30080,7 @@ no. 1426）為據，逐條對位，供回原典覆核。</p>
 71、73、74 三條未能確定，留空不強配。僧祇戒本單提 92
 條，較四分多二條（迴僧物與人、不白入尼住處），為僧祇獨有，不入此表。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>四分</th>
@@ -30605,7 +30613,7 @@ no. 1426）為據，逐條對位，供回原典覆核。</p>
 <td>與如來衣量等作衣。若過，截已，波夜提。如來衣長九修伽陀磔手、廣六磔手</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <blockquote>
 <p>共 <strong>87</strong> 條對位。波羅夷 4 條、僧殘前 10
 條與四分同序，開遮表補比時一併採用；提舍尼之戒本分段未能盡合，暫缺。</p>
@@ -30616,7 +30624,7 @@ id="附錄七之一-僧祇戒本對照表比丘捨墮">附錄七之一　僧祇�
 <p>僧祇戒本捨墮只得 26 條（自稱「三十尼薩耆波夜提」），四分 9 勸二家、10
 過限怱切、24 勸織師、29 蘭若離衣四條無可對位，不強配。</p>
 </blockquote>
-<table>
+<div class="tscroll"><table>
 <thead>
 <tr>
 <th>四分</th>
@@ -30783,7 +30791,7 @@ id="附錄七之一-僧祇戒本對照表比丘捨墮">附錄七之一　僧祇�
 <td>知物向僧自迴向己，尼薩耆波夜提。」</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <p><em>本書據《五部律綜合異同矩陣》2,124
 項、四分律七十五篇索引及歸位表機械生成，G/T
@@ -30816,9 +30824,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 912725d（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 00b3bf5-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 912725d」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 00b3bf5-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -30826,7 +30834,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 912725d（2026-11-07）}<br>
+　note = {版本 00b3bf5-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
