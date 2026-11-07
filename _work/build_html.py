@@ -427,6 +427,19 @@ body.par main:after{content:""; display:block; clear:both}
 
 CSS += r"""
 /* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+/* 底部固定工具區：分卷前後、回目錄、展開收合、跳項號 */
+nav{padding-bottom:0}
+.navdock{position:sticky; bottom:0; z-index:5; margin-top:.5rem;
+  background:var(--panel); border-top:1px solid var(--line);
+  box-shadow:0 -6px 14px rgba(0,0,0,.05); padding:.15rem 0 .45rem}
+.docklinks{display:flex; flex-wrap:wrap; gap:.22rem; padding:.3rem 1rem .05rem}
+.docklinks a{flex:1 1 auto; min-width:0; text-align:center; font-size:11.5px;
+  padding:.24rem .35rem; border:1px solid var(--line); border-radius:3px;
+  color:var(--fg2); text-decoration:none; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis}
+.docklinks a:hover{border-color:var(--accent2); color:var(--accent); background:#efeade}
+.navdock .navtools{padding:.25rem 1rem 0}
+.navdock .grp{padding:.3rem 1rem 0; margin:0}
 #navfilter{display:block; width:calc(100% - 2rem); margin:.15rem 1rem .3rem;
   padding:.3rem .5rem; border:1px solid var(--line); border-radius:3px;
   background:#fff; color:var(--fg); font:inherit; font-size:12.5px}
@@ -489,6 +502,9 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   border-radius:12px; background:var(--panel); color:var(--accent)}
 .tryq a:hover{border-color:var(--accent2); background:#efeade}
 @media (prefers-color-scheme: dark){
+  .navdock{background:#1b1a18}
+  .docklinks a{color:var(--fg2)}
+  .docklinks a:hover{background:#2a2825; color:var(--accent)}
   #navfilter,.findhead input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
   #navtoggle,#navburger{background:#1b1a18; color:var(--accent); border-color:var(--line)}
   .navtools button,.findopts button,#findhist button,#findhelpbtn{background:#1e1d1b; color:var(--fg2)}
@@ -812,8 +828,8 @@ SEARCH_BOX = r"""
 <b>排除</b>　<code>-四分</code>　　<b>片語</b>　<code>"非親里"</code><br>
 <b>別名</b>　波逸提＝單提、捨墮＝尼薩耆、比丘＝苾芻… 自動並查<br>
 <b>模糊</b>　容漏字（<code>摩埵</code> 可中「摩那埵」）<br>
-<b>快捷</b>　<code>/</code> 或 <code>Ctrl+K</code> 聚焦；<code>Enter</code> 逐處跳；
-<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
+<b>快捷</b>　<code>Ctrl+F</code>、<code>Ctrl+K</code> 或 <code>/</code> 聚焦；
+<code>Enter</code> 逐處跳；<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
 </div>
 <div class="findopts" role="group" aria-label="檢索範圍">
 <button type="button" data-scope="all" aria-pressed="true">全部</button>
@@ -1332,11 +1348,20 @@ SHORTCUT_JS = r"""
     }
     el.focus(); if (el.select) el.select();
   };
+  var rf = document.getElementById('refresh');
+  if (rf) rf.addEventListener('click', function(e){
+    e.preventDefault();
+    location.replace(location.pathname + '?_=' + Date.now() + (location.hash || ''));
+  });
   document.addEventListener('keydown', function(e){
     var ae = document.activeElement || {};
     var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
     if (!typing && e.key === '/'){ e.preventDefault(); focusSearch(); return; }
     if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
+      e.preventDefault(); focusSearch(); return;
+    }
+    // Ctrl+F 亦接站內檢索：可搜折疊內容、異體字與名相別名，較瀏覽器原生查找有用
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'f'){
       e.preventDefault(); focusSearch(); return;
     }
     if (e.key === 'F3'){
@@ -1635,8 +1660,14 @@ def cn2num(s):
 
 
 def build_nav(md_text, is_full, cur=None):
-    """從 Markdown 提取目錄結構，生成側邊欄"""
+    """從 Markdown 提取目錄結構，生成側邊欄。
+
+    末尾輸出 <div class="navdock"> 的開始標籤但不閉合：常用控件（分卷前後、
+    回目錄、展開收合、跳項號）由 md_to_html 的模板接著放進去，成為
+    position:sticky;bottom:0 的固定工具區，捲目錄時不會跟著跑掉。
+    """
     parts = []
+    dock = []
     parts.append('<h1><a href="index.html">五部律差異對照本</a></h1>')
     parts.append(NAV_FILTER_HTML)
     parts.append('<div class="grp"><b>全書</b>')
@@ -1649,15 +1680,17 @@ def build_nav(md_text, is_full, cur=None):
         _i = _names.index(cur)
         _prev = _names[_i - 1] if _i > 0 else None
         _next = _names[_i + 1] if _i + 1 < len(_names) else None
-        if _prev or _next:
-            parts.append('<div class="grp"><b>分卷</b>')
+        if _prev or _next or True:
+            dock.append('<div class="docklinks">')
             if _prev:
-                parts.append(f'<a href="五部律差異對照本_{htmlmod.escape(_prev)}.html">'
-                             f'← {htmlmod.escape(_prev)}</a>')
+                dock.append(f'<a href="五部律差異對照本_{htmlmod.escape(_prev)}.html">'
+                            f'← {htmlmod.escape(_prev)}</a>')
             if _next:
-                parts.append(f'<a href="五部律差異對照本_{htmlmod.escape(_next)}.html">'
-                             f'→ {htmlmod.escape(_next)}</a>')
-            parts.append('</div>')
+                dock.append(f'<a href="五部律差異對照本_{htmlmod.escape(_next)}.html">'
+                            f'{htmlmod.escape(_next)} →</a>')
+            dock.append('<a href="index.html">回目錄</a>')
+            dock.append('<a href="#" id="refresh" title="強制重新抓取本頁（破快取）">↻ 更新</a>')
+            dock.append('</div>')
 
     if is_full:
         # 合冊：卷次下嵌該卷篇目（可折疊）
@@ -1711,10 +1744,15 @@ def build_nav(md_text, is_full, cur=None):
             else:
                 parts.append(f'<a href="#p{n}">{n}　{t}</a>')
         parts.append('</div>')
-        parts.append('<div class="grp"><b>其他</b>')
-        parts.append('<a href="index.html">← 回目錄</a>')
-        parts.append('</div>')
 
+    if is_full:
+        dock.append('<div class="docklinks">'
+                    '<a href="index.html">回目錄</a>'
+                    '<a href="#" id="refresh" title="強制重新抓取本頁（破快取）">↻ 更新</a>'
+                    '</div>')
+
+    parts.append('<div class="navdock">')
+    parts.extend(dock)
     return '\n'.join(parts)
 
 
@@ -1799,7 +1837,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <div class="wrap">
 <nav>
 {nav}
-<div class="navtools" style="margin-top:1rem">
+<div class="navtools">
 <button type="button" id="toggle" aria-controls="main" title="展開或收起全部摺疊塊">全部展開／收起</button>
 <button type="button" id="width" title="放寬正文欄寬">切換寬屏</button>
 <button type="button" id="par" aria-pressed="false" title="四分原文與白話左右並列">對讀：原文並白話</button>
@@ -1811,6 +1849,7 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 </div>
+</div><!-- /.navdock -->
 </nav>
 <main id="main">
 {_banner}
@@ -2037,7 +2076,7 @@ def build_index():
 
 <h2>側邊欄與檢索</h2>
 <ul>
-<li><strong>快捷鍵</strong>　<code>/</code> 或 <code>Ctrl+K</code> 聚焦檢索；
+<li><strong>快捷鍵</strong>　<code>Ctrl+F</code>、<code>Ctrl+K</code> 或 <code>/</code> 聚焦檢索；
 <code>F3</code>／<code>Shift+F3</code> 前後巡覽命中處；<code>Alt+N</code> 收起或喚出側欄。</li>
 <li><strong>目錄過濾</strong>　側欄上方輸入篇名／戒名即時篩出所在卷節，<code>Esc</code> 清除；
 卷次摺疊狀態、側欄寬度與收起狀態都會記住。</li>

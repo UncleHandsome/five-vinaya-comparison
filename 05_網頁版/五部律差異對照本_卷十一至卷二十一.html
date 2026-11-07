@@ -298,6 +298,19 @@ body.par main:after{content:""; display:block; clear:both}
 }
 
 /* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+/* 底部固定工具區：分卷前後、回目錄、展開收合、跳項號 */
+nav{padding-bottom:0}
+.navdock{position:sticky; bottom:0; z-index:5; margin-top:.5rem;
+  background:var(--panel); border-top:1px solid var(--line);
+  box-shadow:0 -6px 14px rgba(0,0,0,.05); padding:.15rem 0 .45rem}
+.docklinks{display:flex; flex-wrap:wrap; gap:.22rem; padding:.3rem 1rem .05rem}
+.docklinks a{flex:1 1 auto; min-width:0; text-align:center; font-size:11.5px;
+  padding:.24rem .35rem; border:1px solid var(--line); border-radius:3px;
+  color:var(--fg2); text-decoration:none; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis}
+.docklinks a:hover{border-color:var(--accent2); color:var(--accent); background:#efeade}
+.navdock .navtools{padding:.25rem 1rem 0}
+.navdock .grp{padding:.3rem 1rem 0; margin:0}
 #navfilter{display:block; width:calc(100% - 2rem); margin:.15rem 1rem .3rem;
   padding:.3rem .5rem; border:1px solid var(--line); border-radius:3px;
   background:#fff; color:var(--fg); font:inherit; font-size:12.5px}
@@ -360,6 +373,9 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   border-radius:12px; background:var(--panel); color:var(--accent)}
 .tryq a:hover{border-color:var(--accent2); background:#efeade}
 @media (prefers-color-scheme: dark){
+  .navdock{background:#1b1a18}
+  .docklinks a{color:var(--fg2)}
+  .docklinks a:hover{background:#2a2825; color:var(--accent)}
   #navfilter,.findhead input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
   #navtoggle,#navburger{background:#1b1a18; color:var(--accent); border-color:var(--line)}
   .navtools button,.findopts button,#findhist button,#findhelpbtn{background:#1e1d1b; color:var(--fg2)}
@@ -409,8 +425,8 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <b>排除</b>　<code>-四分</code>　　<b>片語</b>　<code>"非親里"</code><br>
 <b>別名</b>　波逸提＝單提、捨墮＝尼薩耆、比丘＝苾芻… 自動並查<br>
 <b>模糊</b>　容漏字（<code>摩埵</code> 可中「摩那埵」）<br>
-<b>快捷</b>　<code>/</code> 或 <code>Ctrl+K</code> 聚焦；<code>Enter</code> 逐處跳；
-<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
+<b>快捷</b>　<code>Ctrl+F</code>、<code>Ctrl+K</code> 或 <code>/</code> 聚焦；
+<code>Enter</code> 逐處跳；<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
 </div>
 <div class="findopts" role="group" aria-label="檢索範圍">
 <button type="button" data-scope="all" aria-pressed="true">全部</button>
@@ -426,10 +442,6 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <div class="grp" style="margin-bottom:.2rem"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="過濾目錄：篇名／戒名／節名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div>
 <div class="grp"><b>全書</b>
 <a href="index.html">目錄與說明</a>
-</div>
-<div class="grp"><b>分卷</b>
-<a href="五部律差異對照本_卷一至卷十.html">← 卷一至卷十</a>
-<a href="五部律差異對照本_卷二十二至卷三十.html">→ 卷二十二至卷三十</a>
 </div>
 <div class="grp"><b>本卷篇目</b>
 <details class="navj"><summary>013　九十單提法之一<span class="jcnt">10</span></summary>
@@ -612,10 +624,14 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <a href="#u025-1" class="jie">七滅諍法</a>
 </details>
 </div>
-<div class="grp"><b>其他</b>
-<a href="index.html">← 回目錄</a>
+<div class="navdock">
+<div class="docklinks">
+<a href="五部律差異對照本_卷一至卷十.html">← 卷一至卷十</a>
+<a href="五部律差異對照本_卷二十二至卷三十.html">卷二十二至卷三十 →</a>
+<a href="index.html">回目錄</a>
+<a href="#" id="refresh" title="強制重新抓取本頁（破快取）">↻ 更新</a>
 </div>
-<div class="navtools" style="margin-top:1rem">
+<div class="navtools">
 <button type="button" id="toggle" aria-controls="main" title="展開或收起全部摺疊塊">全部展開／收起</button>
 <button type="button" id="width" title="放寬正文欄寬">切換寬屏</button>
 <button type="button" id="par" aria-pressed="false" title="四分原文與白話左右並列">對讀：原文並白話</button>
@@ -627,6 +643,7 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
 </div>
+</div><!-- /.navdock -->
 </nav>
 <main id="main">
 
@@ -17479,9 +17496,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 db5b5bf（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 642393b-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 db5b5bf」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 642393b-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -17489,7 +17506,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 db5b5bf（2026-11-07）}<br>
+　note = {版本 642393b-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -18127,11 +18144,20 @@ window.VS = (function(){
     }
     el.focus(); if (el.select) el.select();
   };
+  var rf = document.getElementById('refresh');
+  if (rf) rf.addEventListener('click', function(e){
+    e.preventDefault();
+    location.replace(location.pathname + '?_=' + Date.now() + (location.hash || ''));
+  });
   document.addEventListener('keydown', function(e){
     var ae = document.activeElement || {};
     var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
     if (!typing && e.key === '/'){ e.preventDefault(); focusSearch(); return; }
     if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
+      e.preventDefault(); focusSearch(); return;
+    }
+    // Ctrl+F 亦接站內檢索：可搜折疊內容、異體字與名相別名，較瀏覽器原生查找有用
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'f'){
       e.preventDefault(); focusSearch(); return;
     }
     if (e.key === 'F3'){
