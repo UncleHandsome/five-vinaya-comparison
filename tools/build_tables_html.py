@@ -15,7 +15,8 @@ WORK = os.path.join(ROOT, '_work')
 OUT = os.path.join(ROOT, '05_網頁版')
 sys.path.insert(0, WORK)
 
-from build_html import CSS, FOOTER, SITE_URL, _DATE, _VER, SEARCH_CORE  # noqa: E402
+from build_html import (CSS, FOOTER, SITE_URL, _DATE, _VER, SEARCH_CORE,  # noqa: E402
+                       COMMON_JS, NAV_FILTER_HTML)
 
 # rebuild_all 於第 5–6 步已改寫其他成品檔，第 7 步載入本模組時 git 會判為 dirty；
 # 但 HEAD 仍是最初那個內容 commit，故沿用其 hash、去掉 dirty 標記，
@@ -314,6 +315,7 @@ def build_page(cfg):
     out.append('<meta name="DC.rights" content="CC BY-NC-SA 4.0">')
     out.append(f'<style>{CSS}\n{EXTRA_CSS}</style>\n</head>\n<body><div class="wrap">')
     nav = ('<nav><h1><a href="index.html">五部律差異對照本</a></h1>'
+           + NAV_FILTER_HTML +
            '<div class="grp"><b>專題表</b>'
            '<a href="index.html">← 回目錄</a>'
            '<a href="五部律差異對照本.html">對照本合冊</a>'
@@ -398,7 +400,7 @@ def build_page(cfg):
 
     out.append(FOOTER)
     out.append('</main></div>')
-    out.append(f'<script>{SEARCH_CORE}</script>\n<script>{JS}</script>')
+    out.append(f'<script>{SEARCH_CORE}</script>\n<script>{JS}</script>\n<script>{COMMON_JS}</script>')
     out.append('</body></html>')
     p = os.path.join(OUT, cfg['out'])
     open(p, 'w', encoding='utf-8', newline='\n').write('\n'.join(out))

@@ -81,7 +81,7 @@ td.ev{font-family:Consolas,monospace;font-size:11.5px;color:#8a8278;white-space:
 @media(max-width:1000px){nav{display:none} main{padding:1rem}}
 </style></head>
 <body><div class="wrap">
-<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>全書</b><a href="index.html">目錄與說明</a><a href="五部律差異對照本.html">對照本合冊</a></div><div class="grp"><b>矩陣分段</b><a href="#seg-五分">五分<span class="n">379</span></a><a href="#seg-十誦">十誦<span class="n">949</span></a><a href="#seg-僧祇">僧祇<span class="n">584</span></a><a href="#seg-根有">根有<span class="n">212</span></a></div></nav>
+<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp" style="margin-bottom:.2rem"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="過濾目錄：篇名／戒名／節名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div><div class="grp"><b>全書</b><a href="index.html">目錄與說明</a><a href="五部律差異對照本.html">對照本合冊</a></div><div class="grp"><b>矩陣分段</b><a href="#seg-五分">五分<span class="n">379</span></a><a href="#seg-十誦">十誦<span class="n">949</span></a><a href="#seg-僧祇">僧祇<span class="n">584</span></a><a href="#seg-根有">根有<span class="n">212</span></a></div></nav>
 <main>
 <h1>五部律綜合異同矩陣</h1>
 <div class="lede">2,124 列，每列一稿之一個保留項。五欄記該律「有／無／未比」。
@@ -106,7 +106,7 @@ td.ev{font-family:Consolas,monospace;font-size:11.5px;color:#8a8278;white-space:
 CBETA 電子佛典依 Creative Commons「姓名標示—非商業性—相同方式分享」授權釋出。</p>
 <p>本矩陣之項目劃分、狀態判別與差異按語，皆編者所加，非底本原有；引據時請以 CBETA 原書覆核。</p>
 <p><b>授權與引用</b>　本矩陣依 CC BY-NC-SA 4.0 釋出。建議引用：UncleHandsome（編）.
-《五部律綜合異同矩陣》. 版本 a86a524-dirty（2026-11-07）. https://unclehandsome.github.io/five-vinaya-comparison/</p>
+《五部律綜合異同矩陣》. 版本 3cd5f5c-dirty（2026-11-07）. https://unclehandsome.github.io/five-vinaya-comparison/</p>
 </footer>
 </main>
 </div>
@@ -325,6 +325,164 @@ window.VS = (function(){
   }, {passive:true});
 
   apply();
+})();
+</script>
+<script>
+(function(){
+  var focusSearch = function(){
+    var el = document.getElementById('find') || document.getElementById('homeq') ||
+             document.getElementById('q') ||
+             document.querySelector('main input[type=search]') ||
+             document.querySelector('input[type=search]');
+    if (!el) return;
+    // 窄屏時搜尋框在抽屜內，先開抽屜再聚焦
+    if (window.innerWidth <= 1100 && el.closest && el.closest('nav')){
+      document.body.classList.add('navopen');
+    }
+    el.focus(); if (el.select) el.select();
+  };
+  document.addEventListener('keydown', function(e){
+    var ae = document.activeElement || {};
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
+    if (!typing && e.key === '/'){ e.preventDefault(); focusSearch(); return; }
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
+      e.preventDefault(); focusSearch(); return;
+    }
+    if (e.key === 'F3'){
+      e.preventDefault();
+      if (window.VS_API && window.VS_API.count()) window.VS_API.next(e.shiftKey ? -1 : 1);
+      else focusSearch();
+      return;
+    }
+    if (e.altKey && String(e.key).toLowerCase() === 'n'){
+      e.preventDefault();
+      document.body.classList.toggle(window.innerWidth <= 1100 ? 'navopen' : 'navclosed');
+      return;
+    }
+    if (e.key === 'Escape' && document.body.classList.contains('navopen')){
+      document.body.classList.remove('navopen');
+    }
+  });
+})();
+
+(function(){
+  var nav = document.querySelector('nav');
+  if (!nav) return;
+  var KEY = 'wb_nav_' + location.pathname.split('/').pop();
+  var dts = Array.prototype.slice.call(nav.querySelectorAll('details.navj'));
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'))
+    .filter(function(a){ return !(a.parentElement && a.parentElement.tagName === 'H1'); });
+
+  // 一、目錄摺疊狀態記憶（按頁分別存）
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY + '_open') || 'null'); } catch(e){}
+  if (saved) dts.forEach(function(d, i){ if (i < saved.length) d.open = !!saved[i]; });
+  var saveOpen = function(){
+    try { localStorage.setItem(KEY + '_open',
+      JSON.stringify(dts.map(function(d){ return d.open; }))); } catch(e){}
+  };
+  dts.forEach(function(d){ d.addEventListener('toggle', saveOpen); });
+
+  // 二、目錄過濾：輸入即篩篇名／節名，命中之所屬卷自動展開
+  var f = document.getElementById('navfilter');
+  var info = document.getElementById('navfinfo');
+  if (f && window.VS){
+    var apply = function(){
+      var q = f.value.trim(), nq = q ? VS.norm(q) : '', shown = 0;
+      dts.forEach(function(d){ d.classList.remove('filtered'); });
+      links.forEach(function(a){
+        var ok = !nq || VS.norm(a.textContent).indexOf(nq) >= 0;
+        a.classList.toggle('filtered', !ok);
+        if (ok) shown++;
+      });
+      if (nq){
+        dts.forEach(function(d){
+          var kids = d.querySelectorAll('a'), any = false;
+          for (var i = 0; i < kids.length; i++){
+            if (!kids[i].classList.contains('filtered')){ any = true; break; }
+          }
+          var sum = d.querySelector('summary');
+          var self = sum && VS.norm(sum.textContent).indexOf(nq) >= 0;
+          if (self){
+            Array.prototype.forEach.call(kids, function(a){ a.classList.remove('filtered'); });
+            any = true;
+          }
+          d.classList.toggle('filtered', !any && !self);
+          if (!d.classList.contains('filtered')) d.open = true;
+        });
+      }
+      if (info) info.textContent = nq ?
+        ('符合 ' + shown + ' / ' + links.length + ' 項（Esc 清除）') : '';
+    };
+    f.addEventListener('input', apply);
+    f.addEventListener('keydown', function(e){
+      if (e.key === 'Escape'){ f.value = ''; apply(); f.blur(); }
+    });
+  }
+
+  // 三、捲動時自動展開當前位置所屬卷，並把該項捲入側欄可視區
+  var tick = null;
+  window.addEventListener('scroll', function(){
+    if (tick) return;
+    tick = setTimeout(function(){
+      tick = null;
+      var on = nav.querySelector('a.on');
+      if (!on) return;
+      var d = on.parentElement;
+      while (d && d !== nav){ if (d.tagName === 'DETAILS') d.open = true; d = d.parentElement; }
+      var r = on.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+      if (r.top < nr.top + 40 || r.bottom > nr.bottom - 40){
+        nav.scrollTop += (r.top - nr.top) - nav.clientHeight / 3;
+      }
+    }, 180);
+  }, {passive:true});
+
+  // 四、拖曳調寬（220–520px），寬度記憶
+  var rz = document.createElement('div');
+  rz.id = 'navresizer'; rz.title = '拖曳調整側欄寬度';
+  nav.appendChild(rz);
+  var W = 280;
+  try { W = parseInt(localStorage.getItem('wb_nav_w') || '280', 10) || 280; } catch(e){}
+  var setW = function(w){
+    w = Math.max(220, Math.min(520, w));
+    nav.style.width = w + 'px'; nav.style.flexBasis = w + 'px';
+  };
+  if (window.innerWidth > 1100) setW(W);
+  var dragging = false;
+  rz.addEventListener('pointerdown', function(e){
+    dragging = true; rz.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  rz.addEventListener('pointermove', function(e){ if (dragging) setW(e.clientX); });
+  rz.addEventListener('pointerup', function(){
+    if (!dragging) return; dragging = false;
+    try { localStorage.setItem('wb_nav_w', String(parseInt(nav.style.width, 10) || 280)); } catch(e){}
+  });
+
+  // 五、桌面收起／展開；窄屏抽屜（漢堡 + 遮罩）
+  var tg = document.createElement('button');
+  tg.id = 'navtoggle'; tg.type = 'button'; tg.textContent = '側欄';
+  tg.setAttribute('aria-label', '收起或展開側邊欄（Alt+N）');
+  document.body.appendChild(tg);
+  try { if (localStorage.getItem('wb_nav_closed') === '1') document.body.classList.add('navclosed'); } catch(e){}
+  tg.addEventListener('click', function(){
+    if (window.innerWidth <= 1100){ document.body.classList.remove('navopen'); return; }
+    var c = document.body.classList.toggle('navclosed');
+    try { localStorage.setItem('wb_nav_closed', c ? '1' : '0'); } catch(e){}
+  });
+  var burger = document.createElement('button');
+  burger.id = 'navburger'; burger.type = 'button'; burger.innerHTML = '☰';
+  burger.setAttribute('aria-label', '開啟側邊欄（Alt+N）');
+  document.body.appendChild(burger);
+  var mask = document.createElement('div');
+  mask.id = 'navmask'; document.body.appendChild(mask);
+  burger.addEventListener('click', function(){ document.body.classList.toggle('navopen'); });
+  mask.addEventListener('click', function(){ document.body.classList.remove('navopen'); });
+  nav.addEventListener('click', function(e){
+    if (window.innerWidth <= 1100 && e.target.tagName === 'A' &&
+        e.target.getAttribute('href')){
+      setTimeout(function(){ document.body.classList.remove('navopen'); }, 120);
+    }
+  });
 })();
 </script>
 </body></html>

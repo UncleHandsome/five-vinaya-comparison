@@ -1769,3 +1769,42 @@ README（節數、HTML／PDF 實測頁數與大小、項號說明）、TODO（50
   `sifen_src.TITLE_FIX` 與 `build_compare.TITLE_FIX`。
 - 版本戳取自 `git rev-parse --short HEAD`，且只看 `_work`／`tools` 等來源目錄判 dirty；
   故提交後重跑 `build_html.py` 才會得到不帶 `-dirty` 的純淨戳。
+## 三十、網站易用性改進：側邊欄與搜尋（2026-11-07 午後）
+
+**動機**：校閱報告修畢後，應請改進網站，重點為側邊欄與搜尋。既有實作只有
+「篇目樹＋滾動高亮」與單頁全文檢索，矩陣／專題表各自為政，無統一快捷鍵。
+
+**一、側邊欄（`COMMON_JS` 之 `SIDEBAR_JS`，注入全 12 頁）**
+- 目錄過濾框：輸入篇名／戒名／節名即時篩選，命中之所屬卷自動展開；
+  用 `VS.norm` 正規化（異體折疊、同義詞），`Esc` 清除。書名連結排除於過濾外。
+- 摺疊狀態按頁記憶（localStorage `wb_nav_<page>_open`）；捲動時自動展開
+  當前位置所屬 `<details>` 並把該項捲入側欄可視區。
+- 右緣可拖曳調寬 220–520px（`wb_nav_w`）；桌面可收起／喚出（`wb_nav_closed`）。
+- 窄屏（≤1100px）由原本 `nav{display:none}` 改為 **☰ 抽屜 + 遮罩**
+  （`navopen`），點目錄連結自動收起。此舉覆蓋 2026-11-05「不做手機檢索入口」之舊決定。
+- 工具區由三列按鈕改為兩欄緊湊格線，補 `title` 說明。
+
+**二、搜尋（`build_html.JS` 既有全文檢索之增強 + `FIND_EXTRA`）**
+- 三種範圍：`全部`／`僅標題・項名`／`略白話・原文`（後者排除 `art-src`／`art-plain`
+  摺疊塊）。切換範圍會使結果快取 key 失效並重新收集。實測「波逸提」：
+  全部 3,000（達上限）、略白話原文 1,715、僅標題 53。
+- 結果面板：附「卷 › 篇 › 節」脈絡與項目號（`D-`/`S-`）、所有關鍵詞皆 `<mark>`、
+  「載入更多」每次 +200、上限提示導引改切範圍。
+- 近期檢索 8 筆（localStorage）、同義詞提示（查「波逸提」提示「單提」）、
+  `?` 語法說明摺疊、合冊頁的結果頁尾連結改指向首頁（原指向自己）。
+- 修復既有 `SEARCH_BOX` 未閉合 `</div>`：原本導致後續所有側欄群組被包進
+  sticky 的 `.findwrap` 內。
+
+**三、全站快捷鍵（`SHORTCUT_JS`）**
+`/` 或 `Ctrl+K` 聚焦該頁搜尋框（合冊 `#find`／首頁 `#homeq`／矩陣 `#q`／
+專題表 `main input[type=search]`，優先 `main` 以免落到目錄過濾框）、
+`F3`／`Shift+F3` 前後巡覽命中處（透過 `window.VS_API.next`）、`Alt+N` 收起／喚出側欄。
+窄屏聚焦時自動先開抽屜。
+
+**四、驗證**
+- 35 個 JS 區塊 `node --check` 全過；Chrome DevTools Protocol 端到端實測：
+  載入更多 200→400、F3 第 1→第 2 處、三範圍命中數、目錄過濾 3/85 與 Esc、
+  桌面收起、窄屏抽屜 `transform:none` 與遮罩、四頁 `Ctrl+K` 各自聚焦正確，
+  **0 個 `Runtime.exceptionThrown`**。
+- `verify_integrity` 通過；PDF 建置只 import `build_html._pandoc_exe`，不受 CSS/JS 影響，
+  32 檔 PDF 無需重跑。

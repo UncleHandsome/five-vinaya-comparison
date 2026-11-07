@@ -281,9 +281,98 @@ body.par main:after{content:""; display:block; clear:both}
   p,li{orphans:3; widows:3}
   a{color:inherit; text-decoration:none}
 }
+
+/* ── 側邊欄與檢索增強（2026-11-07）────────────────────────────── */
+#navfilter{display:block; width:calc(100% - 2rem); margin:.15rem 1rem .3rem;
+  padding:.3rem .5rem; border:1px solid var(--line); border-radius:3px;
+  background:#fff; color:var(--fg); font:inherit; font-size:12.5px}
+#navfilter:focus{outline:2px solid var(--accent2); outline-offset:1px}
+#navfinfo{font-size:11px; color:#8a8278; padding:0 1rem .3rem; min-height:1.1em}
+nav a.filtered,nav details.navj.filtered{display:none}
+nav a.on{font-weight:600}
+#navresizer{position:absolute; top:0; right:-3px; width:7px; height:100%;
+  cursor:col-resize; z-index:9; touch-action:none}
+#navresizer:hover{background:var(--accent2); opacity:.45}
+#navtoggle,#navburger{border:1px solid var(--line); background:var(--panel);
+  color:var(--accent); cursor:pointer; font-family:"Microsoft YaHei",sans-serif; z-index:210}
+#navtoggle{position:fixed; left:0; top:50%; transform:translateY(-50%);
+  width:1.5rem; padding:.55rem .12rem; writing-mode:vertical-rl;
+  border-left:0; border-radius:0 4px 4px 0; font-size:11.5px}
+#navtoggle:hover,#navburger:hover{background:#ece8dd}
+body.navclosed nav{display:none}
+.navtools{display:grid; grid-template-columns:1fr 1fr; gap:.25rem; padding:.4rem 1rem .2rem}
+.navtools button{display:block; width:100%; padding:.28rem .2rem; text-align:center;
+  border:1px solid var(--line); border-radius:3px; background:transparent;
+  color:var(--fg2); font-size:11.5px}
+.navtools button:hover{background:#ece8dd}
+.navtools button[aria-pressed="true"]{border-color:var(--accent); color:var(--accent);
+  background:#efeade}
+#jump{margin-top:.1rem}
+.findhead{display:flex; align-items:center; gap:.3rem}
+.findhead input[type=search]{flex:1 1 auto; min-width:0; padding:.28rem .5rem;
+  border:1px solid var(--line); border-radius:3px; font-size:12.5px;
+  font-family:inherit; background:#fff}
+.findhead input[type=search]:focus{outline:2px solid var(--accent2); outline-offset:1px}
+#findhelpbtn{flex:0 0 1.55rem; height:1.55rem; border:1px solid var(--line);
+  border-radius:50%; background:transparent; color:var(--accent); cursor:pointer;
+  font-size:11.5px; padding:0}
+#findhelpbtn:hover{background:#ece8dd}
+#findhelp{font-size:11.5px; line-height:1.7; color:var(--fg2); background:var(--panel);
+  border:1px solid var(--line); border-radius:3px; padding:.45rem .55rem; margin:.35rem 0 .1rem}
+#findhelp[hidden]{display:none}
+#findhelp code{background:var(--code); padding:0 .2em; border-radius:2px}
+.findopts{display:flex; gap:.25rem; flex-wrap:wrap; margin:.35rem 0 .1rem}
+.findopts button{flex:1 1 auto; font-size:11px; padding:.22rem .3rem;
+  border:1px solid var(--line); border-radius:3px; background:transparent;
+  color:var(--fg2); cursor:pointer; white-space:nowrap}
+.findopts button[aria-pressed="true"]{border-color:var(--accent);
+  background:#efeade; color:var(--accent); font-weight:600}
+#findhist{display:flex; flex-wrap:wrap; align-items:center; gap:.22rem; margin:.28rem 0 0}
+#findhist button{font-size:11px; padding:.12rem .4rem; border:1px solid var(--line);
+  border-radius:10px; background:transparent; color:var(--fg2); cursor:pointer}
+#findhist button:hover{border-color:var(--accent2); color:var(--accent)}
+#findhist span{font-size:10.5px; color:#8a8278}
+.fl-item .fl-p{display:block; color:var(--accent); font-size:10.5px;
+  letter-spacing:.04em; margin-bottom:.1em}
+.fl-item .fl-c{white-space:normal}
+button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointer;
+  background:var(--panel); border:1px solid var(--line); border-radius:3px;
+  font:inherit; font-size:11.5px; padding:.35rem; margin:.2rem 0}
+.tryq{display:flex; flex-wrap:wrap; gap:.35rem; margin:.2rem 0 1.2rem}
+.tryq span{font-size:12.5px; color:var(--fg2)}
+.tryq a{font-size:12.5px; padding:.2rem .6rem; border:1px solid var(--line);
+  border-radius:12px; background:var(--panel); color:var(--accent)}
+.tryq a:hover{border-color:var(--accent2); background:#efeade}
+@media (prefers-color-scheme: dark){
+  #navfilter,.findhead input[type=search]{background:#232120; color:var(--fg); border-color:var(--line)}
+  #navtoggle,#navburger{background:#1b1a18; color:var(--accent); border-color:var(--line)}
+  .navtools button,.findopts button,#findhist button,#findhelpbtn{background:#1e1d1b; color:var(--fg2)}
+  .navtools button[aria-pressed="true"],.findopts button[aria-pressed="true"]{background:#2e2b26; color:var(--accent)}
+  .tryq a{background:#1e1d1b}
+  button.fl-load{background:#1e1d1b; color:var(--accent)}
+  #navfinfo,#findhist span{color:#8b857b}
+}
+@media(max-width:1100px){
+  nav{display:block; position:fixed; left:0; top:0; height:100dvh;
+    width:min(86vw,320px) !important; flex-basis:auto !important;
+    transform:translateX(-102%); transition:transform .22s ease;
+    z-index:310; box-shadow:6px 0 24px rgba(0,0,0,.25)}
+  body.navopen nav{transform:none}
+  body.navclosed nav{display:block}
+  #navtoggle,#navresizer{display:none}
+  #navburger{display:flex; position:fixed; left:.7rem; top:.7rem; z-index:300;
+    width:2.2rem; height:2.2rem; align-items:center; justify-content:center;
+    border-radius:4px; font-size:17px}
+  #navmask{display:block; position:fixed; inset:0; z-index:305;
+    background:rgba(0,0,0,.42); opacity:0; pointer-events:none; transition:opacity .2s}
+  body.navopen #navmask{opacity:1; pointer-events:auto}
+  main{padding-top:3.4rem}
+}
+@media(min-width:1101px){ #navburger,#navmask{display:none} }
+@media print{ #navtoggle,#navburger,#navmask,#navresizer{display:none !important} }
 </style></head>
 <body><div class="wrap">
-<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp"><b>全書</b><a href="index.html">目錄與說明</a><a href="五部律差異對照本.html">對照本合冊</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div><div class="grp"><b>專題表</b><a href="比丘比丘尼戒對照表.html">比丘／比丘尼戒對照</a><a href="五部律開遮持犯表.html">開遮持犯表</a></div><div class="grp"><b>分卷</b><a href="五部律差異對照本_卷一至卷十.html">卷一至卷十</a><a href="五部律差異對照本_卷十一至卷二十一.html">卷十一至卷二十一</a><a href="五部律差異對照本_卷二十二至卷三十.html">卷二十二至卷三十</a><a href="五部律差異對照本_卷三十一至卷三十七.html">卷三十一至卷三十七</a><a href="五部律差異對照本_卷三十八至卷四十九.html">卷三十八至卷四十九</a><a href="五部律差異對照本_卷五十至卷六十.html">卷五十至卷六十</a><a href="五部律差異對照本_四分所無與歸併組.html">四分所無與歸併組</a></div></nav>
+<nav><h1><a href="index.html">五部律差異對照本</a></h1><div class="grp" style="margin-bottom:.2rem"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="過濾目錄：篇名／戒名／節名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div><div class="grp"><b>全書</b><a href="index.html">目錄與說明</a><a href="五部律差異對照本.html">對照本合冊</a><a href="五部律綜合異同矩陣.html">異同矩陣</a></div><div class="grp"><b>專題表</b><a href="比丘比丘尼戒對照表.html">比丘／比丘尼戒對照</a><a href="五部律開遮持犯表.html">開遮持犯表</a></div><div class="grp"><b>分卷</b><a href="五部律差異對照本_卷一至卷十.html">卷一至卷十</a><a href="五部律差異對照本_卷十一至卷二十一.html">卷十一至卷二十一</a><a href="五部律差異對照本_卷二十二至卷三十.html">卷二十二至卷三十</a><a href="五部律差異對照本_卷三十一至卷三十七.html">卷三十一至卷三十七</a><a href="五部律差異對照本_卷三十八至卷四十九.html">卷三十八至卷四十九</a><a href="五部律差異對照本_卷五十至卷六十.html">卷五十至卷六十</a><a href="五部律差異對照本_四分所無與歸併組.html">四分所無與歸併組</a></div></nav>
 <main>
 <h1>五部律差異對照本</h1>
 <blockquote><p><strong>以《四分律》為閱讀主線，一冊在手，遍知五部之異同。</strong></p>
@@ -301,6 +390,12 @@ body.par main:after{content:""; display:block; clear:both}
 並容<strong>漏字模糊</strong>（<code>摩埵</code> 可中「摩那埵」）與<strong>名相別名</strong>
 （查<code>波逸提</code>亦得「單提」、查<code>捨墮</code>亦得「尼薩耆」）。
 送出後於合冊全文檢索並跳至首處；合冊較大，首次載入需數秒。</p>
+<div class="tryq"><span>快速試：</span>
+<a href="五部律差異對照本.html?q=摩那埵">摩那埵</a>
+<a href="五部律差異對照本.html?q=迦絺那%20自恣">迦絺那 自恣</a>
+<a href="五部律差異對照本.html?q=%22非親里%22">"非親里"</a>
+<a href="五部律差異對照本.html?q=波逸提%20-四分">波逸提 -四分</a>
+<a href="五部律差異對照本.html?q=苾芻">苾芻（＝比丘）</a></div>
 
 <h2>五部律</h2>
 <table>
@@ -354,6 +449,17 @@ body.par main:after{content:""; display:block; clear:both}
 <li><strong>同一制度兩稿並列</strong>：看第三部歸併組（甲表 G1–G7 同條歸併、乙表 T1–T3 同題異制）。</li>
 </ol>
 
+<h2>側邊欄與檢索</h2>
+<ul>
+<li><strong>快捷鍵</strong>　<code>/</code> 或 <code>Ctrl+K</code> 聚焦檢索；
+<code>F3</code>／<code>Shift+F3</code> 前後巡覽命中處；<code>Alt+N</code> 收起或喚出側欄。</li>
+<li><strong>目錄過濾</strong>　側欄上方輸入篇名／戒名即時篩出所在卷節，<code>Esc</code> 清除；
+卷次摺疊狀態、側欄寬度與收起狀態都會記住。</li>
+<li><strong>檢索範圍</strong>　可切「全部／僅標題・項名／略白話・原文」；
+結果附「卷 › 篇 › 節」脈絡與項號，可「載入更多」，並保留近期檢索。</li>
+<li><strong>窄屏</strong>　點左上 <strong>☰</strong> 喚出側欄抽屜；側欄右緣可拖曳調整寬度。</li>
+</ul>
+
 <h2>凡例摘要</h2>
 <ul>
 <li>每項八目：序號、標題、狀態與出處、差異、本稿原文、白話、他部對照、補證。</li>
@@ -398,9 +504,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 a672e48（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 3cd5f5c-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 a672e48」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 3cd5f5c-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -408,7 +514,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 a672e48（2026-11-07）}<br>
+　note = {版本 3cd5f5c-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -419,4 +525,289 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 
 </main>
 </div>
+<script>
+window.VS = (function(){
+  var PUNC = /[\s\u3000，。、；：？！「」『』（）()\[\]【】〈〉《》·．,.;:?!'"“”‘’—－\-…／\/]/g;
+  // 異體字折疊（鍵為罕見體，值為通行體）
+  var FOLD = {'麁':'麤','鉢':'缽','著':'着','牀':'床','汙':'污',
+    '脚':'腳','㥲':'瞋','柰':'奈','㝹':'兔','説':'說','摺':'襵',
+    '衆':'眾','敎':'教','卽':'即','爲':'為','凈':'淨','倂':'併','峯':'峰','羣':'群',
+    '眞':'真','覩':'睹','穉':'稚','疎':'疏','隣':'鄰','牕':'窗','窻':'窗','牎':'窗',
+    '鷄':'雞','兎':'兔','豬':'猪','貓':'猫','蟁':'蚊','螘':'蟻','鼈':'鱉',
+    '麪':'麵','麫':'麵','煑':'煮','甞':'嘗','嚐':'嘗','塚':'冢','冡':'冢','冐':'冒',
+    '凖':'準','况':'況','凄':'淒','敍':'敘','牠':'他','麽':'麼',
+    '尠':'鮮','尟':'鮮','尢':'尤','尲':'尷','尶':'尷','屛':'屏','峩':'峨','巗':'巖',
+    '幷':'並','幇':'幫','廼':'乃','迺':'乃','衹':'只','喫':'吃','箒':'帚','篛':'箬',
+    '粧':'妝','糉':'粽','糰':'團','絃':'弦','綫':'線','罇':'樽','羗':'羌','翫':'玩',
+    '耑':'專','肻':'肯','脣':'唇','腅':'臉','舘':'館','菓':'果','萞':'蓖','蔴':'麻',
+    '薫':'薰','藴':'蘊','蘂':'蕊','虵':'蛇','蝨':'蝨','衂':'衄','袵':'衽','裠':'裙',
+    '襍':'雜','覈':'核','謌':'歌','貍':'狸','賸':'剩','跥':'跺','蹟':'跡','躭':'耽',
+    '軃':'嚲','輭':'軟','迻':'移','遶':'繞','邨':'村','醎':'鹹','鈎':'鉤','鉋':'刨',
+    '銲':'焊','鍊':'煉','鎗':'槍','鑪':'爐','閒':'閑','閙':'鬧','陞':'升','隖':'塢',
+    '靑':'青','鞵':'鞋','韈':'襪','頫':'俯','顚':'顛','餧':'餵','饑':'飢','驘':'騾',
+    '髩':'鬢','鬭':'鬥','魲':'鱸','鮎':'鯰','鵶':'鴉','鷰':'燕','麕':'麇','黴':'霉',
+    '齩':'咬','龞':'鱉'};
+  // 律學名相別名（鍵值皆為已正規化之形）
+  var SYN = {
+    '波逸提':['單提'], '單提':['波逸提'],
+    '尼薩耆波逸提':['捨墮','尼薩耆'], '捨墮':['尼薩耆波逸提','尼薩耆'], '尼薩耆':['捨墮'],
+    '僧殘':['僧伽婆尸沙'], '僧伽婆尸沙':['僧殘'],
+    '眾學':['式叉迦羅尼','學法'], '式叉迦羅尼':['眾學'],
+    '突吉羅':['惡作'], '惡作':['突吉羅'],
+    '偷蘭遮':['偷羅遮','土羅遮'], '偷羅遮':['偷蘭遮'],
+    '提舍尼':['波羅提提舍尼'], '波羅提提舍尼':['提舍尼'],
+    '僧祇':['摩訶僧祇'], '摩訶僧祇':['僧祇'],
+    '根有':['根本說一切有部'], '根本說一切有部':['根有'],
+    '五分':['彌沙塞'], '彌沙塞':['五分'],
+    '四分':['法藏部','曇無德'], '法藏部':['四分'],
+    '十誦':['薩婆多'], '薩婆多':['十誦'],
+    '揵度':['犍度'], '犍度':['揵度'],
+    '毘尼':['毗尼'], '毗尼':['毘尼'],
+    '婬':['淫'], '淫':['婬'],
+    '滅諍':['滅諍法','七滅諍'],
+    // 根有（義淨新譯）與僧祇（大眾部）之別譯
+    '波羅夷':['波羅市迦'], '波羅市迦':['波羅夷'],
+    '偷蘭遮':['偷羅遮','土羅遮','窣吐羅底也','窣吐羅'],
+    '窣吐羅底也':['偷蘭遮'], '窣吐羅':['偷蘭遮'],
+    '突吉羅':['惡作','越法罪','越毘尼'], '越法罪':['突吉羅'], '越毘尼':['突吉羅'],
+    '比丘':['苾芻'], '苾芻':['比丘'],
+    '比丘尼':['苾芻尼'], '苾芻尼':['比丘尼'],
+    '僧祇':['摩訶僧祇','大眾部'], '大眾部':['僧祇'],
+    '根有':['根本說一切有部','有部'], '有部':['根有'],
+    // 度量衡異譯（vitasti）
+    '搩手':['磔手','張手'], '磔手':['搩手','張手'], '張手':['搩手','磔手'],
+    '肘':['肘量']
+  };
+  var strip = function(s){
+    s = String(s);
+    if (s.normalize){
+      try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch(e){}
+    }
+    return s;
+  };
+  var norm = function(s){
+    s = strip(s).replace(PUNC, '').toLowerCase();
+    var o = '';
+    for (var i = 0; i < s.length; i++){
+      var c = s.charAt(i);
+      o += (FOLD[c] || c);
+    }
+    return o;
+  };
+  // 子序列模糊：可容漏字、跳字，但首末跨度不得過散
+  var fuzzy = function(hay, needle){
+    if (needle.length < 2) return false;
+    var i = 0, j = 0, first = -1, last = -1;
+    while (i < hay.length && j < needle.length){
+      if (hay.charAt(i) === needle.charAt(j)){
+        if (first < 0) first = i;
+        last = i; j++;
+      }
+      i++;
+    }
+    if (j < needle.length) return false;
+    return (last - first + 1) <= needle.length * 2;
+  };
+  var parseQuery = function(q){
+    var inc = [], exc = [], phr = [], raw = [], m;
+    var re = /"([^"]+)"|(\S+)/g;
+    while ((m = re.exec(q))){
+      if (m[1]){
+        var p = norm(m[1]);
+        if (p){ phr.push(p); raw.push(m[1]); }
+      } else {
+        var t = m[2];
+        if (t.charAt(0) === '-' && t.length > 1){
+          var e = norm(t.slice(1));
+          if (e) exc.push(e);
+        } else {
+          var v = norm(t);
+          if (v){ inc.push(v); raw.push(t); }
+        }
+      }
+    }
+    var groups = [];
+    for (var i = 0; i < inc.length; i++){
+      var t2 = inc[i], g = [t2], alt = SYN[t2];
+      if (alt){
+        for (var j = 0; j < alt.length; j++){
+          if (alt[j] !== t2) g.push(alt[j]);
+        }
+      }
+      groups.push(g);
+    }
+    return {inc: groups, exc: exc, phr: phr, raw: raw, n: groups.length + phr.length};
+  };
+  // 回傳 0 未中、1 精確、2 同義詞、3 模糊
+  var matchGroup = function(hay, g){
+    if (hay.indexOf(g[0]) >= 0) return 1;
+    for (var i = 1; i < g.length; i++){
+      if (hay.indexOf(g[i]) >= 0) return 2;
+    }
+    for (var k = 0; k < g.length; k++){
+      if (fuzzy(hay, g[k])) return 3;
+    }
+    return 0;
+  };
+  return {norm: norm, strip: strip, fuzzy: fuzzy, parseQuery: parseQuery, matchGroup: matchGroup};
+})();
+</script>
+<script>
+(function(){
+  var focusSearch = function(){
+    var el = document.getElementById('find') || document.getElementById('homeq') ||
+             document.getElementById('q') ||
+             document.querySelector('main input[type=search]') ||
+             document.querySelector('input[type=search]');
+    if (!el) return;
+    // 窄屏時搜尋框在抽屜內，先開抽屜再聚焦
+    if (window.innerWidth <= 1100 && el.closest && el.closest('nav')){
+      document.body.classList.add('navopen');
+    }
+    el.focus(); if (el.select) el.select();
+  };
+  document.addEventListener('keydown', function(e){
+    var ae = document.activeElement || {};
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
+    if (!typing && e.key === '/'){ e.preventDefault(); focusSearch(); return; }
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
+      e.preventDefault(); focusSearch(); return;
+    }
+    if (e.key === 'F3'){
+      e.preventDefault();
+      if (window.VS_API && window.VS_API.count()) window.VS_API.next(e.shiftKey ? -1 : 1);
+      else focusSearch();
+      return;
+    }
+    if (e.altKey && String(e.key).toLowerCase() === 'n'){
+      e.preventDefault();
+      document.body.classList.toggle(window.innerWidth <= 1100 ? 'navopen' : 'navclosed');
+      return;
+    }
+    if (e.key === 'Escape' && document.body.classList.contains('navopen')){
+      document.body.classList.remove('navopen');
+    }
+  });
+})();
+
+(function(){
+  var nav = document.querySelector('nav');
+  if (!nav) return;
+  var KEY = 'wb_nav_' + location.pathname.split('/').pop();
+  var dts = Array.prototype.slice.call(nav.querySelectorAll('details.navj'));
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'))
+    .filter(function(a){ return !(a.parentElement && a.parentElement.tagName === 'H1'); });
+
+  // 一、目錄摺疊狀態記憶（按頁分別存）
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY + '_open') || 'null'); } catch(e){}
+  if (saved) dts.forEach(function(d, i){ if (i < saved.length) d.open = !!saved[i]; });
+  var saveOpen = function(){
+    try { localStorage.setItem(KEY + '_open',
+      JSON.stringify(dts.map(function(d){ return d.open; }))); } catch(e){}
+  };
+  dts.forEach(function(d){ d.addEventListener('toggle', saveOpen); });
+
+  // 二、目錄過濾：輸入即篩篇名／節名，命中之所屬卷自動展開
+  var f = document.getElementById('navfilter');
+  var info = document.getElementById('navfinfo');
+  if (f && window.VS){
+    var apply = function(){
+      var q = f.value.trim(), nq = q ? VS.norm(q) : '', shown = 0;
+      dts.forEach(function(d){ d.classList.remove('filtered'); });
+      links.forEach(function(a){
+        var ok = !nq || VS.norm(a.textContent).indexOf(nq) >= 0;
+        a.classList.toggle('filtered', !ok);
+        if (ok) shown++;
+      });
+      if (nq){
+        dts.forEach(function(d){
+          var kids = d.querySelectorAll('a'), any = false;
+          for (var i = 0; i < kids.length; i++){
+            if (!kids[i].classList.contains('filtered')){ any = true; break; }
+          }
+          var sum = d.querySelector('summary');
+          var self = sum && VS.norm(sum.textContent).indexOf(nq) >= 0;
+          if (self){
+            Array.prototype.forEach.call(kids, function(a){ a.classList.remove('filtered'); });
+            any = true;
+          }
+          d.classList.toggle('filtered', !any && !self);
+          if (!d.classList.contains('filtered')) d.open = true;
+        });
+      }
+      if (info) info.textContent = nq ?
+        ('符合 ' + shown + ' / ' + links.length + ' 項（Esc 清除）') : '';
+    };
+    f.addEventListener('input', apply);
+    f.addEventListener('keydown', function(e){
+      if (e.key === 'Escape'){ f.value = ''; apply(); f.blur(); }
+    });
+  }
+
+  // 三、捲動時自動展開當前位置所屬卷，並把該項捲入側欄可視區
+  var tick = null;
+  window.addEventListener('scroll', function(){
+    if (tick) return;
+    tick = setTimeout(function(){
+      tick = null;
+      var on = nav.querySelector('a.on');
+      if (!on) return;
+      var d = on.parentElement;
+      while (d && d !== nav){ if (d.tagName === 'DETAILS') d.open = true; d = d.parentElement; }
+      var r = on.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+      if (r.top < nr.top + 40 || r.bottom > nr.bottom - 40){
+        nav.scrollTop += (r.top - nr.top) - nav.clientHeight / 3;
+      }
+    }, 180);
+  }, {passive:true});
+
+  // 四、拖曳調寬（220–520px），寬度記憶
+  var rz = document.createElement('div');
+  rz.id = 'navresizer'; rz.title = '拖曳調整側欄寬度';
+  nav.appendChild(rz);
+  var W = 280;
+  try { W = parseInt(localStorage.getItem('wb_nav_w') || '280', 10) || 280; } catch(e){}
+  var setW = function(w){
+    w = Math.max(220, Math.min(520, w));
+    nav.style.width = w + 'px'; nav.style.flexBasis = w + 'px';
+  };
+  if (window.innerWidth > 1100) setW(W);
+  var dragging = false;
+  rz.addEventListener('pointerdown', function(e){
+    dragging = true; rz.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  rz.addEventListener('pointermove', function(e){ if (dragging) setW(e.clientX); });
+  rz.addEventListener('pointerup', function(){
+    if (!dragging) return; dragging = false;
+    try { localStorage.setItem('wb_nav_w', String(parseInt(nav.style.width, 10) || 280)); } catch(e){}
+  });
+
+  // 五、桌面收起／展開；窄屏抽屜（漢堡 + 遮罩）
+  var tg = document.createElement('button');
+  tg.id = 'navtoggle'; tg.type = 'button'; tg.textContent = '側欄';
+  tg.setAttribute('aria-label', '收起或展開側邊欄（Alt+N）');
+  document.body.appendChild(tg);
+  try { if (localStorage.getItem('wb_nav_closed') === '1') document.body.classList.add('navclosed'); } catch(e){}
+  tg.addEventListener('click', function(){
+    if (window.innerWidth <= 1100){ document.body.classList.remove('navopen'); return; }
+    var c = document.body.classList.toggle('navclosed');
+    try { localStorage.setItem('wb_nav_closed', c ? '1' : '0'); } catch(e){}
+  });
+  var burger = document.createElement('button');
+  burger.id = 'navburger'; burger.type = 'button'; burger.innerHTML = '☰';
+  burger.setAttribute('aria-label', '開啟側邊欄（Alt+N）');
+  document.body.appendChild(burger);
+  var mask = document.createElement('div');
+  mask.id = 'navmask'; document.body.appendChild(mask);
+  burger.addEventListener('click', function(){ document.body.classList.toggle('navopen'); });
+  mask.addEventListener('click', function(){ document.body.classList.remove('navopen'); });
+  nav.addEventListener('click', function(e){
+    if (window.innerWidth <= 1100 && e.target.tagName === 'A' &&
+        e.target.getAttribute('href')){
+      setTimeout(function(){ document.body.classList.remove('navopen'); }, 120);
+    }
+  });
+})();
+</script>
 </body></html>

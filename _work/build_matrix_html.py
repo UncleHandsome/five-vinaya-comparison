@@ -13,7 +13,7 @@
 """
 import os, re, sys, subprocess, datetime, html as H
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_html import SEARCH_CORE
+from build_html import SEARCH_CORE, COMMON_JS, NAV_FILTER_HTML
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
@@ -242,6 +242,7 @@ def main():
 
     # 側欄
     nav = ['<h1><a href="index.html">五部律差異對照本</a></h1>',
+           NAV_FILTER_HTML,
            '<div class="grp"><b>全書</b>',
            '<a href="index.html">目錄與說明</a>',
            '<a href="五部律差異對照本.html">對照本合冊</a></div>',
@@ -330,6 +331,7 @@ CBETA 電子佛典依 Creative Commons「姓名標示—非商業性—相同方
 </div>
 <script>{SEARCH_CORE}</script>
 <script>{JS}</script>
+<script>{COMMON_JS}</script>
 </body></html>"""
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, 'w', encoding='utf-8', newline='\n').write(page)
