@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,6 +35,22 @@ jobs:
         with:
           path: '05_網頁版'
 
+      # GitHub Pages 平台端偶有逾時（2026-11-06、11-07 各一次，皆掛滿 10 分鐘，
+      # 但 Upload artifact 已成功）。第一次縮短逾時並容錯，失敗即自動重試一次。
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        timeout-minutes: 8
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages (retry)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        timeout-minutes: 10
+
+      - name: Fail if both attempts failed
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: |
+          echo "::error::GitHub Pages deployment failed twice (platform timeout?)"
+          exit 1
