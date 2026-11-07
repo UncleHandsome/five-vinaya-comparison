@@ -110,3 +110,5 @@ tools/*.py
 
 # 精簡版分卷暫存
 _work/_lean_tmp/
+# 增量 PDF 建置暫存（精簡分卷 MD、Chrome profile）
+_work/_pdf_jobs_tmp/
