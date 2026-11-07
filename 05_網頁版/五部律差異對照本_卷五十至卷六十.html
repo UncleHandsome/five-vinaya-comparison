@@ -410,6 +410,118 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
   /* 列印時表格不裁切，改由瀏覽器分頁 */
   .tscroll{overflow:visible !important; max-width:none}
 }
+
+/* ── 側欄 UI 重構（2026-11-07 夜）──────────────────────────────── */
+nav{scrollbar-width:thin; scrollbar-color:#d5cec2 transparent}
+nav::-webkit-scrollbar{width:8px}
+nav::-webkit-scrollbar-thumb{background:#d8d2c6; border-radius:4px}
+nav::-webkit-scrollbar-thumb:hover{background:#c4bcae}
+
+nav h1{font-size:15.5px; margin:.15rem 1rem .1rem; letter-spacing:.03em; font-weight:600}
+nav h1 a{color:var(--fg)}
+.nsub{font-size:10.5px; color:#9a9288; padding:0 1rem .55rem; letter-spacing:.08em}
+
+/* 搜尋區 */
+.findwrap{padding:.5rem 1rem .45rem; border-bottom:1px solid var(--line)}
+.findhead{gap:.3rem}
+.findhead input[type=search]{font-size:12px; padding:.3rem .45rem; border-radius:4px}
+#findhelpbtn{width:1.45rem; height:1.45rem; font-size:11px}
+.findopts{display:grid; grid-template-columns:repeat(3,1fr); gap:.2rem;
+  margin:.32rem 0 .05rem}
+.findopts button{font-size:10.5px; padding:.22rem .1rem; border-radius:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+#findinfo{font-size:10.5px; padding:.22rem 0 0; color:#9a9288}
+#findhist{margin:.2rem 0 0; gap:.18rem}
+#findhist button{font-size:10.5px; padding:.1rem .38rem}
+#findhist span{font-size:10px}
+
+/* 目錄頭 */
+.navhead{display:flex; align-items:center; justify-content:space-between;
+  padding:.55rem 1rem .1rem}
+.navhead b{flex:0 0 auto; white-space:nowrap; font-size:11px; letter-spacing:.14em;
+  color:#9a9288; font-weight:600}
+.navhead button{flex:0 0 auto; margin-left:auto; font-size:10px; padding:.12rem .38rem; border:1px solid var(--line);
+  border-radius:10px; background:transparent; color:var(--fg2); cursor:pointer;
+  font-family:inherit}
+.navhead button:hover{border-color:var(--accent2); color:var(--accent); background:#efeade}
+
+/* 過濾框 */
+.navfilterwrap{padding:.15rem 1rem .1rem}
+#navfilter{width:100%; margin:0; font-size:11.5px; padding:.26rem .45rem; border-radius:4px}
+#navfinfo{font-size:10px; padding:.15rem 0 0; color:#9a9288; min-height:1em}
+
+/* 分組標題：標題＋細線 */
+nav .grp{margin:.15rem 0 .25rem}
+nav .grp>b{display:flex; align-items:center; gap:.4rem; padding:.5rem 1rem .18rem;
+  font-size:10.5px; letter-spacing:.12em; color:#9a9288; font-weight:600}
+nav .grp>b:after{content:""; flex:1; height:1px; background:var(--line)}
+nav a.navhome{padding:.28rem 1rem; font-size:12px; color:var(--fg2)}
+
+/* 卷 */
+nav details.navj>summary{display:flex; align-items:center; gap:.35rem;
+  padding:.32rem 1rem; font-size:12.5px; font-weight:600; color:#5f574d;
+  border-left:2px solid transparent}
+nav details.navj>summary:before{content:"▸"; color:#b8b2a6; font-size:9px;
+  flex:0 0 .7rem}
+nav details.navj[open]>summary:before{content:"▾"}
+nav details.navj>summary:hover{background:#ece8dd; color:var(--accent)}
+nav details.navj>summary .jcnt{margin-left:auto; float:none; font-size:9.5px;
+  color:#a89f92; background:#ece8dd; border-radius:8px; padding:0 .4rem; line-height:1.6}
+nav details.navj[open]>summary .jcnt{background:#e4dfd2}
+
+/* 篇：編號 badge */
+nav a.art{display:flex; align-items:baseline; gap:.45rem;
+  padding:.2rem 1rem .2rem 1.55rem; font-size:12.5px; line-height:1.5;
+  border-left:2px solid transparent}
+nav a.art .pno{flex:0 0 2.05rem; font-size:9.5px; color:#a09889;
+  font-variant-numeric:tabular-nums; letter-spacing:.02em}
+nav a.art .pt{flex:1; min-width:0}
+nav a.art:hover{background:#ece8dd; color:var(--accent)}
+nav a.art:hover .pno{color:var(--accent2)}
+nav a.art.on{border-left-color:var(--accent); background:#efeade;
+  color:var(--accent); font-weight:600}
+nav a.art.on .pno{color:var(--accent)}
+
+/* 節：左側樹線 */
+nav a.jie{position:relative; padding:.2rem 1rem .2rem 2.15rem; font-size:12px;
+  line-height:1.5; color:#8a8278; border-left:2px solid transparent}
+nav a.jie:before{content:""; position:absolute; left:1.4rem; top:0; bottom:0;
+  width:1.5px; background:#dcd6c9}
+nav a.jie:hover{background:#efeade; color:var(--accent)}
+nav a.jie.on{border-left-color:var(--accent); background:#efeade;
+  color:var(--accent); font-weight:600}
+
+/* dock：幽靈按鈕 */
+.navdock{border-top:1px solid var(--line); box-shadow:0 -8px 18px rgba(0,0,0,.05)}
+.docklinks a{border-color:transparent; background:#efeade; color:#7a7268}
+.docklinks a:hover{background:#e7e1d3; border-color:var(--accent2); color:var(--accent)}
+.navdock .navtools button{border-color:transparent; background:transparent; color:#7a7268}
+.navdock .navtools button:hover{background:#ece8dd; color:var(--accent)}
+.navdock .navtools button[aria-pressed="true"]{background:#efeade;
+  border-color:var(--accent); color:var(--accent)}
+
+@media (prefers-color-scheme: dark){
+  nav::-webkit-scrollbar-thumb{background:#3a3733}
+  .nsub{color:#7d766c}
+  .navhead b,nav .grp>b{color:#8b857b}
+  nav .grp>b:after{background:#3a3733}
+  nav details.navj>summary{color:#b3aca1}
+  nav details.navj>summary .jcnt{background:#2a2825; color:#8b857b}
+  nav details.navj[open]>summary .jcnt{background:#332f2a}
+  nav a.art .pno{color:#6f6961}
+  nav a.art:hover,nav a.jie:hover{background:#2a2825}
+  nav a.art.on,nav a.jie.on{background:#2e2b26}
+  nav a.jie:before{background:#3a3733}
+  .docklinks a{background:#242220; color:#b3aca1}
+  .docklinks a:hover{background:#2e2b26}
+  .navdock{box-shadow:0 -8px 18px rgba(0,0,0,.4)}
+}
+@media(max-width:1100px){
+  nav h1{font-size:16px}
+  nav a.art{font-size:13px}
+  nav a.jie{font-size:12px}
+  nav details.navj>summary{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -417,12 +529,13 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <div class="wrap">
 <nav>
 <h1><a href="index.html">五部律差異對照本</a></h1>
+<div class="nsub">以四分律為軸　五部對校</div>
 
 <div class="grp findwrap" style="padding:.2rem 1rem .55rem">
 <label for="find" class="sr-only">全文檢索</label>
 <div class="findhead">
 <input type="search" id="find"
-  placeholder="檢索：多詞空白分隔；-詞排除；&quot;片語&quot;（/ 或 Ctrl+K）"
+  placeholder="檢索全文…（Ctrl+F）"
   aria-label="多關鍵字模糊檢索，含折疊內容。空白分隔多詞，減號排除，引號片語"
   autocomplete="off">
 <button type="button" id="findhelpbtn" aria-expanded="false" aria-controls="findhelp"
@@ -437,9 +550,9 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <code>Enter</code> 逐處跳；<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
 </div>
 <div class="findopts" role="group" aria-label="檢索範圍">
-<button type="button" data-scope="all" aria-pressed="true">全部</button>
-<button type="button" data-scope="title" aria-pressed="false">僅標題・項名</button>
-<button type="button" data-scope="core" aria-pressed="false">略白話・原文</button>
+<button type="button" data-scope="all" aria-pressed="true" title="全文（含白話與四分原文）">全部</button>
+<button type="button" data-scope="title" aria-pressed="false" title="只搜標題與項名">標題</button>
+<button type="button" data-scope="core" aria-pressed="false" title="排除白話與四分律原文">略原文</button>
 </div>
 <div id="findinfo" role="status" aria-live="polite"
   style="font-size:11.5px;color:#8a8278;padding:.25rem .1rem 0;min-height:1.2em"></div>
@@ -447,10 +560,9 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 <div id="findlist" class="findlist" role="listbox" aria-label="檢索結果" hidden></div>
 </div>
 
-<div class="grp" style="margin-bottom:.2rem"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="過濾目錄：篇名／戒名／節名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div>
-<div class="grp"><b>全書</b>
-<a href="index.html">目錄與說明</a>
-</div>
+<div class="navhead"><b>目錄</b><button type="button" id="navall" aria-pressed="false" title="展開或收起全部卷次">全部展開</button></div>
+<div class="navfilterwrap"><label for="navfilter" class="sr-only">過濾目錄</label><input type="search" id="navfilter" placeholder="篩選　篇名／戒名" autocomplete="off" aria-label="過濾側邊欄目錄"><div id="navfinfo" role="status" aria-live="polite"></div></div>
+<div class="grp"><a href="index.html" class="navhome">←　目錄與說明</a></div>
 <div class="grp"><b>本卷篇目</b>
 <details class="navj"><summary>061　房舍揵度初<span class="jcnt">11</span></summary>
 <a href="#u061-1" class="jie">房舍揵度（一）　五人從坐起，我等當住何等房舍臥具</a>
@@ -616,9 +728,9 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
 </div>
 <div class="navdock">
 <div class="docklinks">
-<a href="五部律差異對照本_卷三十八至卷四十九.html">← 卷三十八至卷四十九</a>
-<a href="五部律差異對照本_四分所無與歸併組.html">四分所無與歸併組 →</a>
-<a href="index.html">回目錄</a>
+<a href="五部律差異對照本_卷三十八至卷四十九.html" title="上一卷：卷三十八至卷四十九">← 前卷</a>
+<a href="五部律差異對照本_四分所無與歸併組.html" title="下一卷：四分所無與歸併組">後卷 →</a>
+<a href="index.html" title="回目錄與說明">目錄</a>
 <a href="#" id="refresh" title="強制重新抓取本頁（破快取）">↻ 更新</a>
 </div>
 <div class="navtools">
@@ -10815,9 +10927,9 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 依 Creative Commons 姓名標示—非商業性—相同方式分享 4.0 國際版（CC BY-NC-SA 4.0）釋出；
 引用、轉載、改作者請依同一條款，並標明出處。所引五部律原文之權利狀態，仍依 CBETA 原授權。</p>
 <p><b>建議引用格式</b><br>
-　　UncleHandsome（編）.《五部律差異對照本》. 版本 0cf06d1（2026-11-07）. 線上資料庫.
+　　UncleHandsome（編）.《五部律差異對照本》. 版本 68eb2cd-dirty（2026-11-07）. 線上資料庫.
 <a href="https://unclehandsome.github.io/five-vinaya-comparison/">https://unclehandsome.github.io/five-vinaya-comparison/</a><br>
-　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 0cf06d1」。
+　　單項引用宜並舉項號與錨點，如「《五部律差異對照本》D-0450（#d-0450），版本 68eb2cd-dirty」。
 項號於同一版本內穩定，跨版本引用請附版本戳。</p>
 <p><b>BibTeX</b><br>
 <code>@misc{unclehandsome_vinaya,<br>
@@ -10825,7 +10937,7 @@ Creative Commons「姓名標示—非商業性—相同方式分享」授權釋�
 　title = {五部律差異對照本},<br>
 　year = {2026},<br>
 　url = {https://unclehandsome.github.io/five-vinaya-comparison/},<br>
-　note = {版本 0cf06d1（2026-11-07）}<br>
+　note = {版本 68eb2cd-dirty（2026-11-07）}<br>
 }</code></p>
 <p><b>檔名與永久識別</b>　本檔以中文命名，Git 於 macOS（檔案系統用 NFD）與 Linux（NFC）
 之間，或以正規化之差誤判為二檔；網址中的 <code>%E4%BA%94…</code> 亦不便轉寫。
@@ -11567,6 +11679,16 @@ window.VS = (function(){
       if (e.key === 'Escape'){ f.value = ''; apply(); f.blur(); }
     });
   }
+
+  // 二之二、目錄層級的「全部展開／收起」
+  var na = document.getElementById('navall');
+  if (na) na.addEventListener('click', function(){
+    var ds = nav.querySelectorAll('details.navj'), anyClosed = false;
+    for (var i = 0; i < ds.length; i++){ if (!ds[i].open){ anyClosed = true; break; } }
+    for (var j = 0; j < ds.length; j++) ds[j].open = anyClosed;
+    na.textContent = anyClosed ? '全部收起' : '全部展開';
+    na.setAttribute('aria-pressed', String(anyClosed));
+  });
 
   // 三、捲動時自動展開當前位置所屬卷，並把該項捲入側欄可視區。
   // 使用者正在側欄內捲動／滑鼠停留時不打斷，避免目錄自己亂跳。
