@@ -865,7 +865,11 @@ def unit_label(u, no=None):
         # 少數節 jie_family 未判而仍屬尼單提）
         _v = _ni_jie_map().get(f'{no}|{u["a"]}')
         if _v:
-            return '／'.join(_v)
+            # 尼單提亦冠戒號（1–178 連續），與比丘「十九、蟲水澆泥草戒」同例。
+            # 名表本身不含號，故取該節的 num；缺 num 時退回中文節序。
+            _seq = u.get('num') or _cn2int((u.get('cn') or '').strip())
+            _pre = f'{_cn_num(_seq)}、' if _seq else ''
+            return _pre + '／'.join(_v)
         fam = jie_family(no, u)
         if fam:
             # 尼單提用續編號 num（戒序 1–178）；比丘用 cn 轉數字
