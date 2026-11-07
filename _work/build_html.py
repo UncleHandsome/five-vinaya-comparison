@@ -948,7 +948,7 @@ SEARCH_BOX = r"""
 <b>排除</b>　<code>-四分</code>　　<b>片語</b>　<code>"非親里"</code><br>
 <b>別名</b>　波逸提＝單提、捨墮＝尼薩耆、比丘＝苾芻… 自動並查<br>
 <b>模糊</b>　容漏字（<code>摩埵</code> 可中「摩那埵」）<br>
-<b>快捷</b>　<code>Ctrl+F</code>、<code>Ctrl+K</code> 或 <code>/</code> 聚焦；
+<b>快捷</b>　<code>Ctrl+K</code> 或 <code>/</code> 聚焦（<code>Ctrl+F</code> 為瀏覽器原生查找）；
 <code>Enter</code> 逐處跳；<code>F3</code>／<code>Shift+F3</code> 前後巡覽；<code>↑↓</code> 選結果
 </div>
 <div class="findopts" role="group" aria-label="檢索範圍">
@@ -1478,10 +1478,6 @@ SHORTCUT_JS = r"""
     var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '');
     if (!typing && e.key === '/'){ e.preventDefault(); focusSearch(); return; }
     if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k'){
-      e.preventDefault(); focusSearch(); return;
-    }
-    // Ctrl+F 亦接站內檢索：可搜折疊內容、異體字與名相別名，較瀏覽器原生查找有用
-    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'f'){
       e.preventDefault(); focusSearch(); return;
     }
     if (e.key === 'F3'){
@@ -2217,7 +2213,7 @@ def build_index():
 
 <h2>側邊欄與檢索</h2>
 <ul>
-<li><strong>快捷鍵</strong>　<code>Ctrl+F</code>、<code>Ctrl+K</code> 或 <code>/</code> 聚焦檢索；
+<li><strong>快捷鍵</strong>　<code>Ctrl+K</code> 或 <code>/</code> 聚焦站內檢索（<code>Ctrl+F</code> 留給瀏覽器原生查找）；
 <code>F3</code>／<code>Shift+F3</code> 前後巡覽命中處；<code>Alt+N</code> 收起或喚出側欄。</li>
 <li><strong>目錄過濾</strong>　側欄上方輸入篇名／戒名即時篩出所在卷節，<code>Esc</code> 清除；
 卷次摺疊狀態、側欄寬度與收起狀態都會記住。</li>
