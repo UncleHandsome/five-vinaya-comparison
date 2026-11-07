@@ -598,6 +598,10 @@ nav details.navj>summary:hover{background:#ece8dd; color:var(--accent)}
 nav details.navj>summary .jcnt{margin-left:auto; float:none; font-size:9.5px;
   color:#a89f92; background:#ece8dd; border-radius:8px; padding:0 .4rem; line-height:1.6}
 nav details.navj[open]>summary .jcnt{background:#e4dfd2}
+nav .jcnt.zero{color:#cfc8bb; background:transparent}
+nav a.art .jcnt{margin-left:auto; font-size:9.5px; color:#a89f92;
+  background:#ece8dd; border-radius:8px; padding:0 .4rem; line-height:1.6}
+nav a.art .jcnt.zero{color:#d5cec2; background:transparent}
 
 /* 篇：編號 badge */
 nav a.art{display:flex; align-items:baseline; gap:.45rem;
@@ -1813,6 +1817,11 @@ def cn2num(s):
     return _CN_D.get(s, 0)
 
 
+def _n_items(seg):
+    """片段內的差異項數（D- 與 S- 項）。"""
+    return len(re.findall(r'^\*\*(?:D|S)-\d{4}\*\*', seg, re.M))
+
+
 def build_nav(md_text, is_full, cur=None):
     """從 Markdown 提取目錄結構，生成側邊欄。
 
@@ -1862,12 +1871,20 @@ def build_nav(md_text, is_full, cur=None):
             arts = re.findall(r'^#### (\d{3})　([^\n]+)$', sec, re.M)
             if not arts:
                 continue
+            _tot = _n_items(sec)
+            _art_items = {}
+            for _m in re.finditer(r'^#### (\d{3})　[^\n]*\n(.*?)(?=^#### |\Z)',
+                                  sec, re.M | re.S):
+                _art_items[_m.group(1)] = _n_items(_m.group(2))
             parts.append(f'<details class="navj"><summary>{htmlmod.escape(head)}'
-                         f'<span class="jcnt">{len(arts)}</span></summary>')
+                         f'<span class="jcnt" title="{len(arts)} 篇，{_tot} 項差異">'
+                         f'{_tot}</span></summary>')
             for n, title in arts:
                 t = htmlmod.escape(re.sub(r'<[^>]+>', '', title))
+                _it = _art_items.get(n, 0)
                 parts.append(f'<a href="#p{n}" class="art">'
-                             f'<span class="pno">{n}</span><span class="pt">{t}</span></a>')
+                             f'<span class="pno">{n}</span><span class="pt">{t}</span>'
+                             f'<span class="jcnt{" zero" if _it == 0 else ""}">{_it}</span></a>')
             parts.append('</details>')
         parts.append('</div>')
         parts.append('<div class="grp"><b>第二部　四分所無</b>')
@@ -1895,15 +1912,20 @@ def build_nav(md_text, is_full, cur=None):
             t = htmlmod.escape(re.sub(r'<[^>]+>', '', title))
             units = re.findall(r'<a id="u(\d{3})-(\d+)"></a>\s*\n+\s*##### ([^\n]+)', sec)
             if units:
+                _tot = _n_items(sec)
                 parts.append(f'<details class="navj"><summary>{n}　{t}'
-                             f'<span class="jcnt">{len(units)}</span></summary>')
+                             f'<span class="jcnt{" zero" if _tot == 0 else ""}" '
+                             f'title="{len(units)} 節，{_tot} 項差異">'
+                             f'{_tot}</span></summary>')
                 for pn, a, lbl in units:
                     lbl = htmlmod.escape(re.sub(r'<[^>]+>', '', lbl).strip()) or f'段{a}'
                     parts.append(f'<a href="#u{pn}-{a}" class="jie">{lbl}</a>')
                 parts.append('</details>')
             else:
+                _it = _n_items(sec)
                 parts.append(f'<a href="#p{n}" class="art">'
-                             f'<span class="pno">{n}</span><span class="pt">{t}</span></a>')
+                             f'<span class="pno">{n}</span><span class="pt">{t}</span>'
+                             f'<span class="jcnt{" zero" if _it == 0 else ""}">{_it}</span></a>')
         parts.append('</div>')
 
     if is_full:
