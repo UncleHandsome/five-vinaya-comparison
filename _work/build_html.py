@@ -434,14 +434,15 @@ CSS += r"""
 #navfinfo{font-size:11px; color:#8a8278; padding:0 1rem .3rem; min-height:1.1em}
 nav a.filtered,nav details.navj.filtered{display:none}
 nav a.on{font-weight:600}
-#navresizer{position:absolute; top:0; right:-3px; width:7px; height:100%;
+#navresizer{position:fixed; top:0; left:277px; width:6px; height:100vh;
   cursor:col-resize; z-index:9; touch-action:none}
 #navresizer:hover{background:var(--accent2); opacity:.45}
 #navtoggle,#navburger{border:1px solid var(--line); background:var(--panel);
   color:var(--accent); cursor:pointer; font-family:"Microsoft YaHei",sans-serif; z-index:210}
-#navtoggle{position:fixed; left:0; top:50%; transform:translateY(-50%);
-  width:1.5rem; padding:.55rem .12rem; writing-mode:vertical-rl;
-  border-left:0; border-radius:0 4px 4px 0; font-size:11.5px}
+#navtoggle{display:none; position:fixed; left:0; top:50%; transform:translateY(-50%);
+  width:1.35rem; padding:.5rem .1rem; writing-mode:vertical-rl;
+  border-left:1px solid var(--line); border-radius:0 4px 4px 0; font-size:11px}
+body.navclosed #navtoggle{display:block}
 #navtoggle:hover,#navburger:hover{background:#ece8dd}
 body.navclosed nav{display:none}
 .navtools{display:grid; grid-template-columns:1fr 1fr; gap:.25rem; padding:.4rem 1rem .2rem}
@@ -503,7 +504,7 @@ button.fl-load{width:100%; text-align:center; color:var(--accent); cursor:pointe
     z-index:310; box-shadow:6px 0 24px rgba(0,0,0,.25)}
   body.navopen nav{transform:none}
   body.navclosed nav{display:block}
-  #navtoggle,#navresizer{display:none}
+  #navtoggle,#navresizer{display:none !important}
   #navburger{display:flex; position:fixed; left:.7rem; top:.7rem; z-index:300;
     width:2.2rem; height:2.2rem; align-items:center; justify-content:center;
     border-radius:4px; font-size:17px}
@@ -1346,7 +1347,15 @@ SHORTCUT_JS = r"""
     }
     if (e.altKey && String(e.key).toLowerCase() === 'n'){
       e.preventDefault();
-      document.body.classList.toggle(window.innerWidth <= 1100 ? 'navopen' : 'navclosed');
+      if (window.innerWidth <= 1100){
+        document.body.classList.toggle('navopen');
+      } else {
+        var el = document.getElementById('navtoggle');
+        var c = !document.body.classList.contains('navclosed');
+        document.body.classList.toggle('navclosed', c);
+        if (el) el.style.left = '0px';
+        try { localStorage.setItem('wb_nav_closed', c ? '1' : '0'); } catch(err){}
+      }
       return;
     }
     if (e.key === 'Escape' && document.body.classList.contains('navopen')){
@@ -1373,7 +1382,13 @@ SIDEBAR_JS = r"""
     try { localStorage.setItem(KEY + '_open',
       JSON.stringify(dts.map(function(d){ return d.open; }))); } catch(e){}
   };
-  dts.forEach(function(d){ d.addEventListener('toggle', saveOpen); });
+  nav.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && (t.tagName === 'SUMMARY' ||
+        (t.parentElement && t.parentElement.tagName === 'SUMMARY'))){
+      setTimeout(saveOpen, 0);
+    }
+  });
 
   // 二、目錄過濾：輸入即篩篇名／節名，命中之所屬卷自動展開
   var f = document.getElementById('navfilter');
@@ -1396,15 +1411,18 @@ SIDEBAR_JS = r"""
           var sum = d.querySelector('summary');
           var self = sum && VS.norm(sum.textContent).indexOf(nq) >= 0;
           if (self){
-            Array.prototype.forEach.call(kids, function(a){ a.classList.remove('filtered'); });
+            // 篇名／卷名在 <summary> 而非 <a>；命中時展開其下所有節，並計入可見數
+            Array.prototype.forEach.call(kids, function(a){
+              if (a.classList.contains('filtered')) shown++;
+              a.classList.remove('filtered');
+            });
             any = true;
           }
           d.classList.toggle('filtered', !any && !self);
           if (!d.classList.contains('filtered')) d.open = true;
         });
       }
-      if (info) info.textContent = nq ?
-        ('符合 ' + shown + ' / ' + links.length + ' 項（Esc 清除）') : '';
+      if (info) info.textContent = nq ? ('符合 ' + shown + ' 項（Esc 清除）') : '';
     };
     f.addEventListener('input', apply);
     f.addEventListener('keydown', function(e){
@@ -1412,19 +1430,27 @@ SIDEBAR_JS = r"""
     });
   }
 
-  // 三、捲動時自動展開當前位置所屬卷，並把該項捲入側欄可視區
-  var tick = null;
+  // 三、捲動時自動展開當前位置所屬卷，並把該項捲入側欄可視區。
+  // 使用者正在側欄內捲動／滑鼠停留時不打斷，避免目錄自己亂跳。
+  var tick = null, navBusyUntil = 0, autoScrolling = false;
+  nav.addEventListener('wheel', function(){ navBusyUntil = Date.now() + 5000; }, {passive:true});
+  nav.addEventListener('scroll', function(){
+    if (!autoScrolling) navBusyUntil = Date.now() + 5000;
+  }, {passive:true});
   window.addEventListener('scroll', function(){
     if (tick) return;
     tick = setTimeout(function(){
       tick = null;
+      if (Date.now() < navBusyUntil || nav.matches(':hover')) return;
       var on = nav.querySelector('a.on');
       if (!on) return;
       var d = on.parentElement;
       while (d && d !== nav){ if (d.tagName === 'DETAILS') d.open = true; d = d.parentElement; }
       var r = on.getBoundingClientRect(), nr = nav.getBoundingClientRect();
       if (r.top < nr.top + 40 || r.bottom > nr.bottom - 40){
+        autoScrolling = true;
         nav.scrollTop += (r.top - nr.top) - nav.clientHeight / 3;
+        setTimeout(function(){ autoScrolling = false; }, 80);
       }
     }, 180);
   }, {passive:true});
@@ -1438,6 +1464,9 @@ SIDEBAR_JS = r"""
   var setW = function(w){
     w = Math.max(220, Math.min(520, w));
     nav.style.width = w + 'px'; nav.style.flexBasis = w + 'px';
+    rz.style.left = (w - 3) + 'px';
+    var t = document.getElementById('navtoggle');
+    if (t && !document.body.classList.contains('navclosed')) t.style.left = w + 'px';
   };
   if (window.innerWidth > 1100) setW(W);
   var dragging = false;
@@ -1455,11 +1484,24 @@ SIDEBAR_JS = r"""
   tg.id = 'navtoggle'; tg.type = 'button'; tg.textContent = '側欄';
   tg.setAttribute('aria-label', '收起或展開側邊欄（Alt+N）');
   document.body.appendChild(tg);
+  var setClosed = function(c){
+    document.body.classList.toggle('navclosed', c);
+    tg.style.left = '0px';
+    try { localStorage.setItem('wb_nav_closed', c ? '1' : '0'); } catch(e){}
+  };
   try { if (localStorage.getItem('wb_nav_closed') === '1') document.body.classList.add('navclosed'); } catch(e){}
+  var nh = document.getElementById('navhide');
+  if (!nh){
+    nh = document.createElement('button');
+    nh.id = 'navhide'; nh.type = 'button'; nh.textContent = '收起側欄';
+    nh.title = '收起側邊欄（Alt+N）';
+    nh.style.marginTop = '.4rem';
+    nav.appendChild(nh);
+  }
+  nh.addEventListener('click', function(){ if (window.innerWidth > 1100) setClosed(true); });
   tg.addEventListener('click', function(){
     if (window.innerWidth <= 1100){ document.body.classList.remove('navopen'); return; }
-    var c = document.body.classList.toggle('navclosed');
-    try { localStorage.setItem('wb_nav_closed', c ? '1' : '0'); } catch(e){}
+    setClosed(!document.body.classList.contains('navclosed'));
   });
   var burger = document.createElement('button');
   burger.id = 'navburger'; burger.type = 'button'; burger.innerHTML = '☰';
@@ -1761,14 +1803,13 @@ def md_to_html(md_path, out_path, title, is_full, md_text=None):
 <button type="button" id="toggle" aria-controls="main" title="展開或收起全部摺疊塊">全部展開／收起</button>
 <button type="button" id="width" title="放寬正文欄寬">切換寬屏</button>
 <button type="button" id="par" aria-pressed="false" title="四分原文與白話左右並列">對讀：原文並白話</button>
+<button type="button" id="navhide" title="收起側邊欄（Alt+N）">收起側欄</button>
 </div>
 <div class="grp" style="padding:.4rem 1rem 0">
 <label for="jump" class="sr-only">跳至指定編號</label>
 <input type="text" id="jump" placeholder="跳至 D-0450" aria-label="跳至指定編號，如 D-0450"
   style="width:100%;padding:.28rem .5rem;border:1px solid var(--line);border-radius:3px;
   font-size:12.5px;font-family:inherit;background:#fff">
-</div>
-
 </div>
 </nav>
 <main id="main">
