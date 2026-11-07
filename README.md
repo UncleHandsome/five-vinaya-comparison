@@ -109,8 +109,13 @@ A4、內文 12pt 仿宋、行距 1.45、邊距 14–15mm，一頁約 1,200–1,6
 > **PDF 不入版控（2026-11-06 起）**：歷次重建的 43–44 MB 合冊在 `.git` 內累積成
 > 1.4 GB，已改寫歷史移除（149 → 135 commits，`.git` 1.4 GB → 39 MB；
 > 現 pack 約 40 MB、`.git` 目錄約 68 MB）。兩目錄仍在本機，`.gitignore` 排除之；
-> 需要時執行 `python _work/rebuild_all.py`、`python _work/build_tex.py --full`、
-> `python tools/build_lean.py` 重建。改寫前的備份已於同日刪除。
+> 重建用增量工具（推薦）：
+> `python tools/pdf_jobs.py --plan` 先看哪些冊要重跑，
+> `python tools/pdf_jobs.py` 只重建有變的分卷（多路並行，合冊預設延後），
+> `python tools/pdf_jobs.py --include-full` 定稿時連合冊一起，
+> `--force` 全量。指紋存 `_work/_pdf_jobs.json`；改 HTML／CSS／JS 不會動到 PDF。
+> 底層仍可 `python _work/rebuild_all.py`、`python _work/build_tex.py --full`、
+> `python tools/build_lean.py` 全量重建。改寫前的備份已於同日刪除。
 
 | 檔 | 頁數 | 大小 |
 |---|---:|---:|

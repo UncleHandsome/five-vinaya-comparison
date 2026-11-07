@@ -240,8 +240,11 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None, subtitle=None, meta_lines=
     tmp_html = os.path.join(TMP, os.path.basename(pdf_path).replace('.pdf', '.html'))
     open(tmp_html, 'w', encoding='utf-8').write(page)
 
+    # 並行建置時每個 job 用獨立 profile，免多個 Chrome 實例爭用同一目錄
+    _prof = os.path.join(TMP, '_chrome_' + os.path.basename(pdf_path).replace('.pdf', ''))
     cmd = [
         CHROME, '--headless', '--disable-gpu', '--no-sandbox',
+        f'--user-data-dir={_prof}',
         '--print-to-pdf-no-header',
         f'--print-to-pdf={pdf_path}',
         '--no-pdf-header-footer',
@@ -252,6 +255,7 @@ def md_to_pdf(md_path, pdf_path, title, md_text=None, subtitle=None, meta_lines=
     ok = os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 1000
     if not ok:
         print('  Chrome 失敗：', r.stderr.decode('utf-8', 'ignore')[:300])
+    shutil.rmtree(_prof, ignore_errors=True)
     return ok
 
 

@@ -69,16 +69,18 @@ def prep(md):
     return md
 
 
-def build(src_md, out_pdf, title, extra_meta=None):
-    os.makedirs(TMP, exist_ok=True)
+def build(src_md, out_pdf, title, extra_meta=None, tmp_dir=None):
+    # tmp_dir 供並行建置使用：每個 job 一個獨立目錄，免 doc.md/header.tex 互蓋
+    work = tmp_dir or TMP
+    os.makedirs(work, exist_ok=True)
     md = prep(open(src_md, encoding='utf-8').read())
-    tmp_md = os.path.join(TMP, 'doc.md')
+    tmp_md = os.path.join(work, 'doc.md')
     open(tmp_md, 'w', encoding='utf-8', newline='\n').write(md)
 
     env = dict(os.environ)
     env['PATH'] = TEXBIN + os.pathsep + env.get('PATH', '')
 
-    hdr = os.path.join(TMP, 'header.tex')
+    hdr = os.path.join(work, 'header.tex')
     open(hdr, 'w', encoding='utf-8', newline='\n').write(r'''\usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}

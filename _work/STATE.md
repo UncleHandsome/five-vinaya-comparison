@@ -1853,3 +1853,35 @@ README（節數、HTML／PDF 實測頁數與大小、項號說明）、TODO（50
 **改法**：`errata.JIE_NO_FIX` → `JIE_NAME_FIX`（28 條，old 前綴 → 正式戒名），
 `clean_title()` 同步；`TITLE_MAIN` 改 11 處（含 M-0069 加要點以別同戒兩項）。
 兩處同改，免新題只成副題。全書掃描報告附節由 20 → **0**。
+
+## 三十二、PDF 為何慢：診斷與增量並行建置（2026-11-07 晚）
+
+**診斷（實測，非推測）**
+- 合冊 MD 11.1 MB／101,391 行；`prep_md` 0.08s、`make_toc` 0.08s、
+  pandoc gfm→html5 **6.1s** → 前處理共約 6.3 秒。
+- 其餘全是排版本體：Chrome 印 2,611 頁 **273s**；xelatex 排 3,153 頁 **600s**
+  （`--toc-depth=5` 的目錄與書籤需多遍編譯）。
+- 分卷：Chrome 2–11s、LaTeX 29–113s；精簡版合冊 Chrome 51s、LaTeX 313s。
+- 機器 12 核，但 `build_pdf.py`／`build_tex.py`／`build_lean.py` **全部串行**，
+  11 核閒置。
+
+**結論**：不是程式有 bug，是「單進程排版兩三千頁 ＋ 完全串行 ＋ 每次都全量」。
+三處可改：增量、並行、合冊延後。
+
+**新增 `tools/pdf_jobs.py`**
+- 32 冊各記指紋（源 MD／strip_lean 後文本 ＋ 三支生成腳本 ＋ 參數），
+  存 `_work/_pdf_jobs.json`；未變者跳過。改 HTML／CSS／JS 時 0 冊需重建。
+- 分卷多路並行（`--jobs N`，預設 3）；合冊預設**延後**，`--include-full` 才做。
+- `--plan` 列計畫與預估；`--status` 列各冊狀態；`--force` 全量；`--only` 指定卷。
+- 為並行安全：`build_tex.build()` 加 `tmp_dir` 參數（原共享 `doc.md`／`header.tex`
+  會互蓋）；`build_pdf.md_to_pdf()` 每個 job 用獨立 Chrome profile 並於結束後清除。
+- 實測：卷三十一至卷三十七 4 冊並行 **52 秒**（串行約 93 秒）。
+- 首次執行會沿用現有 PDF 建立清單（以合冊 MD mtime 為參考），不會誤判全量。
+
+**用法**
+```
+python tools/pdf_jobs.py --plan           # 看哪些要重建、估時
+python tools/pdf_jobs.py                  # 日常：只跑有變的分卷
+python tools/pdf_jobs.py --include-full   # 定稿：連合冊
+python tools/pdf_jobs.py --force          # 全量
+```
